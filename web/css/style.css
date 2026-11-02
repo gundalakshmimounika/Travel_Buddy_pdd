@@ -37,7 +37,7 @@ body {
   background-color: var(--bg-dark);
   color: var(--white);
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -125,7 +125,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: 0;
   background-color: var(--bg-dark);
   opacity: 0;
   transform: translateY(10px);
@@ -144,7 +144,8 @@ body {
   flex-direction: column;
   align-items: center;
   background-color: transparent;
-  padding: 16px 0;
+  padding: 32px 20px;
+  margin: auto;
 }
 
 /* Adaptive styles for wider screens */
@@ -1235,23 +1236,13 @@ body {
    ========================================================================== */
 .community-card {
   width: 100%;
-  max-width: 440px;
+  max-width: 100%;
   height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-dark);
   position: relative;
   overflow: hidden;
-}
-
-@media (min-width: 768px) {
-  .community-card {
-    height: 850px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 36px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-    background-color: #151D27;
-  }
 }
 
 /* Community Header */
@@ -2447,7 +2438,7 @@ body {
    ========================================================================== */
 .trip-details-card {
   width: 100%;
-  max-width: 440px;
+  max-width: 100%;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -2458,11 +2449,17 @@ body {
 
 @media (min-width: 768px) {
   .trip-details-card {
-    height: 850px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 36px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+    height: 100vh;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     background-color: #151D27;
+  }
+
+  .details-scroll-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
   }
 }
 

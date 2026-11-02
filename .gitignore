@@ -1,0 +1,16 @@
+# Built binaries and caches
+**/build/
+.gradle/
+*.iml
+.idea/
+.kotlin/
+local.properties
+.DS_Store
+Thumbs.db
+
+# Backend cache
+backend/cache/*.json
+!backend/cache/.gitkeep
+
+# Logs
+*.log

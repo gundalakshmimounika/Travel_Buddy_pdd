@@ -49,7 +49,7 @@
             android:id="@+id/tvFromLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="From: Chennai"
+            android:text="From: Nellore"
             android:textColor="@color/onboarding_blue"
             android:textSize="14sp"
             android:textStyle="bold" />

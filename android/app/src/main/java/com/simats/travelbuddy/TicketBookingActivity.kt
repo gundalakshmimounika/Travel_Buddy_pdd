@@ -45,7 +45,7 @@ class TicketBookingActivity : AppCompatActivity(), PaymentResultListener {
     private lateinit var destination: String
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     
-    private var currentFromLocation: String = "Chennai, India"
+    private var currentFromLocation: String = "Nellore, India"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

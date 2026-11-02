@@ -46,7 +46,7 @@ class TripDetailsActivity : AppCompatActivity() {
         findViewById<View>(R.id.cvTickets).setOnClickListener {
             val ticketIntent = Intent(this, TicketBookingActivity::class.java)
             ticketIntent.putExtra("DESTINATION", title)
-            ticketIntent.putExtra("FROM_LOCATION", "Chennai, India") // Mock location or fetch from Prefs
+            ticketIntent.putExtra("FROM_LOCATION", "Nellore, India") // Mock location or fetch from Prefs
             startActivity(ticketIntent)
         }
 

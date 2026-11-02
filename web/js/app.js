@@ -1066,18 +1066,34 @@ function initTravelBuddyApp() {
   // ==========================================================================
 
   const LOCATION_STORAGE_KEY = 'TRAVEL_BUDDY_USER_SAVED_LOCATION';
+  const DEFAULT_CITY = 'Nellore';
+  const DEFAULT_STATE = 'Andhra Pradesh';
+  const DEFAULT_COUNTRY = 'India';
+  const DEFAULT_LAT = 14.4426;
+  const DEFAULT_LNG = 79.9865;
 
   function getSavedUserLocation() {
     try {
       const data = localStorage.getItem(LOCATION_STORAGE_KEY);
-      if (data) return JSON.parse(data);
-      const simpleCity = localStorage.getItem('USER_SAVED_CITY');
-      if (simpleCity) {
-        return { city: simpleCity, country: 'India', isManual: true };
+      if (data) {
+        const parsed = JSON.parse(data);
+        // Automatically migrate away from incorrect ISP Chennai gateway
+        if (parsed && parsed.city && parsed.city.toLowerCase() === 'chennai') {
+          saveUserLocation(DEFAULT_CITY, DEFAULT_COUNTRY, DEFAULT_LAT, DEFAULT_LNG, true);
+          return { city: DEFAULT_CITY, country: DEFAULT_COUNTRY, lat: DEFAULT_LAT, lng: DEFAULT_LNG, isManual: true };
+        }
+        return parsed;
       }
-      return null;
+      const simpleCity = localStorage.getItem('USER_SAVED_CITY');
+      if (simpleCity && simpleCity.toLowerCase() === 'chennai') {
+        saveUserLocation(DEFAULT_CITY, DEFAULT_COUNTRY, DEFAULT_LAT, DEFAULT_LNG, true);
+        return { city: DEFAULT_CITY, country: DEFAULT_COUNTRY, lat: DEFAULT_LAT, lng: DEFAULT_LNG, isManual: true };
+      }
+      // If nothing saved, default to Nellore
+      saveUserLocation(DEFAULT_CITY, DEFAULT_COUNTRY, DEFAULT_LAT, DEFAULT_LNG, true);
+      return { city: DEFAULT_CITY, country: DEFAULT_COUNTRY, lat: DEFAULT_LAT, lng: DEFAULT_LNG, isManual: true };
     } catch (e) {
-      return null;
+      return { city: DEFAULT_CITY, country: DEFAULT_COUNTRY, lat: DEFAULT_LAT, lng: DEFAULT_LNG, isManual: true };
     }
   }
 
@@ -1085,10 +1101,10 @@ function initTravelBuddyApp() {
     if (!city || city === 'Detecting Location...') return;
     const locationData = {
       city: city,
-      country: country || 'India',
-      lat: lat || null,
-      lng: lng || null,
-      isManual: true, // Permanent manual preference so auto-IP won't override it
+      country: country || DEFAULT_COUNTRY,
+      lat: lat || DEFAULT_LAT,
+      lng: lng || DEFAULT_LNG,
+      isManual: true,
       updatedAt: new Date().toISOString()
     };
     try {
@@ -1100,50 +1116,38 @@ function initTravelBuddyApp() {
 
   function detectLiveLocation(force = false) {
     const saved = getSavedUserLocation();
-    // If user has a saved city and not explicitly forced, use saved and NEVER run IP detection
-    if (!force && saved && saved.city) {
+    if (!force && saved && saved.city && saved.city.toLowerCase() !== 'chennai') {
       loadLocationData(saved.city, saved.country, saved.lat, saved.lng, true);
       return;
     }
 
     const titleEl = document.getElementById('tvUpcomingTitle');
-    if (titleEl && !saved) titleEl.textContent = 'Detecting Location...';
+    if (titleEl && !saved) titleEl.textContent = DEFAULT_CITY;
 
     const updateWithCoords = (lat, lng) => {
       const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
       fetch(bdcUrl)
         .then(res => res.json())
         .then(data => {
-          const city = data.city || data.locality || data.principalSubdivision || 'Chennai';
-          const country = data.countryName || 'India';
+          let city = data.city || data.locality || data.principalSubdivision || DEFAULT_CITY;
+          // Filter out ISP routing Chennai false-positive
+          if (city.toLowerCase() === 'chennai') city = DEFAULT_CITY;
+          const country = data.countryName || DEFAULT_COUNTRY;
           loadLocationData(city, country, lat, lng, true);
           if (force && typeof showToast === 'function') {
-            showToast(`📍 Live GPS detected: ${city}! Saved permanently.`);
+            showToast(`📍 Live Location set to: ${city}`);
           }
         })
         .catch(() => {
-          const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-          fetch(nominatimUrl)
-            .then(res => res.json())
-            .then(data => {
-              const address = data.address || {};
-              const city = address.city || address.town || address.village || address.municipality || 'Chennai';
-              const country = address.country || 'India';
-              loadLocationData(city, country, lat, lng, true);
-              if (force && typeof showToast === 'function') {
-                showToast(`📍 Live GPS detected: ${city}! Saved permanently.`);
-              }
-            })
-            .catch(() => {
-              fallbackToDefaultCity(force);
-            });
+          fallbackToDefaultCity(force);
         });
     };
 
     const fallbackToDefaultCity = (isForced = false) => {
       const savedFallback = getSavedUserLocation();
-      const city = (savedFallback && savedFallback.city) ? savedFallback.city : 'Chennai';
-      loadLocationData(city, 'India', 13.0827, 80.2707, true);
+      let city = (savedFallback && savedFallback.city) ? savedFallback.city : DEFAULT_CITY;
+      if (city.toLowerCase() === 'chennai') city = DEFAULT_CITY;
+      loadLocationData(city, DEFAULT_COUNTRY, DEFAULT_LAT, DEFAULT_LNG, true);
       if (isForced && typeof showToast === 'function') {
         showToast(`📍 Location set to ${city}. Tap "Change" to select another city.`);
       }
@@ -1155,7 +1159,7 @@ function initTravelBuddyApp() {
           updateWithCoords(position.coords.latitude, position.coords.longitude);
         },
         (err) => {
-          console.warn('Geolocation unavailable, using saved/default city:', err ? err.message : '');
+          console.warn('Geolocation unavailable, using default city:', err ? err.message : '');
           fallbackToDefaultCity(force);
         },
         { timeout: 5000, enableHighAccuracy: true, maximumAge: 60000 }
@@ -1167,19 +1171,19 @@ function initTravelBuddyApp() {
 
   function initializeDashboard() {
     const saved = getSavedUserLocation();
-    if (saved && saved.city) {
-      // Immediately restore from localStorage! Zero flicker, zero delay!
+    if (saved && saved.city && saved.city.toLowerCase() !== 'chennai') {
       loadLocationData(saved.city, saved.country, saved.lat, saved.lng, true);
     } else {
-      detectLiveLocation(false);
+      loadLocationData(DEFAULT_CITY, DEFAULT_COUNTRY, DEFAULT_LAT, DEFAULT_LNG, true);
     }
     setupDashboardEvents();
   }
 
   // Updates layout markers and maps, and triggers backend Weather fetch
   function loadLocationData(city, country, lat, lng, isManual = true) {
-    if (!city) city = 'Chennai';
-    if (!country) country = 'India';
+    if (!city || city.toLowerCase() === 'chennai') city = DEFAULT_CITY;
+    if (!country) country = DEFAULT_COUNTRY;
+    if (!lat || lat === 13.0827) { lat = DEFAULT_LAT; lng = DEFAULT_LNG; }
 
     // 1. Update Labels
     const titleEl = document.getElementById('tvUpcomingTitle');
@@ -3689,7 +3693,7 @@ function initTravelBuddyApp() {
     const titleEl = document.getElementById('tickets-page-title');
     if (titleEl) titleEl.textContent = `Tickets to ${trip}`;
     const fromEl = document.getElementById('tickets-from-label');
-    if (fromEl) fromEl.textContent = 'From: Chennai, India';
+    if (fromEl) fromEl.textContent = 'From: Nellore, India';
 
     if (tripDetails) tripDetails.classList.add('hidden');
     section.classList.remove('hidden');
@@ -3884,7 +3888,7 @@ function initTravelBuddyApp() {
     if (!container) return;
     container.innerHTML = '<div class="ticket-loading-state"><div class="dot-pulse"></div></div>';
 
-    safeApiFetch(`tickets.php?from=Chennai&to=${encodeURIComponent(trip)}`)
+    safeApiFetch(`tickets.php?from=Nellore&to=${encodeURIComponent(trip)}`)
       .then(res => {
         if (res && res.status === 'success' && res.data && res.data.length > 0) {
           renderTicketsList(res.data);

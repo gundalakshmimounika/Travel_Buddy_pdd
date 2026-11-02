@@ -5906,3 +5906,167 @@ body {
   box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
 }
 .btn-hotel-pay-now:active { transform: translateY(1px); }
+
+/* ==========================================================================
+   Real-Time Sync Toast & Pulse Indicator
+   ========================================================================== */
+.realtime-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34D399;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.realtime-pulse-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #10B981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10B981;
+  animation: pulseSync 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseSync {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.realtime-toast {
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  background: #1E293B;
+  color: #F8FAFC;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 999999;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.realtime-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Web Desktop Navbar (Clean, Spacious, Desktop-Tailored)
+   ========================================================================== */
+.web-desktop-navbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.web-desktop-navbar .brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.web-desktop-navbar .brand-group img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.web-desktop-navbar .brand-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.web-tag-pill {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60A5FA;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Android Native App Bar & Floating Action Button (FAB)
+   ========================================================================== */
+.android-top-appbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: #141C26;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.android-top-appbar .android-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.android-tag-pill {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34D399;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.android-fab {
+  position: fixed;
+  bottom: 88px;
+  right: 24px;
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #fff;
+  border: none;
+  border-radius: 28px;
+  padding: 14px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+  cursor: pointer;
+  z-index: 998;
+  transition: all 0.25s ease;
+}
+
+.android-fab:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 30px rgba(16, 185, 129, 0.55);
+}
+
+.android-fab:active {
+  transform: translateY(0) scale(0.98);
+}

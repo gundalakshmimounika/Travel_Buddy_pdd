@@ -756,18 +756,20 @@ function initTravelBuddyApp() {
     });
   }
 
-  // 1. Splash Screen Transition Pipeline
-  // Displays splash screen for 2500ms, then fades it out and shows main app.
-  const splashTimeout = setTimeout(() => {
-    // Start the fade out transition
+  // 1. Splash Screen Transition Pipeline (Fast & Interactive)
+  function dismissSplash() {
+    if (!splashScreen || splashScreen.style.display === 'none') return;
     splashScreen.classList.add('fade-out');
-
-    // Wait for the CSS transition (800ms) to complete, then make the app visible
     setTimeout(() => {
-      splashScreen.style.display = 'none'; // Clear from rendering tree
-      mainApp.classList.add('visible');
-    }, 800);
-  }, 2500);
+      splashScreen.style.display = 'none';
+      if (mainApp) mainApp.classList.add('visible');
+    }, 350);
+  }
+  const splashTimeout = setTimeout(dismissSplash, 900);
+  if (splashScreen) {
+    splashScreen.style.cursor = 'pointer';
+    splashScreen.addEventListener('click', dismissSplash);
+  }
 
   // 2. Interactive Form Submission & Dashboard Transition
   const guestBtn = document.getElementById('btn-guest-id');
@@ -792,6 +794,105 @@ function initTravelBuddyApp() {
       }
     });
   }
+
+  // ==========================================================================
+  // Real-Time Cross-Tab Synchronization Bus (BroadcastChannel + Server Polling)
+  // ==========================================================================
+  const realtimeBus = (typeof BroadcastChannel !== 'undefined')
+    ? new BroadcastChannel('travelbuddy_realtime_sync')
+    : null;
+
+  function showRealtimeToast(msg) {
+    let toast = document.getElementById('realtime-sync-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'realtime-sync-toast';
+      toast.className = 'realtime-toast';
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML = `<span style="font-size:16px;">🟢</span><span>${msg}</span>`;
+    toast.classList.add('show');
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2800);
+  }
+
+  window.broadcastRealtimeChange = function(entity) {
+    const isAndroid = window.location.pathname.includes('android');
+    const source = isAndroid ? 'Android App' : 'Web App';
+    if (realtimeBus) {
+      realtimeBus.postMessage({
+        type: 'DATA_SYNC',
+        entity: entity,
+        source: source,
+        timestamp: Date.now()
+      });
+    }
+    try {
+      localStorage.setItem('TB_SYNC_EVENT', JSON.stringify({ entity, source, time: Date.now() }));
+    } catch(e) {}
+  };
+
+  if (realtimeBus) {
+    realtimeBus.onmessage = (event) => {
+      const data = event.data;
+      if (!data || !data.entity) return;
+      console.log('[TravelBuddy RealTime Bus] Event received:', data);
+
+      if (data.entity === 'trips' || data.entity === 'all') {
+        if (typeof loadPlannedTrips === 'function') loadPlannedTrips();
+      }
+      if (data.entity === 'alerts' || data.entity === 'all') {
+        if (typeof loadAlerts === 'function') loadAlerts();
+      }
+      if (data.entity === 'community' || data.entity === 'all') {
+        if (typeof loadCommunityFeed === 'function') loadCommunityFeed();
+      }
+      showRealtimeToast(`Real-Time Sync: Synced ${data.entity} live with ${data.source}`);
+    };
+  }
+
+  // Cross-Tab fallback
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'TB_SYNC_EVENT' && e.newValue) {
+      try {
+        const payload = JSON.parse(e.newValue);
+        if (payload.entity === 'trips' || payload.entity === 'all') {
+          if (typeof loadPlannedTrips === 'function') loadPlannedTrips();
+        }
+        if (payload.entity === 'alerts' || payload.entity === 'all') {
+          if (typeof loadAlerts === 'function') loadAlerts();
+        }
+        if (payload.entity === 'community' || payload.entity === 'all') {
+          if (typeof loadCommunityFeed === 'function') loadCommunityFeed();
+        }
+        showRealtimeToast(`Real-Time Sync: Synced ${payload.entity} live`);
+      } catch(err) {}
+    }
+  });
+
+  // Background MySQL Polling Engine: every 3.5s, keeps trips & alerts fresh
+  let lastTripsCheckCount = -1;
+  setInterval(() => {
+    const dash = document.getElementById('dashboard-section');
+    if (!dash || dash.classList.contains('hidden')) return;
+
+    const email = localStorage.getItem('ACTIVE_EMAIL') || 'guest@travelbuddy.com';
+    safeApiFetch(`get_trips.php?email=${encodeURIComponent(email)}`)
+      .then(res => {
+        if (res && res.status === 'success' && Array.isArray(res.data)) {
+          if (lastTripsCheckCount !== -1 && res.data.length !== lastTripsCheckCount) {
+            console.log('[RealTime] Detected database trip change, reloading...');
+            if (typeof loadPlannedTrips === 'function') loadPlannedTrips();
+            showRealtimeToast('Real-Time Sync: Trips updated from backend');
+          }
+          lastTripsCheckCount = res.data.length;
+        }
+      })
+      .catch(() => {});
+  }, 3500);
+
 
   if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
@@ -2869,6 +2970,7 @@ function initTravelBuddyApp() {
       })
       .then(() => {
         loadPlannedTrips();
+        if (window.broadcastRealtimeChange) window.broadcastRealtimeChange('trips');
       })
       .catch(() => {
         console.warn('Trip saved in local mode');
@@ -2894,6 +2996,7 @@ function initTravelBuddyApp() {
     })
     .then(() => {
       loadPlannedTrips();
+        if (window.broadcastRealtimeChange) window.broadcastRealtimeChange('trips');
     })
     .catch(() => {
       loadPlannedTrips();
@@ -3137,10 +3240,6 @@ function initTravelBuddyApp() {
     setupPlanningButtons(destination);
   }
 
-    // 3. Bind planning trigger cards
-    setupPlanningButtons(destination);
-  }
-
   function closeTripDetails() {
     if (!tripDetailsSection || !dashboardSection) return;
     tripDetailsSection.classList.add('hidden');
@@ -3306,6 +3405,7 @@ function initTravelBuddyApp() {
         safeApiFetch('community.php?action=add', { method: 'POST', body: communityFd })
       ]).then(() => {
         loadPlannedTrips();
+        if (window.broadcastRealtimeChange) window.broadcastRealtimeChange('trips');
         loadCommunityFeed();
       });
     });

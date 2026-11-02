@@ -22,21 +22,8 @@
   </style>
 </head>
 <body>
-    <!-- Top Web Mode Status Banner -->
-  <div id="web-mode-banner" style="background: linear-gradient(90deg, #1e3a8a, #1d4ed8); color: #eff6ff; padding: 10px 18px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; z-index: 99999; position: relative; border-bottom: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <span style="background: #60a5fa; color: #1e3a8a; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 11px; letter-spacing: 0.5px;">WEB</span>
-      <span style="font-weight: 600;">TravelBuddy Web Application (Localhost)</span>
-      <span style="color: #bfdbfe; font-size: 12px;">• Full Screen Responsive Layout</span>
-    </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <span style="font-size: 12px; color: #bfdbfe;">🟢 Unified MySQL (Port 3306)</span>
-      <a href="android.html" target="_blank" style="background: rgba(255,255,255,0.15); color: #ffffff; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.2);">Open Android App 📱</a>
-    </div>
-  </div>
 
-
-  <!-- ==========================================================================
+<!-- ==========================================================================
        1. Splash Screen
        ========================================================================== -->
   <div id="splash-screen">
@@ -227,11 +214,14 @@
     <!-- 2B. Dashboard Section -->
     <section id="dashboard-section" class="dashboard-card hidden">
       
-      <!-- Dashboard Top Header -->
+      <!-- Dashboard Top Header (Web Portal) -->
       <header class="db-header">
         <div class="header-info">
-          <h1 class="db-title">Trip Buddy</h1>
-          <p class="db-subtitle">Ready for your next adventure?</p>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <h1 class="db-title">Trip Buddy</h1>
+            <span class="web-tag-pill">Web Portal</span>
+          </div>
+          <p class="db-subtitle">Ready for your next adventure? • <span style="color:#60A5FA;font-weight:600;">Real-Time Sync Active 🟢</span></p>
         </div>
         <!-- Profile / Community Circular Button -->
         <button class="btn-community" id="cvCommunity" aria-label="Community Feed">

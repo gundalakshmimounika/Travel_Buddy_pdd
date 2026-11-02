@@ -1200,46 +1200,180 @@ function initTravelBuddyApp() {
     setupDashboardEvents();
   }
 
-  // Updates layout markers and maps, and triggers backend Weather fetch
-  function loadLocationData(city, country, lat, lng, isUserChosen = true) {
-    if (!city) city = 'Detecting Location...';
-    if (!country) country = 'India';
+  // ==========================================================================
+  // Leaflet Interactive Map Engine (Full Zoom In/Out, Drag & Exact Place Pin)
+  // ==========================================================================
+  let leafletLiveMap = null;
+  let leafletMarker = null;
+
+  function initLeafletMap(lat, lng, placeName, regionName) {
+    const mapEl = document.getElementById('live-leaflet-map');
+    if (!mapEl) return;
+
+    const defaultLat = lat || 14.4426;
+    const defaultLng = lng || 79.9865;
+    const displayName = placeName || 'Nellore';
+
+    if (leafletLiveMap) {
+      setTimeout(() => {
+        try {
+          leafletLiveMap.invalidateSize();
+          leafletLiveMap.setView([defaultLat, defaultLng], 15);
+          if (leafletMarker) {
+            leafletMarker.setLatLng([defaultLat, defaultLng]);
+            leafletMarker.bindPopup(`<b>${displayName}</b><br><span style="font-size:11px;color:#94A3B8;">📍 Drag pin or click map to move</span>`).openPopup();
+          }
+        } catch(e) {}
+      }, 100);
+      return;
+    }
+
+    if (typeof L === 'undefined') {
+      console.warn('Leaflet library loading in progress...');
+      setTimeout(() => initLeafletMap(lat, lng, placeName, regionName), 300);
+      return;
+    }
+
+    try {
+      leafletLiveMap = L.map('live-leaflet-map', {
+        center: [defaultLat, defaultLng],
+        zoom: 15,
+        zoomControl: true, // Native + and - zoom controls
+        scrollWheelZoom: true, // Enable mouse wheel zoom in / out
+        doubleClickZoom: true,
+        touchZoom: true, // Touch pinch to zoom
+        dragging: true, // Click & drag to pan around
+      });
+
+      // CartoDB Voyager tiles (crisp, elegant contrast)
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+      }).addTo(leafletLiveMap);
+
+      // Pulsing Pin Icon
+      const pulseIcon = L.divIcon({
+        className: 'leaflet-pulse-icon',
+        html: '<div class="pulse-pin-marker"><div class="pulse-ring"></div><div class="pin-dot"></div></div>',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+
+      leafletMarker = L.marker([defaultLat, defaultLng], {
+        icon: pulseIcon,
+        draggable: true
+      }).addTo(leafletLiveMap);
+
+      leafletMarker.bindPopup(`<b>${displayName}</b><br><span style="font-size:11px;color:#94A3B8;">📍 Drag pin or click map to move</span>`);
+
+      // On Marker Drag End -> Reverse Geocode Exact Position
+      leafletMarker.on('dragend', function(e) {
+        const pos = leafletMarker.getLatLng();
+        reverseGeocodeAndSetPlace(pos.lat, pos.lng);
+      });
+
+      // On Map Click -> Move Pin to Clicked Position & Reverse Geocode
+      leafletLiveMap.on('click', function(e) {
+        const clickLat = e.latlng.lat;
+        const clickLng = e.latlng.lng;
+        leafletMarker.setLatLng([clickLat, clickLng]);
+        reverseGeocodeAndSetPlace(clickLat, clickLng);
+      });
+
+      // Ensure proper sizing
+      setTimeout(() => leafletLiveMap.invalidateSize(), 300);
+    } catch(err) {
+      console.warn('Leaflet init error:', err);
+    }
+  }
+
+  function reverseGeocodeAndSetPlace(lat, lng) {
+    const titleEl = document.getElementById('tvUpcomingTitle');
+    if (titleEl) titleEl.textContent = 'Identifying place...';
+    
+    const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+    fetch(nominatimUrl, { headers: { 'Accept': 'application/json' } })
+      .then(res => res.json())
+      .then(data => {
+        const address = data.address || {};
+        // Get most specific neighborhood, suburb, colony, road or hamlet
+        const exactPlace = address.neighbourhood || address.suburb || address.residential || address.hamlet || address.quarter || address.road || address.city || 'Your Place';
+        const district = address.city || address.town || address.county || address.state_district || 'Nellore';
+        const state = address.state || 'Andhra Pradesh';
+        
+        loadLocationData(exactPlace, `${district}, ${state}`, lat, lng, true);
+        if (typeof showToast === 'function') {
+          showToast(`📍 Set place to: ${exactPlace} (${district})`);
+        }
+      })
+      .catch(() => {
+        // Fallback to coordinates
+        loadLocationData(`Place @ ${lat.toFixed(3)}, ${lng.toFixed(3)}`, 'Nellore, India', lat, lng, true);
+      });
+  }
+
+  // Updates layout markers, labels, Leaflet map position, and triggers backend Weather fetch
+  function loadLocationData(placeName, regionName, lat, lng, isUserChosen = true) {
+    if (!placeName) placeName = 'Nellore';
+    if (!regionName) regionName = 'Nellore, Andhra Pradesh';
 
     // 1. Update Labels
     const titleEl = document.getElementById('tvUpcomingTitle');
     const datesEl = document.getElementById('tvUpcomingDates');
     const weatherLocEl = document.getElementById('tvWeatherLocation');
 
-    if (titleEl) titleEl.textContent = city;
-    if (datesEl) datesEl.textContent = `Current: ${country}`;
-    if (weatherLocEl) weatherLocEl.textContent = `Weather in ${city}`;
+    if (titleEl) titleEl.textContent = placeName;
+    if (datesEl) datesEl.textContent = regionName;
+    if (weatherLocEl) weatherLocEl.textContent = `Weather in ${placeName}`;
 
-    // 2. Reload Google Maps Embed focused on coordinates or place name
-    const mapIframe = document.getElementById('live-map-iframe');
-    if (mapIframe) {
-      const q = (lat && lng) ? `${lat},${lng}` : encodeURIComponent(`${city}, ${country}`);
-      mapIframe.src = `https://maps.google.com/maps?q=${q}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    // 2. Center and update Leaflet Map
+    initLeafletMap(lat, lng, placeName, regionName);
+
+    // 3. Save to localStorage permanently
+    if (!placeName.includes('Detecting') && !placeName.includes('Identifying')) {
+      saveUserLocation(placeName, regionName, lat, lng, isUserChosen);
     }
 
-    // 3. Save to localStorage permanently so next time it is remembered!
-    saveUserLocation(city, country, lat, lng, isManual);
-
-    // 4. Query weather.php backend for this specific place
-    if (typeof fetchWeather === 'function') {
-      fetchWeather(city);
+    // 4. Query weather.php backend for this specific place or district
+    if (typeof fetchWeather === 'function' && !placeName.includes('Detecting')) {
+      const weatherQuery = placeName.includes(',') ? placeName.split(',')[0].trim() : placeName;
+      fetchWeather(weatherQuery);
     }
   }
 
-  // UI Modal Handlers for Interactive City Selection
+  const PRESET_PLACES = {
+    'Magunta Layout, Nellore': { lat: 14.4332, lng: 79.9747, name: 'Magunta Layout', region: 'Nellore, Andhra Pradesh' },
+    'Haranathapuram, Nellore': { lat: 14.4468, lng: 79.9739, name: 'Haranathapuram', region: 'Nellore, Andhra Pradesh' },
+    'Vedayapalem, Nellore': { lat: 14.4225, lng: 79.9678, name: 'Vedayapalem', region: 'Nellore, Andhra Pradesh' },
+    'Balaji Nagar, Nellore': { lat: 14.4379, lng: 79.9890, name: 'Balaji Nagar', region: 'Nellore, Andhra Pradesh' },
+    'Pogathota, Nellore': { lat: 14.4452, lng: 79.9856, name: 'Pogathota', region: 'Nellore, Andhra Pradesh' },
+    'AC Nagar, Nellore': { lat: 14.4398, lng: 79.9785, name: 'AC Nagar', region: 'Nellore, Andhra Pradesh' },
+    'Stonehousepet, Nellore': { lat: 14.4533, lng: 79.9895, name: 'Stonehousepet', region: 'Nellore, Andhra Pradesh' },
+    'Dargamitta, Nellore': { lat: 14.4385, lng: 79.9667, name: 'Dargamitta', region: 'Nellore, Andhra Pradesh' },
+    'Kovur, Nellore': { lat: 14.4981, lng: 79.9882, name: 'Kovur', region: 'Nellore, Andhra Pradesh' },
+    'Nellore': { lat: 14.4426, lng: 79.9865, name: 'Nellore', region: 'Nellore, Andhra Pradesh' },
+    'Tirupati': { lat: 13.6288, lng: 79.4192, name: 'Tirupati', region: 'Andhra Pradesh, India' },
+    'Vijayawada': { lat: 16.5062, lng: 80.6480, name: 'Vijayawada', region: 'Andhra Pradesh, India' },
+    'Visakhapatnam': { lat: 17.6868, lng: 83.2185, name: 'Visakhapatnam', region: 'Andhra Pradesh, India' },
+    'Hyderabad': { lat: 17.3850, lng: 78.4867, name: 'Hyderabad', region: 'Telangana, India' },
+    'Bengaluru': { lat: 12.9716, lng: 77.5946, name: 'Bengaluru', region: 'Karnataka, India' },
+    'Chennai': { lat: 13.0827, lng: 80.2707, name: 'Chennai', region: 'Tamil Nadu, India' },
+    'Mumbai': { lat: 19.0760, lng: 72.8777, name: 'Mumbai', region: 'Maharashtra, India' },
+    'Delhi': { lat: 28.6139, lng: 77.2090, name: 'Delhi', region: 'Delhi, India' },
+    'Goa': { lat: 15.2993, lng: 74.1240, name: 'Goa', region: 'Goa, India' }
+  };
+
+  // Modal Open/Close Controls
   window.openLocationModal = function() {
     const modal = document.getElementById('location-picker-modal');
     if (modal) {
-      modal.style.display = 'flex';
       modal.classList.remove('hidden');
+      modal.style.display = 'flex';
       const input = document.getElementById('custom-city-input');
       if (input) {
         input.value = '';
-        setTimeout(() => input.focus(), 100);
+        setTimeout(() => input.focus(), 150);
       }
     }
   };
@@ -1247,25 +1381,75 @@ function initTravelBuddyApp() {
   window.closeLocationModal = function() {
     const modal = document.getElementById('location-picker-modal');
     if (modal) {
-      modal.style.display = 'none';
       modal.classList.add('hidden');
+      modal.style.display = 'none';
     }
   };
 
-  window.selectCity = function(cityName) {
-    if (!cityName) return;
-    loadLocationData(cityName.trim(), 'India', null, null, true);
-    window.closeLocationModal();
-    if (typeof showToast === 'function') {
-      showToast(`✅ Location updated to "${cityName}" and saved for future sessions!`);
+  // Select place from chips or search with Nominatim
+  window.selectPlace = function(placeQuery) {
+    if (!placeQuery) return;
+    const cleanQuery = placeQuery.trim();
+
+    // Check instant preset dictionary first
+    if (PRESET_PLACES[cleanQuery]) {
+      const preset = PRESET_PLACES[cleanQuery];
+      loadLocationData(preset.name, preset.region, preset.lat, preset.lng, true);
+      window.closeLocationModal();
+      if (leafletLiveMap) {
+        leafletLiveMap.flyTo([preset.lat, preset.lng], 16, { duration: 1.0 });
+      }
+      if (typeof showToast === 'function') {
+        showToast(`📍 Set place to: ${preset.name}`);
+      }
+      return;
     }
+
+    if (typeof showToast === 'function') {
+      showToast(`🔍 Searching for "${cleanQuery}"...`);
+    }
+
+    const searchQuery = cleanQuery.toLowerCase().includes('nellore') ? cleanQuery : `${cleanQuery}, Nellore, Andhra Pradesh`;
+    const searchUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`;
+    fetch(searchUrl, { headers: { 'Accept': 'application/json' } })
+      .then(res => res.json())
+      .then(results => {
+        if (results && results.length > 0) {
+          const item = results[0];
+          const lat = parseFloat(item.lat);
+          const lng = parseFloat(item.lon);
+          const shortName = cleanQuery.split(',')[0].trim();
+          loadLocationData(shortName, 'Nellore, Andhra Pradesh', lat, lng, true);
+          window.closeLocationModal();
+          if (leafletLiveMap) {
+            leafletLiveMap.flyTo([lat, lng], 16, { duration: 1.2 });
+          }
+          if (typeof showToast === 'function') {
+            showToast(`✅ Moved to "${shortName}"!`);
+          }
+        } else {
+          // If search fails, update name directly
+          const shortName = cleanQuery.split(',')[0].trim();
+          loadLocationData(shortName, 'Nellore, Andhra Pradesh', 14.4426, 79.9865, true);
+          window.closeLocationModal();
+        }
+      })
+      .catch(() => {
+        const shortName = cleanQuery.split(',')[0].trim();
+        loadLocationData(shortName, 'Nellore, Andhra Pradesh', 14.4426, 79.9865, true);
+        window.closeLocationModal();
+      });
+  };
+
+  window.selectCity = function(cityName) {
+    window.selectPlace(cityName);
   };
 
   window.submitCustomCity = function() {
     const input = document.getElementById('custom-city-input');
-    const city = input ? input.value.trim() : '';
-    if (city) {
-      window.selectCity(city);
+    const place = input ? input.value.trim() : '';
+    if (place) {
+      window.selectPlace(place);
     }
   };
 
@@ -1277,17 +1461,7 @@ function initTravelBuddyApp() {
       window.selectCity(cityName);
       return;
     }
-    const modal = document.getElementById('location-picker-modal');
-    if (modal) {
-      window.openLocationModal();
-    } else {
-      const saved = getSavedUserLocation();
-      const current = saved ? saved.city : '';
-      const promptCity = prompt('Enter your destination or current city (e.g. Chennai, Hyderabad, Bengaluru, Mumbai, Delhi, Tirupati):', current);
-      if (promptCity && promptCity.trim()) {
-        window.selectCity(promptCity.trim());
-      }
-    }
+    window.openLocationModal();
   };
 
   window.clearSavedLocation = function() {
@@ -1298,6 +1472,7 @@ function initTravelBuddyApp() {
     } catch(e) {}
     window.changeMapLocation();
   };
+
 
   // ==========================================================================
   // 4. AJAX Weather API Integration
@@ -1398,7 +1573,7 @@ function initTravelBuddyApp() {
     const mapCard = document.getElementById('cvUpcomingTrip');
     if (mapCard) {
       mapCard.addEventListener('click', (e) => {
-        if (e.target.closest('.btn-map-action') || e.target.closest('#location-picker-modal')) return;
+        if (e.target.closest('#live-leaflet-map') || e.target.closest('.leaflet-container') || e.target.closest('.btn-map-action') || e.target.closest('#location-picker-modal')) return;
         if (typeof window.openLocationModal === 'function') {
           window.openLocationModal();
         }

@@ -12,8 +12,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { useLocation } from '../context/LocationContext';
 
+const NELLORE_PLACES = [
+  { name: 'Magunta Layout, Nellore', label: 'Magunta Layout' },
+  { name: 'Haranathapuram, Nellore', label: 'Haranathapuram' },
+  { name: 'Vedayapalem, Nellore', label: 'Vedayapalem' },
+  { name: 'Balaji Nagar, Nellore', label: 'Balaji Nagar' },
+  { name: 'Pogathota, Nellore', label: 'Pogathota' },
+  { name: 'AC Nagar, Nellore', label: 'AC Nagar' },
+  { name: 'Stonehousepet, Nellore', label: 'Stonehousepet' },
+  { name: 'Dargamitta, Nellore', label: 'Dargamitta' },
+  { name: 'Kovur, Nellore', label: 'Kovur' },
+];
+
 const POPULAR_CITIES = [
-  { name: 'Nellore', badge: 'Default / Current' },
   { name: 'Tirupati', badge: 'Temple City' },
   { name: 'Vijayawada', badge: 'Krishna Hub' },
   { name: 'Visakhapatnam', badge: 'Coastal City' },
@@ -80,9 +91,36 @@ export const CityPickerModal = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Popular Cities */}
-          <Text style={styles.sectionHeader}>POPULAR DESTINATIONS</Text>
+          {/* Popular Places in Nellore */}
+          <Text style={[styles.sectionHeader, { color: colors.accent }]}>POPULAR PLACES IN NELLORE</Text>
           <ScrollView style={styles.chipsContainer} showsVerticalScrollIndicator={false}>
+            <View style={styles.chipsGrid}>
+              {NELLORE_PLACES.map((p) => {
+                const isSelected = currentLocation?.city?.toLowerCase() === p.name.toLowerCase() || currentLocation?.city?.toLowerCase() === p.label.toLowerCase();
+                return (
+                  <TouchableOpacity
+                    key={p.name}
+                    style={[
+                      styles.chip,
+                      isSelected && styles.chipActive,
+                    ]}
+                    onPress={() => handleSelect(p.name)}
+                  >
+                    <Ionicons
+                      name="location"
+                      size={13}
+                      color={isSelected ? colors.white : colors.primaryLight}
+                      style={{ marginRight: 5 }}
+                    />
+                    <Text style={[styles.chipText, isSelected && styles.chipTextActive]}>
+                      {p.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <Text style={[styles.sectionHeader, { marginTop: 12 }]}>OTHER DESTINATIONS</Text>
             <View style={styles.chipsGrid}>
               {POPULAR_CITIES.map((c) => {
                 const isSelected = currentLocation?.city?.toLowerCase() === c.name.toLowerCase();

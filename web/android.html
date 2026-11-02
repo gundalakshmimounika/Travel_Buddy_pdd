@@ -15,7 +15,8 @@
   <link rel="icon" type="image/png" href="assets/ic_app_logo.png">
   
   <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/style.css">
   <style>
     body { background-color: #1A232E; color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
     .hidden { display: none !important; }
@@ -265,15 +266,7 @@
           
           <!-- Embedded Live Map Container -->
           <div class="map-embed-container">
-            <iframe 
-              id="live-map-iframe"
-              src="https://maps.google.com/maps?q=Nellore,Andhra+Pradesh,India&t=&z=13&ie=UTF8&iwloc=&output=embed" 
-              width="100%" 
-              height="100%" 
-              style="border:0;" 
-              allowfullscreen="" 
-              loading="lazy">
-            </iframe>
+            <div id="live-leaflet-map" style="width:100%;height:100%;"></div>
           </div>
 
           <!-- Glassmorphic Map Info Overlay -->
@@ -1668,14 +1661,26 @@
       
       <!-- Custom City Input -->
       <form onsubmit="event.preventDefault(); window.submitCustomCity();" style="display:flex;gap:8px;margin-bottom:18px;">
-        <input type="text" id="custom-city-input" placeholder="Type city (e.g. Hyderabad, Chennai...)" style="flex:1;background:#0F172A;border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px 14px;color:#fff;font-size:14px;outline:none;">
+        <input type="text" id="custom-city-input" placeholder="Type exact place or colony (e.g. Magunta Layout, Nellore)..." style="flex:1;background:#0F172A;border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px 14px;color:#fff;font-size:14px;outline:none;">
         <button type="submit" style="background:#3B82F6;border:none;color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(59,130,246,0.4);">Set</button>
       </form>
 
       <!-- Popular City Chips -->
-      <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#64748B;text-transform:uppercase;margin-bottom:10px;">Popular Destinations</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#38BDF8;text-transform:uppercase;margin-bottom:10px;">Popular Places in Nellore</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;" id="nellore-places-list">
+        <button type="button" class="loc-chip-btn" style="background:#2563EB;border-color:#3B82F6;color:#fff;font-weight:700;" onclick="window.selectPlace('Magunta Layout, Nellore')">📍 Magunta Layout</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectPlace('Haranathapuram, Nellore')">📍 Haranathapuram</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectPlace('Vedayapalem, Nellore')">📍 Vedayapalem</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectPlace('Balaji Nagar, Nellore')">📍 Balaji Nagar</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectPlace('Pogathota, Nellore')">📍 Pogathota</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectPlace('AC Nagar, Nellore')">📍 AC Nagar</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectPlace('Stonehousepet, Nellore')">📍 Stonehousepet</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectPlace('Dargamitta, Nellore')">📍 Dargamitta</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectPlace('Kovur, Nellore')">📍 Kovur</button>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#64748B;text-transform:uppercase;margin-bottom:10px;">Other Cities</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;" id="location-chips-list">
-        <button type="button" class="loc-chip-btn" style="background:#2563EB;border-color:#3B82F6;color:#fff;font-weight:700;" onclick="window.selectCity('Nellore')">📍 Nellore (Current)</button>
         <button type="button" class="loc-chip-btn" onclick="window.selectCity('Tirupati')">Tirupati</button>
         <button type="button" class="loc-chip-btn" onclick="window.selectCity('Vijayawada')">Vijayawada</button>
         <button type="button" class="loc-chip-btn" onclick="window.selectCity('Visakhapatnam')">Visakhapatnam</button>
@@ -1688,14 +1693,15 @@
       </div>
 
       <!-- Action Footer -->
-      <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:14px;display:flex;justify-content:space-between;align-items:center;">
         <button type="button" onclick="window.detectMyCurrentLocation(true); window.closeLocationModal();" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#60A5FA;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
           <span>🎯</span> Detect Live GPS
         </button>
         <button type="button" onclick="window.closeLocationModal()" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:#94a3b8;padding:8px 14px;border-radius:10px;font-size:13px;cursor:pointer;">
-          Cancel
+          Close
         </button>
       </div>
+
     </div>
   </div>
 
@@ -1726,7 +1732,8 @@
 <!-- Razorpay SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <!-- JavaScript File -->
-  <script src="js/config.js"></script>
+  <script src="js/leaflet.js"></script>
+    <script src="js/config.js"></script>
   <script src="js/app.js"></script>
 
 </body>

@@ -640,6 +640,11 @@ body {
 .map-embed-container iframe {
   filter: invert(90%) hue-rotate(180deg) grayscale(15%) contrast(95%);
   opacity: 0.85;
+  pointer-events: none; /* Prevents clicks on embedded map from opening external Google Maps */
+}
+
+.card-map {
+  cursor: pointer;
 }
 
 /* Glassmorphic Map Info Overlay */

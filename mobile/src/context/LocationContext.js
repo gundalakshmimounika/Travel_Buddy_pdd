@@ -6,16 +6,13 @@ const LocationContext = createContext({});
 
 const LOCATION_STORAGE_KEY = 'TRAVEL_BUDDY_USER_SAVED_LOCATION';
 
-export const DEFAULT_LOCATION = {
-  city: 'Nellore',
-  state: 'Andhra Pradesh',
-  country: 'India',
-  lat: 14.4426,
-  lng: 79.9865,
-};
-
 export const LocationProvider = ({ children }) => {
-  const [currentLocation, setCurrentLocation] = useState(DEFAULT_LOCATION);
+  const [currentLocation, setCurrentLocation] = useState({
+    city: 'Detecting Location...',
+    country: 'India',
+    lat: null,
+    lng: null,
+  });
   const [weather, setWeather] = useState(null);
   const [loadingWeather, setLoadingWeather] = useState(false);
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -25,7 +22,7 @@ export const LocationProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (currentLocation?.city) {
+    if (currentLocation?.city && !currentLocation.city.includes('Detecting')) {
       fetchWeather(currentLocation.city);
     }
   }, [currentLocation?.city]);
@@ -35,37 +32,34 @@ export const LocationProvider = ({ children }) => {
       const stored = await storage.getItem(LOCATION_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Clean out any stale Chennai ISP gateway references
-        if (parsed?.city && parsed.city.toLowerCase() === 'chennai') {
-          saveLocation(DEFAULT_LOCATION);
-        } else if (parsed?.city) {
+        if (parsed?.city && parsed.isUserChosen) {
           setCurrentLocation(parsed);
           return;
         }
       }
-      saveLocation(DEFAULT_LOCATION);
+      setPickerVisible(true);
     } catch (e) {
-      saveLocation(DEFAULT_LOCATION);
+      setPickerVisible(true);
     }
   };
 
   const saveLocation = async (loc) => {
     const updated = {
-      ...DEFAULT_LOCATION,
       ...loc,
-      city: loc.city?.toLowerCase() === 'chennai' ? DEFAULT_LOCATION.city : loc.city,
+      isUserChosen: true,
     };
     setCurrentLocation(updated);
     await storage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(updated));
   };
 
   const setCity = (cityName) => {
-    const cleanCity = cityName?.toLowerCase() === 'chennai' ? DEFAULT_LOCATION.city : cityName;
+    if (!cityName) return;
     saveLocation({
-      city: cleanCity,
+      city: cityName,
       country: 'India',
-      lat: cleanCity === 'Nellore' ? 14.4426 : null,
-      lng: cleanCity === 'Nellore' ? 79.9865 : null,
+      lat: null,
+      lng: null,
+      isUserChosen: true,
     });
   };
 
@@ -76,16 +70,15 @@ export const LocationProvider = ({ children }) => {
       if (res && res.current_temp) {
         setWeather(res);
       } else {
-        // Fallback default realistic weather for South India / AP
         setWeather({
-          current_temp: '26°',
+          current_temp: '27°',
           condition: 'Partly Cloudy',
           hourly: [
-            { time: '10 AM', temp: '25°', condition: 'Partly Cloudy' },
-            { time: '12 PM', temp: '28°', condition: 'Sunny' },
-            { time: '02 PM', temp: '30°', condition: 'Sunny' },
-            { time: '04 PM', temp: '28°', condition: 'Partly Cloudy' },
-            { time: '06 PM', temp: '26°', condition: 'Clear' },
+            { time: '10 AM', temp: '26°', condition: 'Partly Cloudy' },
+            { time: '12 PM', temp: '29°', condition: 'Sunny' },
+            { time: '02 PM', temp: '31°', condition: 'Sunny' },
+            { time: '04 PM', temp: '29°', condition: 'Partly Cloudy' },
+            { time: '06 PM', temp: '27°', condition: 'Clear' },
           ],
         });
       }

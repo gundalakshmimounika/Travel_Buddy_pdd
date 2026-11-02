@@ -1066,45 +1066,39 @@ function initTravelBuddyApp() {
   // ==========================================================================
 
   const LOCATION_STORAGE_KEY = 'TRAVEL_BUDDY_USER_SAVED_LOCATION';
-  const DEFAULT_CITY = 'Nellore';
-  const DEFAULT_STATE = 'Andhra Pradesh';
-  const DEFAULT_COUNTRY = 'India';
-  const DEFAULT_LAT = 14.4426;
-  const DEFAULT_LNG = 79.9865;
 
   function getSavedUserLocation() {
     try {
       const data = localStorage.getItem(LOCATION_STORAGE_KEY);
       if (data) {
         const parsed = JSON.parse(data);
-        // Automatically migrate away from incorrect ISP Chennai gateway
-        if (parsed && parsed.city && parsed.city.toLowerCase() === 'chennai') {
-          saveUserLocation(DEFAULT_CITY, DEFAULT_COUNTRY, DEFAULT_LAT, DEFAULT_LNG, true);
-          return { city: DEFAULT_CITY, country: DEFAULT_COUNTRY, lat: DEFAULT_LAT, lng: DEFAULT_LNG, isManual: true };
+        // Clean out any stale Chennai ISP or incorrect Nellore fallbacks
+        const cityLower = (parsed.city || '').toLowerCase();
+        if (cityLower === 'chennai' || (cityLower === 'nellore' && !parsed.isUserChosen)) {
+          localStorage.removeItem(LOCATION_STORAGE_KEY);
+          localStorage.removeItem('USER_SAVED_CITY');
+          return null;
         }
         return parsed;
       }
       const simpleCity = localStorage.getItem('USER_SAVED_CITY');
-      if (simpleCity && simpleCity.toLowerCase() === 'chennai') {
-        saveUserLocation(DEFAULT_CITY, DEFAULT_COUNTRY, DEFAULT_LAT, DEFAULT_LNG, true);
-        return { city: DEFAULT_CITY, country: DEFAULT_COUNTRY, lat: DEFAULT_LAT, lng: DEFAULT_LNG, isManual: true };
+      if (simpleCity && simpleCity.toLowerCase() !== 'chennai' && simpleCity.toLowerCase() !== 'nellore') {
+        return { city: simpleCity, country: 'India', isUserChosen: true };
       }
-      // If nothing saved, default to Nellore
-      saveUserLocation(DEFAULT_CITY, DEFAULT_COUNTRY, DEFAULT_LAT, DEFAULT_LNG, true);
-      return { city: DEFAULT_CITY, country: DEFAULT_COUNTRY, lat: DEFAULT_LAT, lng: DEFAULT_LNG, isManual: true };
+      return null;
     } catch (e) {
-      return { city: DEFAULT_CITY, country: DEFAULT_COUNTRY, lat: DEFAULT_LAT, lng: DEFAULT_LNG, isManual: true };
+      return null;
     }
   }
 
-  function saveUserLocation(city, country, lat, lng, isManual = true) {
-    if (!city || city === 'Detecting Location...') return;
+  function saveUserLocation(city, country, lat, lng, isUserChosen = true) {
+    if (!city || city === 'Detecting Location...' || city === 'Detecting GPS...') return;
     const locationData = {
       city: city,
-      country: country || DEFAULT_COUNTRY,
-      lat: lat || DEFAULT_LAT,
-      lng: lng || DEFAULT_LNG,
-      isManual: true,
+      country: country || 'India',
+      lat: lat || null,
+      lng: lng || null,
+      isUserChosen: isUserChosen,
       updatedAt: new Date().toISOString()
     };
     try {
@@ -1116,41 +1110,60 @@ function initTravelBuddyApp() {
 
   function detectLiveLocation(force = false) {
     const saved = getSavedUserLocation();
-    if (!force && saved && saved.city && saved.city.toLowerCase() !== 'chennai') {
+    if (!force && saved && saved.city && !saved.city.toLowerCase().includes('detecting')) {
       loadLocationData(saved.city, saved.country, saved.lat, saved.lng, true);
       return;
     }
 
     const titleEl = document.getElementById('tvUpcomingTitle');
-    if (titleEl && !saved) titleEl.textContent = DEFAULT_CITY;
+    if (titleEl) titleEl.textContent = 'Detecting GPS...';
+    if (typeof showToast === 'function') {
+      showToast('🛰️ Requesting device GPS location...');
+    }
 
     const updateWithCoords = (lat, lng) => {
       const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
       fetch(bdcUrl)
         .then(res => res.json())
         .then(data => {
-          let city = data.city || data.locality || data.principalSubdivision || DEFAULT_CITY;
-          // Filter out ISP routing Chennai false-positive
-          if (city.toLowerCase() === 'chennai') city = DEFAULT_CITY;
-          const country = data.countryName || DEFAULT_COUNTRY;
-          loadLocationData(city, country, lat, lng, true);
-          if (force && typeof showToast === 'function') {
-            showToast(`📍 Live Location set to: ${city}`);
+          let city = data.city || data.locality || data.principalSubdivision;
+          if (!city || city === 'Unknown') city = data.localityInfo?.administrative?.[2]?.name;
+          const country = data.countryName || 'India';
+          if (city) {
+            loadLocationData(city, country, lat, lng, true);
+            if (typeof showToast === 'function') {
+              showToast(`📍 Live GPS detected: ${city}!`);
+            }
+          } else {
+            fallbackNominatim(lat, lng);
           }
         })
         .catch(() => {
-          fallbackToDefaultCity(force);
+          fallbackNominatim(lat, lng);
         });
     };
 
-    const fallbackToDefaultCity = (isForced = false) => {
-      const savedFallback = getSavedUserLocation();
-      let city = (savedFallback && savedFallback.city) ? savedFallback.city : DEFAULT_CITY;
-      if (city.toLowerCase() === 'chennai') city = DEFAULT_CITY;
-      loadLocationData(city, DEFAULT_COUNTRY, DEFAULT_LAT, DEFAULT_LNG, true);
-      if (isForced && typeof showToast === 'function') {
-        showToast(`📍 Location set to ${city}. Tap "Change" to select another city.`);
-      }
+    const fallbackNominatim = (lat, lng) => {
+      const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+      fetch(nominatimUrl)
+        .then(res => res.json())
+        .then(data => {
+          const address = data.address || {};
+          const city = address.city || address.town || address.village || address.county || address.state_district || 'Your Location';
+          const country = address.country || 'India';
+          loadLocationData(city, country, lat, lng, true);
+          if (typeof showToast === 'function') {
+            showToast(`📍 Live GPS detected: ${city}!`);
+          }
+        })
+        .catch(() => {
+          if (typeof showToast === 'function') {
+            showToast('📍 Could not detect exact city. Please pick your city.');
+          }
+          if (typeof window.openLocationModal === 'function') {
+            window.openLocationModal();
+          }
+        });
     };
 
     if (navigator.geolocation) {
@@ -1159,31 +1172,38 @@ function initTravelBuddyApp() {
           updateWithCoords(position.coords.latitude, position.coords.longitude);
         },
         (err) => {
-          console.warn('Geolocation unavailable, using default city:', err ? err.message : '');
-          fallbackToDefaultCity(force);
+          console.warn('Geolocation unavailable:', err ? err.message : '');
+          if (typeof showToast === 'function') {
+            showToast('📍 GPS permission needed or unavailable. Select your city.');
+          }
+          if (typeof window.openLocationModal === 'function') {
+            window.openLocationModal();
+          }
         },
-        { timeout: 5000, enableHighAccuracy: true, maximumAge: 60000 }
+        { timeout: 10000, enableHighAccuracy: true, maximumAge: 0 }
       );
     } else {
-      fallbackToDefaultCity(force);
+      if (typeof window.openLocationModal === 'function') {
+        window.openLocationModal();
+      }
     }
   }
 
   function initializeDashboard() {
     const saved = getSavedUserLocation();
-    if (saved && saved.city && saved.city.toLowerCase() !== 'chennai') {
+    if (saved && saved.city) {
       loadLocationData(saved.city, saved.country, saved.lat, saved.lng, true);
     } else {
-      loadLocationData(DEFAULT_CITY, DEFAULT_COUNTRY, DEFAULT_LAT, DEFAULT_LNG, true);
+      // Trigger live device GPS immediately on launch
+      detectLiveLocation(true);
     }
     setupDashboardEvents();
   }
 
   // Updates layout markers and maps, and triggers backend Weather fetch
-  function loadLocationData(city, country, lat, lng, isManual = true) {
-    if (!city || city.toLowerCase() === 'chennai') city = DEFAULT_CITY;
-    if (!country) country = DEFAULT_COUNTRY;
-    if (!lat || lat === 13.0827) { lat = DEFAULT_LAT; lng = DEFAULT_LNG; }
+  function loadLocationData(city, country, lat, lng, isUserChosen = true) {
+    if (!city) city = 'Detecting Location...';
+    if (!country) country = 'India';
 
     // 1. Update Labels
     const titleEl = document.getElementById('tvUpcomingTitle');
@@ -1374,12 +1394,16 @@ function initTravelBuddyApp() {
     weatherCard.addEventListener('click', toggleForecast);
     weatherToggle.addEventListener('click', toggleForecast);
 
-    // Click Map Card to open full Google Maps view in new tab
+    // Click Map Card opens in-app location picker modal (never opens external Google Maps)
     const mapCard = document.getElementById('cvUpcomingTrip');
-    mapCard.addEventListener('click', () => {
-      const city = document.getElementById('tvUpcomingTitle').textContent;
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(city)}`, '_blank');
-    });
+    if (mapCard) {
+      mapCard.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-map-action') || e.target.closest('#location-picker-modal')) return;
+        if (typeof window.openLocationModal === 'function') {
+          window.openLocationModal();
+        }
+      });
+    }
 
     // slide-up Chat Drawer bindings
     const askBuddyCard = document.getElementById('cvAskBuddy');

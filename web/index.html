@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script>
@@ -11,12 +11,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="TravelBuddy - Plan smarter. Travel easier.">
-  <title>TravelBuddy</title>
+  <title>TravelBuddy - Web Application (Localhost)</title>
+  <link rel="icon" type="image/png" href="assets/ic_app_logo.png">
   
   <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=2.5.0">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background-color: #1A232E; color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 0; }
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
+    <!-- Top Web Mode Status Banner -->
+  <div id="web-mode-banner" style="background: linear-gradient(90deg, #1e3a8a, #1d4ed8); color: #eff6ff; padding: 10px 18px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; z-index: 99999; position: relative; border-bottom: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="background: #60a5fa; color: #1e3a8a; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 11px; letter-spacing: 0.5px;">WEB</span>
+      <span style="font-weight: 600;">TravelBuddy Web Application (Localhost)</span>
+      <span style="color: #bfdbfe; font-size: 12px;">• Full Screen Responsive Layout</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 12px; color: #bfdbfe;">🟢 Unified MySQL (Port 3306)</span>
+      <a href="android.html" target="_blank" style="background: rgba(255,255,255,0.15); color: #ffffff; text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.2);">Open Android App 📱</a>
+    </div>
+  </div>
+
 
   <!-- ==========================================================================
        1. Splash Screen
@@ -104,6 +122,7 @@
 
         <!-- Submit Button -->
         <button type="submit" class="btn-submit" id="btn-signin-id">Sign In</button>
+        <button type="button" class="btn-guest" id="btn-guest-id" style="width:100%;margin-top:12px;background:transparent;border:1.5px solid rgba(255,255,255,0.25);color:#cbd5e1;padding:14px;border-radius:18px;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;">Continue as Guest</button>
       </form>
 
       <!-- Footer/Navigation Links -->
@@ -251,7 +270,7 @@
           <div class="map-embed-container">
             <iframe 
               id="live-map-iframe"
-              src="https://maps.google.com/maps?q=Nellore,India&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+              src="about:blank" 
               width="100%" 
               height="100%" 
               style="border:0;" 
@@ -263,12 +282,19 @@
           <!-- Glassmorphic Map Info Overlay -->
           <div class="map-info-overlay">
             <div class="map-info-left">
-              <h3 id="tvUpcomingTitle">Nellore</h3>
-              <p id="tvUpcomingDates">Current: India</p>
+              <h3 id="tvUpcomingTitle">Detecting Location...</h3>
+              <p id="tvUpcomingDates">Live GPS / IP Location</p>
             </div>
-            <div class="map-info-badge">
-              <span>Route Summary</span>
-              <p>Active Location</p>
+            <div class="map-info-actions" style="display:flex;gap:6px;align-items:center;z-index:10;">
+              <button id="btnDetectGps" class="btn-map-action" onclick="event.stopPropagation(); if(window.detectMyCurrentLocation) window.detectMyCurrentLocation();" title="Detect Live GPS" style="background:rgba(15,23,42,0.65);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;backdrop-filter:blur(6px);">
+                📍 Live GPS
+              </button>
+              <button id="btnChangeLocation" class="btn-map-action" onclick="event.stopPropagation(); if(window.changeMapLocation) window.changeMapLocation();" title="Change Location" style="background:#3B82F6;border:none;color:#fff;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(59,130,246,0.4);">
+                🗺️ Change
+              </button>
+              <button id="btnClearLocation" class="btn-map-action" onclick="event.stopPropagation(); if(window.clearSavedLocation) window.clearSavedLocation();" title="Reset Location" style="background:rgba(239,68,68,0.25);border:1px solid rgba(239,68,68,0.5);color:#fca5a5;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">
+                🔄 Reset
+              </button>
             </div>
           </div>
         </div>
@@ -277,7 +303,7 @@
         <div class="card card-weather" id="cvWeatherCard">
           <div class="weather-summary">
             <div class="weather-text">
-              <h3 id="tvWeatherLocation">Weather in Nellore</h3>
+              <h3 id="tvWeatherLocation">Weather</h3>
               <p id="weather-condition">Partly Cloudy</p>
             </div>
             <div class="weather-temp-container">
@@ -337,9 +363,17 @@
       <div class="db-content hidden" id="trips-tab-content">
         <!-- Trips Header Area -->
         <div class="trips-header-wrapper">
-          <div class="trips-header-info">
-            <h2 class="trips-tab-title">My Trips</h2>
-            <p class="trips-tab-subtitle">Plan and manage your adventures</p>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button class="btn-toolbar-back" id="btn-trips-tab-back" aria-label="Back to Home">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+            </button>
+            <div class="trips-header-info">
+              <h2 class="trips-tab-title">My Trips</h2>
+              <p class="trips-tab-subtitle">Plan and manage your adventures</p>
+            </div>
           </div>
           <!-- Premium Floating Action Plus Button in Header -->
           <button class="btn-add-trip-header" id="fabAddTrip" aria-label="Add Planned Trip">
@@ -360,9 +394,17 @@
       <div class="db-content hidden" id="alerts-tab-content">
         <!-- Alerts Header Area -->
         <div class="alerts-header-wrapper">
-          <div class="alerts-header-info">
-            <h2 class="alerts-tab-title">Notifications</h2>
-            <p class="alerts-tab-subtitle">Stay updated on your travel activities</p>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button class="btn-toolbar-back" id="btn-alerts-tab-back" aria-label="Back to Home">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+            </button>
+            <div class="alerts-header-info">
+              <h2 class="alerts-tab-title">Notifications</h2>
+              <p class="alerts-tab-subtitle">Stay updated on your travel activities</p>
+            </div>
           </div>
           <button class="btn-clear-alerts" id="btnClearAllAlerts" aria-label="Clear All Notifications">Clear All</button>
         </div>
@@ -389,7 +431,15 @@
       <div class="db-content hidden" id="search-tab-content">
         <!-- Search Header Area -->
         <div class="search-header-wrapper">
-          <h2 class="search-tab-title">Search</h2>
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+            <button class="btn-toolbar-back" id="btn-search-tab-back" aria-label="Back to Home">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+            </button>
+            <h2 class="search-tab-title" style="margin: 0;">Search</h2>
+          </div>
           
           <!-- Large Search Bar Input -->
           <div class="search-tab-bar">
@@ -422,6 +472,17 @@
 
       <!-- Scrollable Dashboard Content (Profile Tab) -->
       <div class="db-content hidden" id="profile-tab-content">
+        <!-- Profile Tab Header Toolbar with Back Button -->
+        <header class="section-toolbar profile-tab-toolbar">
+          <button class="btn-toolbar-back" id="btn-profile-tab-back" aria-label="Back to Home">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </button>
+          <h2 class="toolbar-title">Profile</h2>
+        </header>
+
         <!-- Profile Header/Card Area -->
         <div class="profile-card-header">
           <div class="profile-avatar-large" id="profile-avatar-initials">AM</div>
@@ -596,6 +657,12 @@
         <div class="chat-messages" id="chat-messages-id">
           <div class="message ai">
             <p>Hey traveler! 👋 I am **Travel Buddy AI**, your personal tour guide. Ask me anything about destinations, packing lists, budgeting, or itinerary ideas! Where are we heading next?</p>
+          </div>
+          <div class="chat-chips-container" id="chat-chips-container-id">
+            <button type="button" class="chat-chip" data-prompt="Plan a Mumbai trip">🌆 Plan Mumbai trip</button>
+            <button type="button" class="chat-chip" data-prompt="Plan a Goa trip">🏖️ Plan Goa trip</button>
+            <button type="button" class="chat-chip" data-prompt="Essential packing checklist">🎒 Packing Checklist</button>
+            <button type="button" class="chat-chip" data-prompt="Budget tips for traveling">💰 Budget Tips</button>
           </div>
         </div>
         
@@ -1587,11 +1654,79 @@
     </div>
   </div>
 
+    <!-- ==========================================================================
+       Interactive Location Selector Modal (Permanent Cross-Session Persistence)
+       ========================================================================== -->
+  <div id="location-picker-modal" class="modal-overlay hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:999999;display:none;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:#1E293B;border:1px solid rgba(255,255,255,0.15);border-radius:24px;max-width:440px;width:100%;padding:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.7);color:#fff;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="margin:0;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;">
+          <span>📍</span> Choose Your City
+        </h3>
+        <button type="button" onclick="window.closeLocationModal()" style="background:transparent;border:none;color:#94a3b8;font-size:22px;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+      </div>
+      <p style="font-size:13px;color:#94a3b8;margin:0 0 16px 0;line-height:1.4;">
+        Select your home or travel destination. TravelBuddy permanently saves your preference across all tabs and visits.
+      </p>
+      
+      <!-- Custom City Input -->
+      <form onsubmit="event.preventDefault(); window.submitCustomCity();" style="display:flex;gap:8px;margin-bottom:18px;">
+        <input type="text" id="custom-city-input" placeholder="Type city (e.g. Hyderabad, Chennai...)" style="flex:1;background:#0F172A;border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px 14px;color:#fff;font-size:14px;outline:none;">
+        <button type="submit" style="background:#3B82F6;border:none;color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(59,130,246,0.4);">Set</button>
+      </form>
+
+      <!-- Popular City Chips -->
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#64748B;text-transform:uppercase;margin-bottom:10px;">Popular Destinations</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;" id="location-chips-list">
+        <button type="button" class="loc-chip-btn" onclick="window.selectCity('Chennai')">Chennai</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectCity('Hyderabad')">Hyderabad</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectCity('Bengaluru')">Bengaluru</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectCity('Mumbai')">Mumbai</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectCity('Delhi')">Delhi</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectCity('Tirupati')">Tirupati</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectCity('Vijayawada')">Vijayawada</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectCity('Visakhapatnam')">Visakhapatnam</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectCity('Goa')">Goa</button>
+        <button type="button" class="loc-chip-btn" onclick="window.selectCity('Nellore')">Nellore</button>
+      </div>
+
+      <!-- Action Footer -->
+      <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;display:flex;justify-content:space-between;align-items:center;">
+        <button type="button" onclick="window.detectMyCurrentLocation(true); window.closeLocationModal();" style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#60A5FA;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <span>🎯</span> Detect Live GPS
+        </button>
+        <button type="button" onclick="window.closeLocationModal()" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:#94a3b8;padding:8px 14px;border-radius:10px;font-size:13px;cursor:pointer;">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .loc-chip-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .loc-chip-btn:hover {
+      background: #3B82F6;
+      border-color: #3B82F6;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+  </style>
+
   <!-- Razorpay SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <!-- JavaScript File -->
   <script src="js/config.js"></script>
-  <script src="js/app.js?v=2.0.0"></script>
+  <script src="js/app.js"></script>
 
 </body>
 </html>

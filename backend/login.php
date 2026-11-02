@@ -18,7 +18,7 @@ $stmt->execute();
 $stmt->bind_result($full_name, $db_password);
 
 if ($stmt->fetch()) {
-    if ($password === $db_password) {
+    if ($password === $db_password || (function_exists("password_verify") && password_verify($password, $db_password))) {
         echo json_encode([
             "status" => "success",
             "message" => "Login successful",

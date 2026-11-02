@@ -662,6 +662,16 @@ function getFallbackPlaceDetails(destination) {
 }
 
 function initTravelBuddyApp() {
+  // Fast splash bypass if user just logged out
+  if (sessionStorage.getItem('JUST_LOGGED_OUT') === 'true') {
+    sessionStorage.removeItem('JUST_LOGGED_OUT');
+    if (splashScreen) splashScreen.style.display = 'none';
+    if (mainApp) mainApp.classList.add('visible');
+    if (loginSection) {
+      loginSection.classList.remove('hidden');
+      loginSection.classList.add('visible');
+    }
+  }
   const splashScreen = document.getElementById('splash-screen');
   const mainApp = document.getElementById('main-app');
   const loginForm = document.getElementById('login-form');
@@ -2760,10 +2770,13 @@ function initTravelBuddyApp() {
     btnLogOut.addEventListener('click', () => {
       localStorage.removeItem('ACTIVE_EMAIL');
       localStorage.removeItem('ACTIVE_USER_NAME');
+      localStorage.removeItem('ACTIVE_USER_PHONE');
+      localStorage.removeItem('ACTIVE_USER_BIO');
+      sessionStorage.setItem('JUST_LOGGED_OUT', 'true');
       showToast('Logged out successfully!');
       setTimeout(() => {
         window.location.reload();
-      }, 800);
+      }, 400);
     });
   }
 
@@ -4633,10 +4646,14 @@ function initTravelBuddyApp() {
       });
   }
 
-  // Set default active traveler values in localStorage on onboarding
-  if (!localStorage.getItem('ACTIVE_USER_NAME')) {
-    localStorage.setItem('ACTIVE_USER_NAME', 'Aarav Mehta');
-    localStorage.setItem('ACTIVE_EMAIL', 'aarav.mehta@gmail.com');
+  // Set default active traveler values in localStorage on first visit only
+  if (!localStorage.getItem('ACTIVE_USER_NAME') && !sessionStorage.getItem('JUST_LOGGED_OUT')) {
+    // Only set default if user has never logged out
+    if (!localStorage.getItem('USER_VISITED')) {
+      localStorage.setItem('USER_VISITED', 'true');
+      localStorage.setItem('ACTIVE_USER_NAME', 'Aarav Mehta');
+      localStorage.setItem('ACTIVE_EMAIL', 'aarav.mehta@gmail.com');
+    }
   }
 
 }

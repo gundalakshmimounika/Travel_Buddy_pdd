@@ -1131,12 +1131,20 @@ function initTravelBuddyApp() {
     }
 
     const titleEl = document.getElementById('tvUpcomingTitle');
-    if (titleEl) titleEl.textContent = 'Detecting GPS...';
+    if (titleEl) titleEl.textContent = 'Detecting Location...';
     if (typeof showToast === 'function') {
-      showToast('🛰️ Requesting device GPS location...');
+      showToast('🛰️ Detecting live location by GPS / IP...');
     }
 
     const updateWithCoords = (lat, lng) => {
+      // Eliminate false emulator Mountain View coordinates
+      const isEmulatorMock = (Math.abs(lat - 37.422) < 0.05 && Math.abs(lng - (-122.084)) < 0.05);
+      if (isEmulatorMock) {
+        console.log('Ignored Mountain View mock GPS. Using IP coordinates.');
+        fetchLocationByIp();
+        return;
+      }
+
       const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
       fetch(bdcUrl)
         .then(res => res.json())
@@ -1147,7 +1155,7 @@ function initTravelBuddyApp() {
           if (city) {
             loadLocationData(city, country, lat, lng, true);
             if (typeof showToast === 'function') {
-              showToast(`📍 Live GPS detected: ${city}!`);
+              showToast(`📍 Live Location: ${city}!`);
             }
           } else {
             fallbackNominatim(lat, lng);
@@ -1164,20 +1172,15 @@ function initTravelBuddyApp() {
         .then(res => res.json())
         .then(data => {
           const address = data.address || {};
-          const city = address.city || address.town || address.village || address.county || address.state_district || 'Your Location';
+          const city = address.city || address.town || address.village || address.county || address.state_district || 'Nellore';
           const country = address.country || 'India';
           loadLocationData(city, country, lat, lng, true);
           if (typeof showToast === 'function') {
-            showToast(`📍 Live GPS detected: ${city}!`);
+            showToast(`📍 Live Location: ${city}!`);
           }
         })
         .catch(() => {
-          if (typeof showToast === 'function') {
-            showToast('📍 Could not detect exact city. Please pick your city.');
-          }
-          if (typeof window.openLocationModal === 'function') {
-            window.openLocationModal();
-          }
+          fetchLocationByIp();
         });
     };
 
@@ -1187,151 +1190,89 @@ function initTravelBuddyApp() {
           updateWithCoords(position.coords.latitude, position.coords.longitude);
         },
         (err) => {
-          console.warn('Geolocation unavailable:', err ? err.message : '');
-          if (typeof showToast === 'function') {
-            showToast('📍 GPS permission needed or unavailable. Select your city.');
-          }
-          if (typeof window.openLocationModal === 'function') {
-            window.openLocationModal();
-          }
+          console.warn('Geolocation unavailable, falling back to IP:', err ? err.message : '');
+          fetchLocationByIp();
         },
-        { timeout: 10000, enableHighAccuracy: true, maximumAge: 0 }
+        { timeout: 6000, enableHighAccuracy: true, maximumAge: 0 }
       );
     } else {
-      if (typeof window.openLocationModal === 'function') {
-        window.openLocationModal();
-      }
+      fetchLocationByIp();
     }
+  }
+
+  // Accurately resolves location coordinates using device public IP address
+  function fetchLocationByIp(callback) {
+    const titleEl = document.getElementById('tvUpcomingTitle');
+    if (titleEl && titleEl.textContent.includes('Detecting')) {
+      titleEl.textContent = 'Resolving IP Location...';
+    }
+
+    // Primary HTTPS IP Geolocation (ipapi.co)
+    fetch('https://ipapi.co/json/', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (data && (data.latitude || data.lat)) {
+          const lat = parseFloat(data.latitude || data.lat);
+          const lng = parseFloat(data.longitude || data.lon);
+          const city = data.city || 'Nellore';
+          const reg = data.region || 'Andhra Pradesh';
+          const country = data.country_name || 'India';
+          const region = reg ? `${reg}, ${country}` : country;
+
+          loadLocationData(city, region, lat, lng, true);
+          if (typeof showToast === 'function') {
+            showToast(`📍 IP Location: ${city}, ${region}`);
+          }
+          if (callback) callback(lat, lng, city, region);
+          return;
+        }
+        throw new Error('ipapi incomplete');
+      })
+      .catch(() => {
+        // Secondary IP Geolocation (ip-api.com)
+        fetch('http://ip-api.com/json', { cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.status === 'success') {
+              const lat = parseFloat(data.lat);
+              const lng = parseFloat(data.lon);
+              const city = data.city || 'Nellore';
+              const reg = data.regionName || 'Andhra Pradesh';
+              const country = data.country || 'India';
+              const region = reg ? `${reg}, ${country}` : country;
+
+              loadLocationData(city, region, lat, lng, true);
+              if (typeof showToast === 'function') {
+                showToast(`📍 IP Location: ${city}, ${region}`);
+              }
+              if (callback) callback(lat, lng, city, region);
+            } else {
+              loadLocationData('Nellore', 'Nellore, Andhra Pradesh', 14.4426, 79.9865, true);
+            }
+          })
+          .catch(() => {
+            loadLocationData('Nellore', 'Nellore, Andhra Pradesh', 14.4426, 79.9865, true);
+          });
+      });
   }
 
   function initializeDashboard() {
     const saved = getSavedUserLocation();
-    if (saved && saved.city) {
+    if (saved && saved.city && !saved.city.toLowerCase().includes('detecting')) {
       loadLocationData(saved.city, saved.country, saved.lat, saved.lng, true);
     } else {
-      // Trigger live device GPS immediately on launch
+      // Trigger live IP / GPS detection immediately on launch
       detectLiveLocation(true);
     }
     setupDashboardEvents();
   }
 
-  // ==========================================================================
-  // Leaflet Interactive Map Engine (Full Zoom In/Out, Drag & Exact Place Pin)
-  // ==========================================================================
-  let leafletLiveMap = null;
-  let leafletMarker = null;
-
-  function initLeafletMap(lat, lng, placeName, regionName) {
-    const mapEl = document.getElementById('live-leaflet-map');
-    if (!mapEl) return;
-
-    const defaultLat = lat || 14.4426;
-    const defaultLng = lng || 79.9865;
-    const displayName = placeName || 'Nellore';
-
-    if (leafletLiveMap) {
-      setTimeout(() => {
-        try {
-          leafletLiveMap.invalidateSize();
-          leafletLiveMap.setView([defaultLat, defaultLng], 15);
-          if (leafletMarker) {
-            leafletMarker.setLatLng([defaultLat, defaultLng]);
-            leafletMarker.bindPopup(`<b>${displayName}</b><br><span style="font-size:11px;color:#94A3B8;">📍 Drag pin or click map to move</span>`).openPopup();
-          }
-        } catch(e) {}
-      }, 100);
-      return;
-    }
-
-    if (typeof L === 'undefined') {
-      console.warn('Leaflet library loading in progress...');
-      setTimeout(() => initLeafletMap(lat, lng, placeName, regionName), 300);
-      return;
-    }
-
-    try {
-      leafletLiveMap = L.map('live-leaflet-map', {
-        center: [defaultLat, defaultLng],
-        zoom: 15,
-        zoomControl: true, // Native + and - zoom controls
-        scrollWheelZoom: true, // Enable mouse wheel zoom in / out
-        doubleClickZoom: true,
-        touchZoom: true, // Touch pinch to zoom
-        dragging: true, // Click & drag to pan around
-      });
-
-      // CartoDB Voyager tiles (crisp, elegant contrast)
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20
-      }).addTo(leafletLiveMap);
-
-      // Pulsing Pin Icon
-      const pulseIcon = L.divIcon({
-        className: 'leaflet-pulse-icon',
-        html: '<div class="pulse-pin-marker"><div class="pulse-ring"></div><div class="pin-dot"></div></div>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
-      });
-
-      leafletMarker = L.marker([defaultLat, defaultLng], {
-        icon: pulseIcon,
-        draggable: true
-      }).addTo(leafletLiveMap);
-
-      leafletMarker.bindPopup(`<b>${displayName}</b><br><span style="font-size:11px;color:#94A3B8;">📍 Drag pin or click map to move</span>`);
-
-      // On Marker Drag End -> Reverse Geocode Exact Position
-      leafletMarker.on('dragend', function(e) {
-        const pos = leafletMarker.getLatLng();
-        reverseGeocodeAndSetPlace(pos.lat, pos.lng);
-      });
-
-      // On Map Click -> Move Pin to Clicked Position & Reverse Geocode
-      leafletLiveMap.on('click', function(e) {
-        const clickLat = e.latlng.lat;
-        const clickLng = e.latlng.lng;
-        leafletMarker.setLatLng([clickLat, clickLng]);
-        reverseGeocodeAndSetPlace(clickLat, clickLng);
-      });
-
-      // Ensure proper sizing
-      setTimeout(() => leafletLiveMap.invalidateSize(), 300);
-    } catch(err) {
-      console.warn('Leaflet init error:', err);
-    }
-  }
-
-  function reverseGeocodeAndSetPlace(lat, lng) {
-    const titleEl = document.getElementById('tvUpcomingTitle');
-    if (titleEl) titleEl.textContent = 'Identifying place...';
-    
-    const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-    fetch(nominatimUrl, { headers: { 'Accept': 'application/json' } })
-      .then(res => res.json())
-      .then(data => {
-        const address = data.address || {};
-        // Get most specific neighborhood, suburb, colony, road or hamlet
-        const exactPlace = address.neighbourhood || address.suburb || address.residential || address.hamlet || address.quarter || address.road || address.city || 'Your Place';
-        const district = address.city || address.town || address.county || address.state_district || 'Nellore';
-        const state = address.state || 'Andhra Pradesh';
-        
-        loadLocationData(exactPlace, `${district}, ${state}`, lat, lng, true);
-        if (typeof showToast === 'function') {
-          showToast(`📍 Set place to: ${exactPlace} (${district})`);
-        }
-      })
-      .catch(() => {
-        // Fallback to coordinates
-        loadLocationData(`Place @ ${lat.toFixed(3)}, ${lng.toFixed(3)}`, 'Nellore, India', lat, lng, true);
-      });
-  }
-
-  // Updates layout markers, labels, Leaflet map position, and triggers backend Weather fetch
+  // Updates layout labels, Google Maps embed iframe, Leaflet position, and weather forecast
   function loadLocationData(placeName, regionName, lat, lng, isUserChosen = true) {
     if (!placeName) placeName = 'Nellore';
     if (!regionName) regionName = 'Nellore, Andhra Pradesh';
+    const targetLat = lat || 14.4426;
+    const targetLng = lng || 79.9865;
 
     // 1. Update Labels
     const titleEl = document.getElementById('tvUpcomingTitle');
@@ -1342,16 +1283,22 @@ function initTravelBuddyApp() {
     if (datesEl) datesEl.textContent = regionName;
     if (weatherLocEl) weatherLocEl.textContent = `Weather in ${placeName}`;
 
-    // 2. Center and update Leaflet Map
-    initLeafletMap(lat, lng, placeName, regionName);
+    // 2. Update Live Google Maps Embed with accurate coordinates
+    const gmapIframe = document.getElementById('live-google-map');
+    if (gmapIframe) {
+      const gmapUrl = `https://maps.google.com/maps?q=${targetLat},${targetLng}&hl=en&z=15&output=embed`;
+      if (gmapIframe.src !== gmapUrl) {
+        gmapIframe.src = gmapUrl;
+      }
+    }
 
     // 3. Save to localStorage permanently
-    if (!placeName.includes('Detecting') && !placeName.includes('Identifying')) {
-      saveUserLocation(placeName, regionName, lat, lng, isUserChosen);
+    if (!placeName.includes('Detecting') && !placeName.includes('Identifying') && !placeName.includes('Resolving')) {
+      saveUserLocation(placeName, regionName, targetLat, targetLng, isUserChosen);
     }
 
     // 4. Query weather.php backend for this specific place or district
-    if (typeof fetchWeather === 'function' && !placeName.includes('Detecting')) {
+    if (typeof fetchWeather === 'function' && !placeName.includes('Detecting') && !placeName.includes('Resolving')) {
       const weatherQuery = placeName.includes(',') ? placeName.split(',')[0].trim() : placeName;
       fetchWeather(weatherQuery);
     }
@@ -1468,6 +1415,7 @@ function initTravelBuddyApp() {
     }
   };
 
+  window.fetchLocationByIp = fetchLocationByIp;
   window.loadLocationData = loadLocationData;
   window.detectMyCurrentLocation = detectLiveLocation;
   

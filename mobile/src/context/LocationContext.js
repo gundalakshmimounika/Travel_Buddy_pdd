@@ -27,6 +27,37 @@ export const LocationProvider = ({ children }) => {
     }
   }, [currentLocation?.city]);
 
+  const fetchLocationByIp = async () => {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.latitude) {
+          const loc = {
+            city: data.city || 'Nellore',
+            state: data.region || 'Andhra Pradesh',
+            country: data.country_name || 'India',
+            lat: parseFloat(data.latitude),
+            lng: parseFloat(data.longitude),
+            isUserChosen: false,
+          };
+          setCurrentLocation(loc);
+          return;
+        }
+      }
+    } catch (e) {}
+
+    // Fallback default to Nellore coordinates
+    setCurrentLocation({
+      city: 'Nellore',
+      state: 'Andhra Pradesh',
+      country: 'India',
+      lat: 14.4426,
+      lng: 79.9865,
+      isUserChosen: false,
+    });
+  };
+
   const loadLocation = async () => {
     try {
       const stored = await storage.getItem(LOCATION_STORAGE_KEY);
@@ -37,9 +68,9 @@ export const LocationProvider = ({ children }) => {
           return;
         }
       }
-      setPickerVisible(true);
+      await fetchLocationByIp();
     } catch (e) {
-      setPickerVisible(true);
+      await fetchLocationByIp();
     }
   };
 

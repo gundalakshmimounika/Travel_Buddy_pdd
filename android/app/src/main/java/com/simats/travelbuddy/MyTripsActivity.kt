@@ -28,6 +28,10 @@ class MyTripsActivity : AppCompatActivity() {
             insets
         }
 
+        findViewById<ImageView>(R.id.ivBack)?.setOnClickListener {
+            finish()
+        }
+
         setupNavigation()
     }
 

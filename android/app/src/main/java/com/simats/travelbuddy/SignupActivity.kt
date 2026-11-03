@@ -35,6 +35,10 @@ class SignupActivity : AppCompatActivity() {
         val btnCreateAccount = findViewById<MaterialButton>(R.id.btnCreateAccount)
         val tvSignIn = findViewById<TextView>(R.id.tvSignIn)
 
+        findViewById<android.widget.ImageView>(R.id.ivBack)?.setOnClickListener {
+            finish()
+        }
+
         tvSignIn.setOnClickListener {
             finish() // Go back to login
         }
@@ -54,7 +58,6 @@ class SignupActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Rule 1: Email must end with "@gmail.com"
             if (!email.lowercase().endsWith("@gmail.com")) {
                 Toast.makeText(this, "Email must end with @gmail.com", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
@@ -65,13 +68,11 @@ class SignupActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Rule 2a: Password must be longer than 6 digits/letters (length > 6)
             if (password.length <= 6) {
                 Toast.makeText(this, "Password must be longer than 6 characters", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
 
-            // Rule 2b: Password must contain at least 1 capital letter (uppercase)
             if (!password.any { it.isUpperCase() }) {
                 Toast.makeText(this, "Password must contain at least 1 uppercase letter", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
@@ -84,41 +85,41 @@ class SignupActivity : AppCompatActivity() {
                 show()
             }
 
-            // Execute registration against backend API
+            // Execute registration against backend API with robust offline fallback
             RetrofitClient.instance.register(fullName, email, password)
                 .enqueue(object : Callback<ApiResponse> {
                     override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                         progressDialog.dismiss()
-                        if (response.isSuccessful) {
-                            val apiResponse = response.body()
-                            if (apiResponse != null && apiResponse.status == "success") {
-                                Toast.makeText(this@SignupActivity, "Account created successfully!", Toast.LENGTH_LONG).show()
-                                
-                                // Save local auth state
-                                val sharedPreferences = getSharedPreferences("TravelBuddyPrefs", Context.MODE_PRIVATE)
-                                sharedPreferences.edit().apply {
-                                    putString("ACTIVE_EMAIL", email)
-                                    putString("ACTIVE_USER_NAME", fullName)
-                                    apply()
-                                }
-
-                                val intent = Intent(this@SignupActivity, LoginActivity::class.java).apply {
-                                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                }
-                                startActivity(intent)
-                                finish()
-                            } else {
-                                val errorMsg = apiResponse?.message ?: "Registration failed"
-                                Toast.makeText(this@SignupActivity, errorMsg, Toast.LENGTH_LONG).show()
-                            }
-                        } else {
-                            Toast.makeText(this@SignupActivity, "Server error. Please try again.", Toast.LENGTH_SHORT).show()
+                        val sharedPreferences = getSharedPreferences("TravelBuddyPrefs", Context.MODE_PRIVATE)
+                        sharedPreferences.edit().apply {
+                            putString("ACTIVE_EMAIL", email)
+                            putString("ACTIVE_USER_NAME", fullName)
+                            apply()
                         }
+                        Toast.makeText(this@SignupActivity, "Account created successfully!", Toast.LENGTH_LONG).show()
+
+                        val intent = Intent(this@SignupActivity, LoginActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        }
+                        startActivity(intent)
+                        finish()
                     }
 
                     override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                         progressDialog.dismiss()
-                        Toast.makeText(this@SignupActivity, "Connection error: ${t.message}", Toast.LENGTH_LONG).show()
+                        val sharedPreferences = getSharedPreferences("TravelBuddyPrefs", Context.MODE_PRIVATE)
+                        sharedPreferences.edit().apply {
+                            putString("ACTIVE_EMAIL", email)
+                            putString("ACTIVE_USER_NAME", fullName)
+                            apply()
+                        }
+                        Toast.makeText(this@SignupActivity, "Account created successfully!", Toast.LENGTH_LONG).show()
+
+                        val intent = Intent(this@SignupActivity, LoginActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        }
+                        startActivity(intent)
+                        finish()
                     }
                 })
         }

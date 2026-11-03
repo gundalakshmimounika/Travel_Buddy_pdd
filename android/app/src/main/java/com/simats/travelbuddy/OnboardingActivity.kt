@@ -83,6 +83,14 @@ class OnboardingActivity : AppCompatActivity() {
             }
         }
 
+        findViewById<android.widget.ImageView>(R.id.ivBack)?.setOnClickListener {
+            if (viewPager.currentItem > 0) {
+                viewPager.currentItem = viewPager.currentItem - 1
+            } else {
+                finish()
+            }
+        }
+
         tvSkip.setOnClickListener {
             navigateToLogin()
         }

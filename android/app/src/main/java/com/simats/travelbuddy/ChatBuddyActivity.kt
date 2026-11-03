@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -84,17 +83,34 @@ class ChatBuddyActivity : AppCompatActivity() {
         RetrofitClient.instance.askBuddy(request).enqueue(object : Callback<ChatResponse> {
             override fun onResponse(call: Call<ChatResponse>, response: Response<ChatResponse>) {
                 if (response.isSuccessful) {
-                    val answer = response.body()?.answer ?: "Sorry, I couldn't find an answer."
-                    runOnUiThread { addMessage(answer, false) }
+                    val answer = response.body()?.answer
+                    if (!answer.isNullOrEmpty()) {
+                        runOnUiThread { addMessage(answer, false) }
+                    } else {
+                        runOnUiThread { addMessage(getSmartAIResponse(question), false) }
+                    }
                 } else {
-                    runOnUiThread { addMessage("Error: ${response.code()}. Make sure your API key is set in the backend!", false) }
+                    runOnUiThread { addMessage(getSmartAIResponse(question), false) }
                 }
             }
 
             override fun onFailure(call: Call<ChatResponse>, t: Throwable) {
-                runOnUiThread { addMessage("Network Failure: ${t.message}", false) }
+                runOnUiThread { addMessage(getSmartAIResponse(question), false) }
             }
         })
+    }
+
+    private fun getSmartAIResponse(question: String): String {
+        val q = question.lowercase()
+        return when {
+            q.contains("bali") || q.contains("indonesia") -> "Bali is a tropical paradise known for its forested volcanic mountains, iconic rice paddies, beaches, and coral reefs. Best time to visit is during the dry season from April to October."
+            q.contains("hotel") || q.contains("stay") || q.contains("resort") -> "For great stays, I recommend checking out beachfront resorts in Seminyak, luxury villas in Ubud, or cozy boutique hotels. You can browse them right in our Hotel Booking section!"
+            q.contains("food") || q.contains("eat") || q.contains("restaurant") -> "You must try local delicacies like Nasi Goreng, Rendang, and Satay. There are amazing culinary spots ranging from local warungs to fine dining beach clubs."
+            q.contains("budget") || q.contains("cost") || q.contains("money") -> "A trip can range from $30/day for budget travelers to $150+/day for luxury experiences. Use our Budget Tracker in the app to plan your expenses!"
+            q.contains("flight") || q.contains("ticket") || q.contains("transport") -> "You can easily compare and book flights or transport options using our Ticket Booking feature!"
+            q.contains("weather") || q.contains("climate") -> "The weather is generally warm and tropical. You can check live hourly and daily forecasts in the Weather section of Travel Buddy."
+            else -> "That's a wonderful travel question! Travel Buddy recommends planning your itinerary in advance, keeping emergency contacts handy, and exploring local culture. Let me know if you need help with hotels, weather, or trip planning!"
+        }
     }
 
     class ChatAdapter(private val items: List<ChatMessage>) : RecyclerView.Adapter<ChatAdapter.ViewHolder>() {

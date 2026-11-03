@@ -52,8 +52,17 @@ export const AlertsScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
-        <Text style={styles.headerTitle}>Travel Alerts</Text>
-        <Text style={styles.locationSubtitle}>Active in {city}</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => (navigation?.canGoBack() ? navigation.goBack() : navigation?.navigate('Home'))}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="arrow-back" size={22} color={colors.white} />
+        </TouchableOpacity>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>Travel Alerts</Text>
+          <Text style={styles.locationSubtitle}>Active in {city}</Text>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -86,9 +95,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 18,
     paddingTop: 16,
     paddingBottom: 12,
+    gap: 12,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.surfaceElevated,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.surfaceBorder,
+  },
+  headerTitleContainer: {
+    flex: 1,
   },
   headerTitle: {
     fontSize: 20,

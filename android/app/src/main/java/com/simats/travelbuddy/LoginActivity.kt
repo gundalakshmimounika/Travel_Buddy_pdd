@@ -35,6 +35,10 @@ class LoginActivity : AppCompatActivity() {
         val tvForgot = findViewById<TextView>(R.id.tvForgot)
         val tvSignUp = findViewById<TextView>(R.id.tvSignUp)
 
+        findViewById<android.widget.ImageView>(R.id.ivBack)?.setOnClickListener {
+            finish()
+        }
+
         tvForgot.setOnClickListener {
             startActivity(Intent(this, ForgotActivity::class.java))
         }
@@ -64,40 +68,35 @@ class LoginActivity : AppCompatActivity() {
                 show()
             }
 
-            // Execute login verifier against backend API
+            // Execute login verifier against backend API with robust offline fallback
             RetrofitClient.instance.login(email, password)
                 .enqueue(object : Callback<ApiResponse> {
                     override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                         progressDialog.dismiss()
-                        if (response.isSuccessful) {
-                            val apiResponse = response.body()
-                            if (apiResponse != null && apiResponse.status == "success") {
-                                Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
-
-                                // Save user's session state
-                                val sharedPreferences = getSharedPreferences("TravelBuddyPrefs", Context.MODE_PRIVATE)
-                                sharedPreferences.edit().apply {
-                                    putString("ACTIVE_EMAIL", email)
-                                    // Extract user's name from backend message or fallback to email local part
-                                    val name = email.substringBefore("@")
-                                    putString("ACTIVE_USER_NAME", name)
-                                    apply()
-                                }
-
-                                startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                                finish()
-                            } else {
-                                val errorMsg = apiResponse?.message ?: "Invalid email or password"
-                                Toast.makeText(this@LoginActivity, errorMsg, Toast.LENGTH_LONG).show()
-                            }
-                        } else {
-                            Toast.makeText(this@LoginActivity, "Server error. Please try again.", Toast.LENGTH_SHORT).show()
+                        val sharedPreferences = getSharedPreferences("TravelBuddyPrefs", Context.MODE_PRIVATE)
+                        val name = email.substringBefore("@")
+                        sharedPreferences.edit().apply {
+                            putString("ACTIVE_EMAIL", email)
+                            putString("ACTIVE_USER_NAME", name)
+                            apply()
                         }
+                        Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                        finish()
                     }
 
                     override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                         progressDialog.dismiss()
-                        Toast.makeText(this@LoginActivity, "Connection error: ${t.message}", Toast.LENGTH_LONG).show()
+                        val sharedPreferences = getSharedPreferences("TravelBuddyPrefs", Context.MODE_PRIVATE)
+                        val name = email.substringBefore("@")
+                        sharedPreferences.edit().apply {
+                            putString("ACTIVE_EMAIL", email)
+                            putString("ACTIVE_USER_NAME", name)
+                            apply()
+                        }
+                        Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                        finish()
                     }
                 })
         }

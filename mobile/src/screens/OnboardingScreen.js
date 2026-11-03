@@ -56,8 +56,20 @@ export const OnboardingScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Top Skip button */}
+      {/* Top Bar with Back and Skip buttons */}
       <View style={styles.topBar}>
+        {currentIndex > 0 ? (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => setCurrentIndex(currentIndex - 1)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="arrow-back" size={18} color={colors.white} />
+            <Text style={styles.backText}>Back</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 60 }} />
+        )}
         <TouchableOpacity onPress={() => navigation.replace('Login')}>
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
@@ -112,8 +124,23 @@ const styles = StyleSheet.create({
   },
   topBar: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingTop: 12,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  backText: {
+    fontSize: 14,
+    color: colors.white,
+    fontWeight: '600',
   },
   skipText: {
     fontSize: 14,

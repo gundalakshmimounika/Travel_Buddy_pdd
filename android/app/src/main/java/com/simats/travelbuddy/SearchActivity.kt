@@ -37,6 +37,9 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        findViewById<android.widget.ImageView>(R.id.ivBack)?.setOnClickListener {
+            finish()
+        }
         enableEdgeToEdge()
         setContentView(R.layout.activity_search)
 

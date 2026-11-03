@@ -121,6 +121,17 @@
     <!-- 2A-2. Signup Section -->
     <section id="signup-section" class="login-card hidden">
       
+      <!-- Top Back Navigation -->
+      <div class="auth-top-nav">
+        <button type="button" class="btn-auth-back" id="btn-signup-back" aria-label="Back to Sign In">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Back to Sign In</span>
+        </button>
+      </div>
+      
       <!-- Small Squircle Logo -->
       <div class="small-logo">
         <img src="assets/ic_app_logo.png" alt="TravelBuddy Logo">
@@ -1474,6 +1485,10 @@
             <input type="password" class="modal-textarea" id="reset-val-password" placeholder="Enter new password (min 7 chars, 1 uppercase)" required style="height: auto; padding:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:var(--text-primary); font-size:14px; outline:none;">
           </div>
           <button type="submit" class="btn-modal-submit" style="margin-top:12px;">Confirm Reset</button>
+          <button type="button" class="btn-modal-back" id="btn-reset-password-back">
+            <span>←</span>
+            <span>Back to Sign In</span>
+          </button>
         </form>
       </div>
     </div>

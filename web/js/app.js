@@ -723,6 +723,21 @@ function initTravelBuddyApp() {
     });
   }
 
+    const btnSignupBack = document.getElementById('btn-signup-back');
+  if (btnSignupBack) {
+    btnSignupBack.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (signupSection) {
+        signupSection.classList.remove('visible');
+        signupSection.classList.add('hidden');
+      }
+      if (loginSection) {
+        loginSection.classList.remove('hidden');
+        loginSection.classList.add('visible');
+      }
+    });
+  }
+
   if (signinLinkId) {
     signinLinkId.addEventListener('click', (e) => {
       e.preventDefault();
@@ -2906,6 +2921,15 @@ function initTravelBuddyApp() {
     });
   }
 
+    const btnResetPasswordBack = document.getElementById('btn-reset-password-back');
+  if (btnResetPasswordBack && resetPasswordModal) {
+    btnResetPasswordBack.addEventListener('click', (e) => {
+      e.preventDefault();
+      resetPasswordModal.classList.remove('visible');
+      resetPasswordModal.classList.add('hidden');
+    });
+  }
+
   if (btnResetPasswordClose && resetPasswordModal) {
     btnResetPasswordClose.addEventListener('click', () => {
       resetPasswordModal.classList.remove('visible');
@@ -4846,7 +4870,123 @@ function initTravelBuddyApp() {
       })
       .catch(() => {
         renderOverlayData(getFallbackWeatherData(trip));
-      });
+      
+  // ==========================================================================
+  // Universal Back Action Manager for Web & Android
+  // ==========================================================================
+  window.handleUniversalBackAction = function() {
+    // 1. Check open modals
+    const openModals = [
+      { id: 'location-picker-modal', close: () => window.closeLocationModal && window.closeLocationModal() },
+      { id: 'hotel-booking-modal', close: () => { const m = document.getElementById('hotel-booking-modal'); if (m) { m.classList.add('hidden'); m.classList.remove('visible'); } } },
+      { id: 'reset-password-modal', close: () => { const m = document.getElementById('reset-password-modal'); if (m) { m.classList.add('hidden'); m.classList.remove('visible'); } } },
+      { id: 'add-trip-modal', close: () => { const m = document.getElementById('add-trip-modal'); if (m) { m.classList.add('hidden'); m.classList.remove('visible'); } } },
+      { id: 'create-post-modal', close: () => { const m = document.getElementById('create-post-modal'); if (m) { m.classList.add('hidden'); m.classList.remove('visible'); } } },
+      { id: 'chat-drawer-id', close: () => { const c = document.getElementById('chat-drawer-id'); const o = document.getElementById('chat-overlay-id'); if (c) c.classList.remove('open'); if (o) o.classList.remove('open'); } }
+    ];
+
+    for (const item of openModals) {
+      const el = document.getElementById(item.id);
+      if (el && !el.classList.contains('hidden') && (el.classList.contains('visible') || el.classList.contains('open') || el.style.display === 'flex' || el.style.display === 'block')) {
+        item.close();
+        return true;
+      }
+    }
+
+    // 2. Check full-screen sub-pages
+    const packingSec = document.getElementById('packing-section');
+    if (packingSec && !packingSec.classList.contains('hidden')) {
+      if (typeof closePackingPage === 'function') closePackingPage();
+      return true;
+    }
+
+    const ticketsSec = document.getElementById('tickets-section');
+    if (ticketsSec && !ticketsSec.classList.contains('hidden')) {
+      if (typeof closeTicketsPage === 'function') closeTicketsPage();
+      return true;
+    }
+
+    const budgetSec = document.getElementById('budget-section');
+    if (budgetSec && !budgetSec.classList.contains('hidden')) {
+      if (typeof closeBudgetPage === 'function') closeBudgetPage();
+      return true;
+    }
+
+    const tripDetailsSec = document.getElementById('trip-details-section');
+    if (tripDetailsSec && !tripDetailsSec.classList.contains('hidden')) {
+      tripDetailsSec.classList.add('hidden');
+      const dash = document.getElementById('dashboard-section');
+      if (dash) dash.classList.remove('hidden');
+      return true;
+    }
+
+    const commSec = document.getElementById('community-section');
+    if (commSec && !commSec.classList.contains('hidden')) {
+      commSec.classList.add('hidden');
+      const dash = document.getElementById('dashboard-section');
+      if (dash) dash.classList.remove('hidden');
+      return true;
+    }
+
+    // 3. Check profile sub-sections
+    for (const pId of ['profile-info-section', 'profile-requests-section', 'profile-privacy-section', 'profile-support-section']) {
+      const pSec = document.getElementById(pId);
+      if (pSec && !pSec.classList.contains('hidden')) {
+        pSec.classList.add('hidden');
+        const dash = document.getElementById('dashboard-section');
+        if (dash) dash.classList.remove('hidden');
+        if (typeof switchToProfileTab === 'function') switchToProfileTab();
+        return true;
+      }
+    }
+
+    // 4. Check dashboard sub-tabs
+    const tripsTab = document.getElementById('trips-tab-content');
+    const alertsTab = document.getElementById('alerts-tab-content');
+    const searchTab = document.getElementById('search-tab-content');
+    const profileTab = document.getElementById('profile-tab-content');
+
+    if ((tripsTab && !tripsTab.classList.contains('hidden')) ||
+        (alertsTab && !alertsTab.classList.contains('hidden')) ||
+        (searchTab && !searchTab.classList.contains('hidden')) ||
+        (profileTab && !profileTab.classList.contains('hidden'))) {
+      if (typeof switchToHomeTab === 'function') {
+        switchToHomeTab();
+        return true;
+      }
+    }
+
+    // 5. Check signup section
+    const signupSec = document.getElementById('signup-section');
+    const loginSec = document.getElementById('login-section');
+    if (signupSec && !signupSec.classList.contains('hidden')) {
+      signupSec.classList.remove('visible');
+      signupSec.classList.add('hidden');
+      if (loginSec) {
+        loginSec.classList.remove('hidden');
+        loginSec.classList.add('visible');
+      }
+      return true;
+    }
+
+    return false;
+  };
+
+  // Keyboard Escape / Backspace back handler
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (window.handleUniversalBackAction()) {
+        e.preventDefault();
+      }
+    }
+  });
+
+  // Browser History & Mobile Android Back Button Handler
+  window.addEventListener('popstate', (e) => {
+    window.handleUniversalBackAction();
+  });
+
+});
   }
 
   // Set default active traveler values in localStorage on first visit only

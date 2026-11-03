@@ -35,7 +35,16 @@ export const MyTripsScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.topBar}>
-        <Text style={styles.headerTitle}>My Itineraries</Text>
+        <View style={styles.headerLeftRow}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => (navigation?.canGoBack() ? navigation.goBack() : navigation?.navigate('Home'))}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="arrow-back" size={20} color={colors.white} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>My Itineraries</Text>
+        </View>
         <TouchableOpacity
           style={styles.addIconBtn}
           onPress={() => navigation.navigate('TripPlanner')}
@@ -125,6 +134,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 16,
     paddingBottom: 12,
+  },
+  headerLeftRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: colors.surfaceElevated,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.surfaceBorder,
   },
   headerTitle: {
     fontSize: 20,

@@ -61,6 +61,15 @@ export const LoginScreen = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => (navigation?.canGoBack() ? navigation.goBack() : navigation?.replace('Onboarding'))}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="arrow-back" size={20} color={colors.white} />
+          <Text style={styles.backText}>Welcome</Text>
+        </TouchableOpacity>
+
         {/* Logo and Greeting */}
         <View style={styles.header}>
           <View style={styles.logoBadge}>
@@ -170,6 +179,25 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: 24,
+    paddingTop: 16,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    marginBottom: 16,
+  },
+  backText: {
+    fontSize: 13,
+    color: colors.white,
+    fontWeight: '600',
   },
   header: {
     alignItems: 'center',

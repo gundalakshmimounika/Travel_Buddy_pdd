@@ -26,7 +26,9 @@ import retrofit2.Response
 data class ChatMessage(
     val text: String,
     val isUser: Boolean,
-    val options: List<ChatOptionItem> = emptyList()
+    val options: List<ChatOptionItem> = emptyList(),
+    val agentName: String = "",
+    val agentType: String = ""
 )
 
 class ChatBuddyActivity : AppCompatActivity() {
@@ -75,7 +77,7 @@ class ChatBuddyActivity : AppCompatActivity() {
             ChatOptionItem("🏨 Browse Hotels", "hotels", "Goa"),
             ChatOptionItem("ℹ️ Travel Info & Tips", "info", "General Travel Info")
         )
-        addMessage("Hello! I'm your Travel Buddy. Ask me anything about budgets, destinations, hotels, or travel tips!", false, initialOptions)
+        addMessage("Hello! I'm your Travel Buddy. Ask me anything about budgets, destinations, hotels, or travel tips!", false, initialOptions, "🌟 Travel Buddy Concierge", "default_agent")
 
         btnSend.setOnClickListener {
             val text = etMessage.text.toString().trim()
@@ -87,8 +89,8 @@ class ChatBuddyActivity : AppCompatActivity() {
         }
     }
 
-    private fun addMessage(text: String, isUser: Boolean, options: List<ChatOptionItem> = emptyList()) {
-        messages.add(ChatMessage(text, isUser, options))
+    private fun addMessage(text: String, isUser: Boolean, options: List<ChatOptionItem> = emptyList(), agentName: String = "", agentType: String = "") {
+        messages.add(ChatMessage(text, isUser, options, agentName, agentType))
         chatAdapter.notifyItemInserted(messages.size - 1)
         rvChat.scrollToPosition(messages.size - 1)
     }
@@ -174,23 +176,51 @@ class ChatBuddyActivity : AppCompatActivity() {
                     val body = response.body()!!
                     val answer = body.answer
                     val options = body.options ?: getSmartFallbackOptions(question)
+                    val agentName = body.agent_name ?: getSmartAgentName(question)
+                    val agentType = body.agent_type ?: getSmartAgentType(question)
                     if (!answer.isNullOrEmpty()) {
-                        runOnUiThread { addMessage(answer, false, options) }
+                        runOnUiThread { addMessage(answer, false, options, agentName, agentType) }
                     } else {
                         val fallback = getSmartAIResponse(question)
-                        runOnUiThread { addMessage(fallback.first, false, fallback.second) }
+                        runOnUiThread { addMessage(fallback.first, false, fallback.second, agentName, agentType) }
                     }
                 } else {
                     val fallback = getSmartAIResponse(question)
-                    runOnUiThread { addMessage(fallback.first, false, fallback.second) }
+                    val agentName = getSmartAgentName(question)
+                    val agentType = getSmartAgentType(question)
+                    runOnUiThread { addMessage(fallback.first, false, fallback.second, agentName, agentType) }
                 }
             }
 
             override fun onFailure(call: Call<ChatResponse>, t: Throwable) {
                 val fallback = getSmartAIResponse(question)
-                runOnUiThread { addMessage(fallback.first, false, fallback.second) }
+                val agentName = getSmartAgentName(question)
+                val agentType = getSmartAgentType(question)
+                runOnUiThread { addMessage(fallback.first, false, fallback.second, agentName, agentType) }
             }
         })
+    }
+
+    private fun getSmartAgentName(q: String): String {
+        val lower = q.lowercase()
+        return when {
+            lower.contains("budget") || lower.contains("cost") || lower.contains("6k") -> "💰 Budget Specialist Agent"
+            lower.contains("hotel") || lower.contains("stay") || lower.contains("room") -> "🏨 Hotel Specialist Agent"
+            lower.contains("train") || lower.contains("flight") || lower.contains("ticket") || lower.contains("transit") -> "🚆 Transit & Booking Specialist"
+            lower.contains("activity") || lower.contains("adventure") -> "🏄 Activity & Adventure Specialist"
+            else -> "🤖 Trip Coordinator Agent"
+        }
+    }
+
+    private fun getSmartAgentType(q: String): String {
+        val lower = q.lowercase()
+        return when {
+            lower.contains("budget") || lower.contains("cost") || lower.contains("6k") -> "budget_planner"
+            lower.contains("hotel") || lower.contains("stay") || lower.contains("room") -> "hotel_booking"
+            lower.contains("train") || lower.contains("flight") || lower.contains("ticket") || lower.contains("transit") -> "transit_booking"
+            lower.contains("activity") || lower.contains("adventure") -> "activities_booking"
+            else -> "group_chat_manager"
+        }
     }
 
     private fun getSmartFallbackOptions(q: String): List<ChatOptionItem> {
@@ -279,6 +309,7 @@ class ChatBuddyActivity : AppCompatActivity() {
             val container: LinearLayout = view.findViewById(R.id.llChatContainer)
             val card: MaterialCardView = view.findViewById(R.id.cvMessage)
             val text: TextView = view.findViewById(R.id.tvMessage)
+            val tvAgentBadge: TextView = view.findViewById(R.id.tvAgentBadge)
             val hsvOptions: HorizontalScrollView = view.findViewById(R.id.hsvOptions)
             val llOptionsContainer: LinearLayout = view.findViewById(R.id.llOptionsContainer)
         }
@@ -295,11 +326,34 @@ class ChatBuddyActivity : AppCompatActivity() {
                 params.gravity = Gravity.END
                 holder.card.setCardBackgroundColor(Color.parseColor("#2563EB"))
                 holder.text.setTextColor(Color.WHITE)
+                holder.tvAgentBadge.visibility = View.GONE
                 holder.hsvOptions.visibility = View.GONE
             } else {
                 params.gravity = Gravity.START
                 holder.card.setCardBackgroundColor(Color.parseColor("#1E293B"))
                 holder.text.setTextColor(Color.parseColor("#F1F5F9"))
+
+                if (!item.isUser && item.agentName.isNotEmpty()) {
+                    holder.tvAgentBadge.visibility = View.VISIBLE
+                    holder.tvAgentBadge.text = item.agentName
+                    val density = holder.itemView.context.resources.displayMetrics.density
+                    val bg = GradientDrawable().apply {
+                        cornerRadius = 10 * density
+                        val (bgColor, strokeColor, textColor) = when (item.agentType) {
+                            "budget_planner" -> Triple(Color.parseColor("#2610B981"), Color.parseColor("#8034D399"), Color.parseColor("#34D399"))
+                            "hotel_booking" -> Triple(Color.parseColor("#26F59E0B"), Color.parseColor("#80FBBF24"), Color.parseColor("#FBBF24"))
+                            "transit_booking", "flight_booking" -> Triple(Color.parseColor("#26A855F7"), Color.parseColor("#80C084FC"), Color.parseColor("#C084FC"))
+                            "destination_info" -> Triple(Color.parseColor("#260EA5E9"), Color.parseColor("#8038BDF8"), Color.parseColor("#38BDF8"))
+                            else -> Triple(Color.parseColor("#263B82F6"), Color.parseColor("#8060A5FA"), Color.parseColor("#60A5FA"))
+                        }
+                        setColor(bgColor)
+                        setStroke((1 * density).toInt(), strokeColor)
+                        holder.tvAgentBadge.setTextColor(textColor)
+                    }
+                    holder.tvAgentBadge.background = bg
+                } else {
+                    holder.tvAgentBadge.visibility = View.GONE
+                }
 
                 if (item.options.isNotEmpty()) {
                     holder.hsvOptions.visibility = View.VISIBLE

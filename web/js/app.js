@@ -1788,7 +1788,20 @@ function initTravelBuddyApp() {
           { label: '📋 Copy Itinerary', action: 'copy_itinerary', param: dest }
         ];
 
-        return { answer: answer, options: options };
+        let agentName = "🤖 Trip Coordinator Agent";
+        let agentType = "group_chat_manager";
+        if (lower.includes('budget') || lower.includes('cost') || lower.includes('6k') || lower.includes('expense')) {
+          agentName = "💰 Budget Specialist Agent";
+          agentType = "budget_planner";
+        } else if (lower.includes('hotel') || lower.includes('resort') || lower.includes('stay') || lower.includes('room')) {
+          agentName = "🏨 Hotel Specialist Agent";
+          agentType = "hotel_booking";
+        } else if (lower.includes('train') || lower.includes('flight') || lower.includes('ticket') || lower.includes('transit') || lower.includes('bus')) {
+          agentName = "🚆 Transit & Booking Specialist";
+          agentType = "transit_booking";
+        }
+
+        return { answer: answer, options: options, agent_name: agentName, agent_type: agentType };
       }
 
       // ── Handle AI Option Pill Clicks (Budget, Hotels, Tickets, Info, Packing, Map, Copy) ──
@@ -1936,7 +1949,7 @@ function initTravelBuddyApp() {
           const indicator = document.getElementById(typingId);
           if (indicator) indicator.remove();
           const fallback = getClientSideTravelAdvice(question);
-          appendMessage(fallback.answer, 'ai', fallback.options);
+          appendMessage(fallback.answer, 'ai', fallback.options, fallback.agent_name, fallback.agent_type);
           return;
         }
 
@@ -1953,10 +1966,10 @@ function initTravelBuddyApp() {
             const indicator = document.getElementById(typingId);
             if (indicator) indicator.remove();
             if (data.status === 'success' && data.answer) {
-              appendMessage(data.answer, 'ai', data.options);
+              appendMessage(data.answer, 'ai', data.options, data.agent_name, data.agent_type);
             } else {
               const fallback = getClientSideTravelAdvice(question);
-              appendMessage(fallback.answer, 'ai', fallback.options);
+              appendMessage(fallback.answer, 'ai', fallback.options, fallback.agent_name, fallback.agent_type);
             }
           })
           .catch(() => {
@@ -1968,7 +1981,7 @@ function initTravelBuddyApp() {
     });
 
     // ── Render Message with Clickable Action Options & Info Pills Below Message ──
-    function appendMessage(text, sender, options = null) {
+    function appendMessage(text, sender, options = null, agentName = null, agentType = null) {
       const bubble = document.createElement('div');
       bubble.className = `message ${sender}`;
       
@@ -1978,7 +1991,16 @@ function initTravelBuddyApp() {
         .replace(/\n\s*-\s+(.*?)(?=\n|$)/g, '<br>• $1')
         .replace(/\n/g, '<br>');
         
-      bubble.innerHTML = `<p>${formattedText}</p>`;
+      if (sender === 'ai') {
+        const bName = agentName || '🤖 Trip Coordinator Agent';
+        const bType = agentType || 'group_chat_manager';
+        bubble.innerHTML = `
+          <div class="ai-agent-badge ${bType}">${bName}</div>
+          <div class="ai-msg-body"><p>${formattedText}</p></div>
+        `;
+      } else {
+        bubble.innerHTML = `<p>${formattedText}</p>`;
+      }
       chatMessages.appendChild(bubble);
 
       // Render options & info buttons below AI message

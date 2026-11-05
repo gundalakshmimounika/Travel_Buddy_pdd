@@ -1,21 +1,29 @@
 <?php
 /**
- * Travel Buddy AI - Comprehensive Travel Planner Intelligence Engine
- * Modeled on Rutugo (travel-planner-ai) architecture:
- * - Destination overview (abouttheplace)
- * - Best time to visit (besttimetovisit)
- * - Top places to visit with geocoordinates (topplacestovisit)
- * - Adventure & top activities with locations (adventuresactivitiestodo)
- * - Local cuisine recommendations & eateries (localcuisinerecommendations)
- * - Categorized packing checklist (packingchecklist)
- * - Day-by-Day timeline itinerary: Morning, Afternoon, Evening (itinerary)
- * - Realistic itemized budget breakdown (budgetBreakdown)
- * - Interactive action chips below the message (options)
+ * Travel Buddy AI - Multi-Agent Travel Intelligence Engine
+ * Modeled on the AutoGen Multi-Agent Architecture (lordlinus/travel-chatbot):
+ * 
+ * 1. SemanticRouterAgent: Analyzes intent, user context, and directs queries
+ * 2. GroupChatManager (Trip Coordinator Agent): Synthesizes multi-domain plans
+ * 3. BudgetSpecialistAgent (budget_planner): Financial allocations & daily burn rates
+ * 4. HotelSpecialistAgent (hotel_booking): Simulated booking engine & accommodations
+ * 5. TransitSpecialistAgent (flight_booking / transit_booking): Trains, flights & buses
+ * 6. DestinationSpecialistAgent (destination_info): Landmarks, geocoordinates & climate
+ * 7. ActivitySpecialistAgent (activities_booking): Adventures, water sports & tours
+ * 8. CarRentalSpecialistAgent (car_rental): Scooters, self-drive rentals & cabs
+ * 9. DefaultGreeterAgent (default_agent): Welcomes user with starter quick chips
+ * 
+ * Always emits structured AgentStructuredResponse:
+ * - agent_type: string
+ * - agent_name: string (badge label)
+ * - data: structured domain model
+ * - answer / reply: markdown formatted text
+ * - options: interactive action pills for Web and Android apps
  */
 
 require_once 'config.php';
 
-// Retrieve input
+// Retrieve input from JSON payload, POST, or GET
 $raw = file_get_contents('php://input');
 $json = !empty($raw) ? json_decode($raw, true) : [];
 
@@ -32,53 +40,593 @@ if (empty($question) && empty($userDest)) {
     exit;
 }
 
-// 1. Check Gemini API if available (with Rutugo JSON schema prompt)
-if (!empty($question)) {
-    $geminiPrompt = "You are Travel Buddy AI, an expert travel planner. Create an exhaustive structured travel plan for: '{$question}'. "
-                  . "Include: destination name, abouttheplace (>50 words), besttimetovisit, "
-                  . "itinerary (Day 1, Day 2, Day 3 with Morning, Afternoon, Evening activities), "
-                  . "topplacestovisit (with lat, lng coordinates), adventuresactivitiestodo (at least 5), "
-                  . "localcuisinerecommendations, packingchecklist, and itemized budget breakdown.";
-    
-    $ai_response = callGemini($geminiPrompt);
-    if (isset($ai_response['success']) && !empty($ai_response['text'])) {
-        $parsedAi = @json_decode($ai_response['text'], true);
-        if (is_array($parsedAi) && !empty($parsedAi['itinerary'])) {
-            $destName = $parsedAi['placeName'] ?? ($parsedAi['destination'] ?? 'Destination');
-            $budgetVal = parseBudgetAmount($question) ?: 6000;
-            $opts = buildActionOptions($destName, $budgetVal);
-            echo json_encode([
-                "status" => "success",
-                "plan" => $parsedAi,
-                "answer" => formatPlanToMarkdown($parsedAi),
-                "reply" => formatPlanToMarkdown($parsedAi),
-                "options" => $opts
-            ]);
-            exit;
-        }
-    }
-}
+// Instantiate Semantic Router and orchestrate agent execution
+$router = new SemanticRouterAgent();
+$response = $router->routeMessage($question, $userDest, $userBudget, $userDays);
 
-// 2. High-Precision Rutugo Local Travel Planner Engine
-$result = generateRutugoTravelPlan($question, $userDest, $userBudget, $userDays);
-
-echo json_encode([
-    "status" => "success",
-    "plan" => $result['plan'],
-    "answer" => $result['answer'],
-    "reply" => $result['answer'],
-    "options" => $result['options']
-]);
+echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 exit;
 
 
 // =========================================================================
-// HELPER FUNCTIONS & RUTUGO AI GENERATION ENGINE
+// 1. SEMANTIC ROUTER AGENT
 // =========================================================================
 
-/**
- * Parses numeric budget amount from text (e.g. 6k -> 6000, 10000, 15k, ₹5,000)
- */
+class SemanticRouterAgent {
+    public function routeMessage($question, $userDest = null, $userBudget = null, $userDays = null) {
+        $q = strtolower($question);
+
+        // 1. Detect Greetings & Salutations (default_agent)
+        if ($this->isGreeting($q)) {
+            $agent = new DefaultGreeterAgent();
+            return $agent->handle($question);
+        }
+
+        // 2. Detect Specific Domain Inquiries
+        $hasBudget = $this->hasBudgetIntent($q) || !empty($userBudget);
+        $hasHotel = $this->hasHotelIntent($q);
+        $hasTransit = $this->hasTransitIntent($q);
+        $hasActivity = $this->hasActivityIntent($q);
+        $hasCarRental = $this->hasCarRentalIntent($q);
+        $hasDestinationInfo = $this->hasDestinationInfoIntent($q);
+        $hasFullTripPlan = $this->hasFullTripPlanIntent($q);
+
+        // Extract context entities
+        $dest = detectDestination($question, $userDest);
+        $budget = $userBudget ?: (parseBudgetAmount($question) ?: 6000);
+        $days = $userDays ?: parseDurationDays($question);
+
+        // Compound Request Check:
+        // If the query asks for a full trip, or combines multiple domains (e.g. budget + hotel, plan + transit)
+        $domainCount = ($hasBudget ? 1 : 0) + ($hasHotel ? 1 : 0) + ($hasTransit ? 1 : 0) + ($hasActivity ? 1 : 0) + ($hasDestinationInfo ? 1 : 0);
+
+        if ($hasFullTripPlan || $domainCount >= 2 || (strpos($q, 'plan') !== false && ($hasBudget || !empty($dest)))) {
+            $coordinator = new GroupChatManager();
+            return $coordinator->coordinatePlan($question, $dest, $budget, $days);
+        }
+
+        // Single Domain Routing:
+        if ($hasBudget) {
+            $agent = new BudgetSpecialistAgent();
+            return $agent->handle($question, $dest, $budget, $days);
+        }
+
+        if ($hasHotel) {
+            $agent = new HotelSpecialistAgent();
+            return $agent->handle($question, $dest, $budget, $days);
+        }
+
+        if ($hasTransit) {
+            $agent = new TransitSpecialistAgent();
+            return $agent->handle($question, $dest, $budget, $days);
+        }
+
+        if ($hasCarRental) {
+            $agent = new CarRentalSpecialistAgent();
+            return $agent->handle($question, $dest, $budget, $days);
+        }
+
+        if ($hasActivity) {
+            $agent = new ActivitySpecialistAgent();
+            return $agent->handle($question, $dest, $budget, $days);
+        }
+
+        if ($hasDestinationInfo) {
+            $agent = new DestinationSpecialistAgent();
+            return $agent->handle($question, $dest, $budget, $days);
+        }
+
+        // Default to Group Chat Coordinator for general travel questions
+        $coordinator = new GroupChatManager();
+        return $coordinator->coordinatePlan($question, $dest, $budget, $days);
+    }
+
+    private function isGreeting($text) {
+        $greetings = ['hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening', 'who are you', 'what can you do', 'start', 'help me'];
+        $clean = trim(preg_replace('/[^a-z\s]/', '', $text));
+        return in_array($clean, $greetings);
+    }
+
+    private function hasBudgetIntent($text) {
+        return preg_match('/\b(budget|cost|price|expense|cheap|affordable|\d+k|\d{4,6}|inr|rs|rupees|allocation)\b/i', $text);
+    }
+
+    private function hasHotelIntent($text) {
+        return preg_match('/\b(hotel|resort|homestay|room|stay|rooms|booking|hostel|lodge|accommodation|checkin)\b/i', $text);
+    }
+
+    private function hasTransitIntent($text) {
+        return preg_match('/\b(flight|fly|airline|plane|train|vande bharat|railway|irctc|bus|tickets?|transit|travel to|tickets booking)\b/i', $text);
+    }
+
+    private function hasActivityIntent($text) {
+        return preg_match('/\b(activities|activity|adventure|scuba|surfing|water sports|boating|sightseeing|safari|things to do|tour)\b/i', $text);
+    }
+
+    private function hasCarRentalIntent($text) {
+        return preg_match('/\b(car rental|rent car|rent a car|bike rental|rent bike|scooter|activa|cab|taxi|self-drive)\b/i', $text);
+    }
+
+    private function hasDestinationInfoIntent($text) {
+        return preg_match('/\b(tell me about|about|weather|climate|best time|attractions|places to see|history of)\b/i', $text);
+    }
+
+    private function hasFullTripPlanIntent($text) {
+        return preg_match('/\b(plan|trip|itinerary|vacation|holiday|getaway|weekend|full plan|tour plan)\b/i', $text);
+    }
+}
+
+
+// =========================================================================
+// 2. GROUP CHAT MANAGER (TRIP COORDINATOR AGENT)
+// =========================================================================
+
+class GroupChatManager {
+    public function coordinatePlan($question, $dest, $budget, $days) {
+        $catalog = getTravelCatalog();
+        $data = $catalog[$dest] ?? generateDynamicCatalogData($dest, $days, $budget);
+        $budgetBreakdown = calculateBudgetBreakdown($budget, $days, $dest);
+
+        $plan = [
+            "placeName" => $dest,
+            "destination" => $dest,
+            "noOfDays" => $days,
+            "totalBudget" => $budget,
+            "abouttheplace" => $data['abouttheplace'],
+            "besttimetovisit" => $data['besttimetovisit'],
+            "topplacestovisit" => $data['topplacestovisit'],
+            "adventuresactivitiestodo" => $data['adventuresactivitiestodo'],
+            "localcuisinerecommendations" => $data['localcuisinerecommendations'],
+            "packingchecklist" => $data['packingchecklist'],
+            "itinerary" => array_slice($data['itinerary'], 0, $days),
+            "budgetBreakdown" => $budgetBreakdown
+        ];
+
+        $markdown = formatPlanToMarkdown($plan);
+        $options = [
+            ["label" => "🗺️ View on Map", "action" => "map", "param" => $dest],
+            ["label" => "🏨 Recommended Hotels", "action" => "hotels", "param" => $dest],
+            ["label" => "💰 Set ₹" . number_format($budget) . " in Budget", "action" => "budget", "param" => (string)$budget],
+            ["label" => "🎒 Packing Checklist", "action" => "packing", "param" => $dest],
+            ["label" => "🌤️ Live Weather", "action" => "weather", "param" => $dest],
+            ["label" => "🎫 Book Tickets", "action" => "tickets", "param" => $dest],
+            ["label" => "📋 Copy Itinerary", "action" => "copy_itinerary", "param" => $dest]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "group_chat_manager",
+            "agent_name" => "🤖 Trip Coordinator Agent",
+            "data" => $plan,
+            "answer" => $markdown,
+            "reply" => $markdown,
+            "options" => $options
+        ];
+    }
+}
+
+
+// =========================================================================
+// 3. BUDGET SPECIALIST AGENT (budget_planner)
+// =========================================================================
+
+class BudgetSpecialistAgent {
+    public function handle($question, $dest, $budget, $days) {
+        $bb = calculateBudgetBreakdown($budget, $days, $dest);
+        $formatted = "₹" . number_format($budget);
+        $perNightStay = round($bb['stay']['amount'] / max(1, $days - 1));
+        $perDayFood = round($bb['food']['amount'] / $days);
+
+        $md = "💰 **Budget Specialist Analysis for {$dest} ({$formatted} Total)**\n\n"
+            . "Here is your optimized, itemized financial allocation designed for a high-value {$days}-day trip to {$dest}:\n\n"
+            . "• 🏨 **Stay Allocation (38%):** ₹" . number_format($bb['stay']['amount']) . "\n"
+            . "  - Budget per night: ~₹" . number_format($perNightStay) . "/night for " . ($days - 1) . " nights.\n"
+            . "  - Recommendation: Verified AC boutique homestay, hostel private room, or 3-star resort.\n\n"
+            . "• 🚆 **Travel & Transit (22%):** ₹" . number_format($bb['transport']['amount']) . "\n"
+            . "  - Roundtrip express train (Sleeper/3AC) or state luxury bus + local scooter rental (₹400/day).\n\n"
+            . "• 🍲 **Food & Dining (25%):** ₹" . number_format($bb['food']['amount']) . "\n"
+            . "  - Daily allowance: ~₹" . number_format($perDayFood) . "/day for authentic local messes, coastal seafood thalis & cafes.\n\n"
+            . "• 🎟️ **Sightseeing & Excursions (10%):** ₹" . number_format($bb['activities']['amount']) . "\n"
+            . "  - Entry tickets for historic monuments, beach ferries, museum passes, and water sports.\n\n"
+            . "• 🛡️ **Emergency & Contingency Buffer (5%):** ₹" . number_format($bb['buffer']['amount']) . "\n"
+            . "  - Packaged mineral water, snacks, medicine, and emergency backup.\n\n"
+            . "💡 **Pro-Tip:** Tap **'Set {$formatted} in Budget'** below to instantly sync this allocation into your real-time Budget Tracker!";
+
+        $options = [
+            ["label" => "💰 Set {$formatted} in Budget", "action" => "budget", "param" => (string)$budget],
+            ["label" => "🏨 Budget Hotels (~₹" . number_format($perNightStay) . "/nt)", "action" => "hotels", "param" => $dest],
+            ["label" => "🎫 Book Tickets (~₹" . number_format($bb['transport']['amount']) . ")", "action" => "tickets", "param" => $dest],
+            ["label" => "🗺️ Explore {$dest} on Map", "action" => "map", "param" => $dest],
+            ["label" => "ℹ️ Travel & Expense Tips", "action" => "info", "param" => "Budget Guidelines"]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "budget_planner",
+            "agent_name" => "💰 Budget Specialist Agent",
+            "data" => [
+                "total_budget" => $budget,
+                "destination" => $dest,
+                "days" => $days,
+                "breakdown" => $bb
+            ],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+}
+
+
+// =========================================================================
+// 4. HOTEL SPECIALIST AGENT (hotel_booking)
+// =========================================================================
+
+class HotelSpecialistAgent {
+    public function handle($question, $dest, $budget, $days) {
+        $hotels = $this->getSimulatedHotels($dest, $budget, $days);
+        $checkIn = date('Y-m-d', strtotime('+3 days'));
+        $checkOut = date('Y-m-d', strtotime("+" . (3 + $days) . " days"));
+        $bookingRef = "HT-" . rand(1000, 9999) . "-" . strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $dest), 0, 3));
+
+        $md = "🏨 **Hotel Specialist Recommendations for {$dest}**\n\n"
+            . "Here are verified, top-rated accommodations matching your stay in {$dest} (Check-in: **{$checkIn}**, Check-out: **{$checkOut}**):\n\n";
+
+        foreach ($hotels as $h) {
+            $md .= "• **{$h['name']}** ({$h['rating']}★ | {$h['type']})\n"
+                 . "  - Tariff: ₹" . number_format($h['price_per_night']) . "/night (Total for " . ($days - 1) . " nights: **₹" . number_format($h['price_per_night'] * max(1, $days - 1)) . "**)\n"
+                 . "  - Amenities: {$h['amenities']}\n"
+                 . "  - Location: {$h['location']}\n\n";
+        }
+
+        $md .= "📋 **Simulated Reservation Code:** `{$bookingRef}`\n"
+             . "💡 Select **'Browse Hotels'** below to reserve your room with instant booking confirmation!";
+
+        $options = [
+            ["label" => "🏨 Browse Hotels in {$dest}", "action" => "hotels", "param" => $dest],
+            ["label" => "💰 Track Stay in Budget", "action" => "budget", "param" => (string)($hotels[0]['price_per_night'] * max(1, $days - 1))],
+            ["label" => "🗺️ View Hotels on Map", "action" => "map", "param" => $dest],
+            ["label" => "🎫 Book Transit Tickets", "action" => "tickets", "param" => $dest],
+            ["label" => "ℹ️ Hotel Check-in Guidelines", "action" => "info", "param" => "Hotel Check-in"]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "hotel_booking",
+            "agent_name" => "🏨 Hotel Specialist Agent",
+            "data" => [
+                "city" => $dest,
+                "check_in_date" => $checkIn,
+                "check_out_date" => $checkOut,
+                "booking_reference" => $bookingRef,
+                "hotels" => $hotels
+            ],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+
+    private function getSimulatedHotels($dest, $budget, $days) {
+        $nightlyTarget = round(($budget * 0.38) / max(1, $days - 1));
+        if ($nightlyTarget < 900) $nightlyTarget = 1200;
+
+        return [
+            [
+                "name" => "Heritage Colonial Villa & Suites",
+                "type" => "Boutique Heritage AC Stay",
+                "price_per_night" => $nightlyTarget,
+                "rating" => 4.8,
+                "amenities" => "Free High-Speed Wi-Fi, Breakfast Included, Swimming Pool, 24/7 Security",
+                "location" => "Central {$dest}, 500m from Promenade/Beach"
+            ],
+            [
+                "name" => "Ocean Palms Resort & Spa",
+                "type" => "Deluxe Sea-View Room",
+                "price_per_night" => round($nightlyTarget * 1.25),
+                "rating" => 4.6,
+                "amenities" => "AC, Balcony with Sunset View, Multi-cuisine Restaurant, Travel Desk",
+                "location" => "Coastline Highway, {$dest}"
+            ],
+            [
+                "name" => "Green Haven Budget Guest House",
+                "type" => "Standard AC Double Room",
+                "price_per_night" => round($nightlyTarget * 0.75),
+                "rating" => 4.3,
+                "amenities" => "AC, Clean Linens, Hot Water Shower, Luggage Storage",
+                "location" => "Near Railway Station / Market Square, {$dest}"
+            ]
+        ];
+    }
+}
+
+
+// =========================================================================
+// 5. TRANSIT SPECIALIST AGENT (flight_booking / transit_booking)
+// =========================================================================
+
+class TransitSpecialistAgent {
+    public function handle($question, $dest, $budget, $days) {
+        $bookingRef = "TR-" . rand(1000, 9999) . "-" . strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $dest), 0, 3));
+        $transitOptions = $this->getSimulatedTransit($dest);
+
+        $md = "🚆 **Transit & Booking Specialist Advisory for {$dest}**\n\n"
+            . "Here are verified travel options, timings, and schedules connecting to **{$dest}**:\n\n";
+
+        foreach ($transitOptions as $opt) {
+            $md .= "• **{$opt['name']}** ({$opt['type']})\n"
+                 . "  - Departure: {$opt['departure']} | Arrival: {$opt['arrival']} (Duration: {$opt['duration']})\n"
+                 . "  - Fare: **₹" . number_format($opt['fare']) . "** ({$opt['class']})\n"
+                 . "  - Availability: {$opt['availability']}\n\n";
+        }
+
+        $md .= "🎫 **Instant Transit Booking Reference:** `{$bookingRef}`\n"
+             . "💡 Tap **'Book Tickets'** below to reserve your train or bus seats!";
+
+        $options = [
+            ["label" => "🎫 Book Tickets to {$dest}", "action" => "tickets", "param" => $dest],
+            ["label" => "🏨 Browse Stays in {$dest}", "action" => "hotels", "param" => $dest],
+            ["label" => "💰 Add Transit to Budget", "action" => "budget", "param" => (string)($transitOptions[0]['fare'] * 2)],
+            ["label" => "🗺️ View Route on Map", "action" => "map", "param" => $dest],
+            ["label" => "ℹ️ Railway Security (139)", "action" => "info", "param" => "Transit Security"]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "transit_booking",
+            "agent_name" => "🚆 Transit & Booking Specialist",
+            "data" => [
+                "destination" => $dest,
+                "booking_reference" => $bookingRef,
+                "transit_options" => $transitOptions
+            ],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+
+    private function getSimulatedTransit($dest) {
+        return [
+            [
+                "name" => "Vande Bharat / Express Special",
+                "type" => "Superfast AC Express",
+                "departure" => "06:15 AM",
+                "arrival" => "10:45 AM",
+                "duration" => "4h 30m",
+                "class" => "AC Chair Car / 3AC",
+                "fare" => 850,
+                "availability" => "Available (RAC/Confirmed)"
+            ],
+            [
+                "name" => "State Express Luxury Sleeper",
+                "type" => "Multi-Axle Volvo AC Bus",
+                "departure" => "10:30 PM (Overnight)",
+                "arrival" => "05:45 AM",
+                "duration" => "7h 15m",
+                "class" => "AC Sleeper Berth",
+                "fare" => 680,
+                "availability" => "14 Berths Available"
+            ],
+            [
+                "name" => "Regional Intercity Fast Passenger",
+                "type" => "Budget Intercity Train",
+                "departure" => "01:20 PM",
+                "arrival" => "06:40 PM",
+                "duration" => "5h 20m",
+                "class" => "Second Seating / Sleeper",
+                "fare" => 220,
+                "availability" => "Seats Available"
+            ]
+        ];
+    }
+}
+
+
+// =========================================================================
+// 6. DESTINATION SPECIALIST AGENT (destination_info)
+// =========================================================================
+
+class DestinationSpecialistAgent {
+    public function handle($question, $dest, $budget, $days) {
+        $catalog = getTravelCatalog();
+        $data = $catalog[$dest] ?? generateDynamicCatalogData($dest, $days, $budget);
+
+        $md = "🌍 **Destination Specialist Guide: {$dest}**\n\n"
+            . "📖 **About {$dest}:**\n{$data['abouttheplace']}\n\n"
+            . "🌤️ **Climate & Best Time to Visit:**\n{$data['besttimetovisit']}\n\n"
+            . "📍 **Must-Visit Landmarks & Coordinates:**\n";
+
+        foreach ($data['topplacestovisit'] as $spot) {
+            $lat = $spot['coordinates']['lat'] ?? '';
+            $lng = $spot['coordinates']['lng'] ?? '';
+            $coordStr = ($lat && $lng) ? " `[{$lat}, {$lng}]`" : "";
+            $md .= "• **{$spot['name']}** ({$spot['type']}){$coordStr}\n";
+        }
+
+        $md .= "\n🍲 **Culinary Highlights & Eateries:**\n";
+        foreach ($data['localcuisinerecommendations'] as $dish) {
+            $md .= "• {$dish}\n";
+        }
+
+        $md .= "\n💡 Tap **'View on Map'** to open interactive coordinates or check **'Live Weather'**!";
+
+        $options = [
+            ["label" => "🗺️ View on Map", "action" => "map", "param" => $dest],
+            ["label" => "🌤️ Live Weather", "action" => "weather", "param" => $dest],
+            ["label" => "🏨 Recommended Hotels", "action" => "hotels", "param" => $dest],
+            ["label" => "🎫 Book Tickets to {$dest}", "action" => "tickets", "param" => $dest],
+            ["label" => "🎒 Packing Checklist", "action" => "packing", "param" => $dest]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "destination_info",
+            "agent_name" => "🌍 Destination Specialist Agent",
+            "data" => [
+                "city" => $dest,
+                "overview" => $data['abouttheplace'],
+                "best_time" => $data['besttimetovisit'],
+                "landmarks" => $data['topplacestovisit']
+            ],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+}
+
+
+// =========================================================================
+// 7. ACTIVITY SPECIALIST AGENT (activities_booking)
+// =========================================================================
+
+class ActivitySpecialistAgent {
+    public function handle($question, $dest, $budget, $days) {
+        $catalog = getTravelCatalog();
+        $data = $catalog[$dest] ?? generateDynamicCatalogData($dest, $days, $budget);
+
+        $md = "🏄 **Activity & Adventure Specialist: Top Experiences in {$dest}**\n\n"
+            . "Here are curated excursions and adventure activities to elevate your time in {$dest}:\n\n";
+
+        foreach ($data['adventuresactivitiestodo'] as $idx => $act) {
+            $md .= ($idx + 1) . ". **{$act}**\n";
+        }
+
+        $md .= "\n💡 Select any option below to view activity coordinates or plan accommodation!";
+
+        $options = [
+            ["label" => "🗺️ Activity Locations on Map", "action" => "map", "param" => $dest],
+            ["label" => "🏨 Stays Near Activities", "action" => "hotels", "param" => $dest],
+            ["label" => "💰 Plan Activity Budget", "action" => "budget", "param" => (string)($budget ?: 6000)],
+            ["label" => "🎒 Packing Gear List", "action" => "packing", "param" => $dest],
+            ["label" => "ℹ️ Adventure Safety Tips", "action" => "info", "param" => "Adventure Safety"]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "activities_booking",
+            "agent_name" => "🏄 Activity & Adventure Specialist",
+            "data" => [
+                "destination" => $dest,
+                "activities" => $data['adventuresactivitiestodo']
+            ],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+}
+
+
+// =========================================================================
+// 8. CAR & SCOOTER RENTAL SPECIALIST AGENT (car_rental)
+// =========================================================================
+
+class CarRentalSpecialistAgent {
+    public function handle($question, $dest, $budget, $days) {
+        $bookingRef = "CR-" . rand(1000, 9999) . "-" . strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $dest), 0, 3));
+        $vehicles = [
+            [
+                "type" => "Gearless Scooter (Honda Activa 6G)",
+                "tariff" => 450,
+                "fuel" => "Petrol (Mileage: ~45 km/l)",
+                "deposit" => "₹1,000 refundable + Original Govt ID"
+            ],
+            [
+                "type" => "Royal Enfield Classic 350 / Himalayan",
+                "tariff" => 900,
+                "fuel" => "Petrol (Helmet & lock included)",
+                "deposit" => "₹2,000 refundable + DL"
+            ],
+            [
+                "type" => "Self-Drive AC Hatchback (Swift / i20)",
+                "tariff" => 1600,
+                "fuel" => "Petrol / Diesel (Unlimited km)",
+                "deposit" => "₹3,000 refundable"
+            ]
+        ];
+
+        $md = "🚗 **Car & Scooter Rental Specialist for {$dest}**\n\n"
+            . "Here are verified, self-drive rental options available in {$dest}:\n\n";
+
+        foreach ($vehicles as $v) {
+            $md .= "• **{$v['type']}**\n"
+                 . "  - Daily Tariff: **₹" . number_format($v['tariff']) . "/day**\n"
+                 . "  - Specs: {$v['fuel']}\n"
+                 . "  - Security Deposit: {$v['deposit']}\n\n";
+        }
+
+        $md .= "📋 **Pre-Approved Rental Reference:** `{$bookingRef}`\n"
+             . "💡 Driving license (DL) and valid original government photo ID required at pick-up.";
+
+        $options = [
+            ["label" => "🛵 Rent Scooter (~₹450/day)", "action" => "hotels", "param" => $dest],
+            ["label" => "💰 Add Rental to Budget", "action" => "budget", "param" => (string)(450 * $days)],
+            ["label" => "🗺️ View Roads on Map", "action" => "map", "param" => $dest],
+            ["label" => "ℹ️ Rental Terms & Guidelines", "action" => "info", "param" => "Rental Rules"]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "car_rental",
+            "agent_name" => "🚗 Car & Scooter Rental Specialist",
+            "data" => [
+                "destination" => $dest,
+                "booking_reference" => $bookingRef,
+                "vehicles" => $vehicles
+            ],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+}
+
+
+// =========================================================================
+// 9. DEFAULT GREETER AGENT (default_agent)
+// =========================================================================
+
+class DefaultGreeterAgent {
+    public function handle($question) {
+        $md = "🌟 **Hello, Adventurer! Welcome to Travel Buddy AI.** 🌍\n\n"
+            . "I'm your intelligent multi-agent travel concierge, modeled on the AutoGen Multi-Agent Architecture. Here is how my specialist team assists your journey:\n\n"
+            . "• 💰 **Budget Specialist Agent:** Itemized expense allocation, hotel room rates & transit costs.\n"
+            . "• 🏨 **Hotel Specialist Agent:** Verified boutique stays, resort reviews & reservation codes.\n"
+            . "• 🚆 **Transit & Booking Specialist:** Flight, express train (Vande Bharat) & bus tickets.\n"
+            . "• 🌍 **Destination Specialist Agent:** Climate, best travel seasons & GPS coordinates.\n"
+            . "• 🏄 **Activity Specialist Agent:** Adventure sports, boat ferries, scuba & food trails.\n"
+            . "• 🤖 **Trip Coordinator Agent:** Multi-agent synthesis for complete day-by-day itineraries.\n\n"
+            . "How can my specialist team assist you today?";
+
+        $options = [
+            ["label" => "💰 Plan ₹6,000 Trip", "action" => "prompt", "param" => "my budget is 6k"],
+            ["label" => "🏖️ Explore Goa 3-Day Trip", "action" => "prompt", "param" => "plan a 3-day trip to Goa"],
+            ["label" => "🏨 Browse Top Hotels", "action" => "hotels", "param" => "Goa"],
+            ["label" => "🎫 Book Tickets", "action" => "tickets", "param" => "Pondicherry"],
+            ["label" => "ℹ️ Travel & Emergency Info", "action" => "info", "param" => "General Info"]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "default_agent",
+            "agent_name" => "🌟 Travel Buddy Concierge",
+            "data" => [
+                "greeting" => "Welcome to Travel Buddy AI"
+            ],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+}
+
+
+// =========================================================================
+// HELPER FUNCTIONS & CATALOG
+// =========================================================================
+
 function parseBudgetAmount($text) {
     if (empty($text)) return null;
     if (preg_match('/(?:budget\s*(?:is|of|around|:)?\s*|(?:rs\.?|inr|₹)\s*)(\d+)\s*(k|thousand|l|lakh)?/i', $text, $m)) {
@@ -98,9 +646,6 @@ function parseBudgetAmount($text) {
     return null;
 }
 
-/**
- * Parses travel duration (days) from text
- */
 function parseDurationDays($text) {
     if (empty($text)) return 3;
     if (preg_match('/(\d+)\s*(?:day|days|d\b)/i', $text, $m)) {
@@ -112,9 +657,6 @@ function parseDurationDays($text) {
     return 3;
 }
 
-/**
- * Detects destination from user text
- */
 function detectDestination($text, $explicitDest = null) {
     if (!empty($explicitDest)) return trim($explicitDest);
     $q = strtolower($text);
@@ -169,7 +711,6 @@ function detectDestination($text, $explicitDest = null) {
         }
     }
 
-    // Regex match "trip to X", "visit X", "explore X", "plan X"
     if (preg_match('/(?:trip\s+to|visit|explore|travel\s+to|plan\s+(?:a\s+)?(?:trip\s+to\s+)?)\s*([a-zA-Z\s]{3,20})/i', $text, $m)) {
         $extracted = trim($m[1]);
         $extracted = preg_replace('/\b(for|with|in|under|on|budget|days?)\b.*/i', '', $extracted);
@@ -179,75 +720,9 @@ function detectDestination($text, $explicitDest = null) {
         }
     }
 
-    // Default destination if query is purely budget oriented (e.g. "my budget is 6k")
     return 'Pondicherry';
 }
 
-/**
- * Builds standard action options for chat
- */
-function buildActionOptions($dest, $budget) {
-    $budgetStr = number_format($budget);
-    return [
-        ["label" => "🗺️ View on Map", "action" => "map", "param" => $dest],
-        ["label" => "🏨 Recommended Hotels", "action" => "hotels", "param" => $dest],
-        ["label" => "💰 Set ₹{$budgetStr} in Budget", "action" => "budget", "param" => (string)$budget],
-        ["label" => "🎒 Packing Checklist", "action" => "packing", "param" => $dest],
-        ["label" => "🌤️ Live Weather", "action" => "weather", "param" => $dest],
-        ["label" => "🎫 Book Tickets", "action" => "tickets", "param" => $dest],
-        ["label" => "📋 Copy Itinerary", "action" => "copy_itinerary", "param" => $dest]
-    ];
-}
-
-/**
- * Core Travel Planner Intelligence Engine (Modeled on Rutugo travel-planner-ai)
- */
-function generateRutugoTravelPlan($question, $userDest, $userBudget, $userDays) {
-    $dest = detectDestination($question, $userDest);
-    $budget = $userBudget ?: (parseBudgetAmount($question) ?: 6000);
-    $days = $userDays ?: parseDurationDays($question);
-
-    // Database of curated Rutugo travel data
-    $catalog = getTravelCatalog();
-
-    if (isset($catalog[$dest])) {
-        $data = $catalog[$dest];
-    } else {
-        $data = generateDynamicRutugoData($dest, $days, $budget);
-    }
-
-    // Calculate itemized budget allocations matching requested amount
-    $budgetBreakdown = calculateBudgetBreakdown($budget, $days, $dest);
-
-    // Assemble complete Rutugo Plan object
-    $plan = [
-        "placeName" => $dest,
-        "destination" => $dest,
-        "noOfDays" => $days,
-        "totalBudget" => $budget,
-        "abouttheplace" => $data['abouttheplace'],
-        "besttimetovisit" => $data['besttimetovisit'],
-        "topplacestovisit" => $data['topplacestovisit'],
-        "adventuresactivitiestodo" => $data['adventuresactivitiestodo'],
-        "localcuisinerecommendations" => $data['localcuisinerecommendations'],
-        "packingchecklist" => $data['packingchecklist'],
-        "itinerary" => array_slice($data['itinerary'], 0, $days),
-        "budgetBreakdown" => $budgetBreakdown
-    ];
-
-    $markdownAnswer = formatPlanToMarkdown($plan);
-    $options = buildActionOptions($dest, $budget);
-
-    return [
-        "plan" => $plan,
-        "answer" => $markdownAnswer,
-        "options" => $options
-    ];
-}
-
-/**
- * Computes realistic budget breakdown according to total amount and trip duration
- */
 function calculateBudgetBreakdown($total, $days, $dest) {
     $stayPct = 0.38;
     $foodPct = 0.25;
@@ -289,9 +764,6 @@ function calculateBudgetBreakdown($total, $days, $dest) {
     ];
 }
 
-/**
- * Renders the structured Rutugo travel plan into a gorgeous, readable Markdown document
- */
 function formatPlanToMarkdown($plan) {
     $dest = $plan['destination'] ?? ($plan['placeName'] ?? 'Destination');
     $days = $plan['noOfDays'] ?? count($plan['itinerary'] ?? []);
@@ -299,14 +771,9 @@ function formatPlanToMarkdown($plan) {
     $formattedBudget = "₹" . number_format($budget);
 
     $md = "🌟 **{$dest} {$days}-Day Travel Plan (Budget: {$formattedBudget})**\n\n";
-
-    // 1. About the Place
     $md .= "📖 **About {$dest}:**\n" . $plan['abouttheplace'] . "\n\n";
-
-    // 2. Best Time to Visit
     $md .= "🌤️ **Best Time to Visit:** " . $plan['besttimetovisit'] . "\n\n";
 
-    // 3. Day-by-Day Itinerary (Rutugo Schema)
     $md .= "📅 **Interactive {$days}-Day Itinerary:**\n\n";
     if (!empty($plan['itinerary'])) {
         foreach ($plan['itinerary'] as $idx => $day) {
@@ -343,7 +810,6 @@ function formatPlanToMarkdown($plan) {
         }
     }
 
-    // 4. Top Places to Visit with Coordinates
     if (!empty($plan['topplacestovisit'])) {
         $md .= "📍 **Top Places to Visit & Landmarks:**\n";
         foreach ($plan['topplacestovisit'] as $spot) {
@@ -357,7 +823,6 @@ function formatPlanToMarkdown($plan) {
         $md .= "\n";
     }
 
-    // 5. Adventure & Top Activities
     if (!empty($plan['adventuresactivitiestodo'])) {
         $md .= "🏖️ **Top Adventure Activities:**\n";
         foreach ($plan['adventuresactivitiestodo'] as $adv) {
@@ -366,7 +831,6 @@ function formatPlanToMarkdown($plan) {
         $md .= "\n";
     }
 
-    // 6. Local Cuisine Recommendations
     if (!empty($plan['localcuisinerecommendations'])) {
         $md .= "🍲 **Local Cuisine Recommendations & Foodie Hotspots:**\n";
         foreach ($plan['localcuisinerecommendations'] as $dish) {
@@ -375,7 +839,6 @@ function formatPlanToMarkdown($plan) {
         $md .= "\n";
     }
 
-    // 7. Itemized Budget Breakdown
     if (!empty($plan['budgetBreakdown'])) {
         $bb = $plan['budgetBreakdown'];
         $md .= "💰 **Itemized Budget Breakdown ({$formattedBudget}):**\n"
@@ -386,7 +849,6 @@ function formatPlanToMarkdown($plan) {
              . "• 🛡️ **Emergency Buffer:** ₹" . number_format($bb['buffer']['amount']) . " — " . $bb['buffer']['description'] . "\n\n";
     }
 
-    // 8. Packing Checklist
     if (!empty($plan['packingchecklist'])) {
         $md .= "🎒 **Tailored Packing Checklist:**\n";
         foreach ($plan['packingchecklist'] as $item) {
@@ -400,9 +862,6 @@ function formatPlanToMarkdown($plan) {
     return $md;
 }
 
-/**
- * Curated Rutugo Catalog for Major Destinations
- */
 function getTravelCatalog() {
     return [
         'Pondicherry' => [
@@ -499,7 +958,7 @@ function getTravelCatalog() {
                 ['name' => 'Basilica of Bom Jesus', 'coordinates' => ['lat' => 15.5009, 'lng' => 73.9116], 'type' => 'UNESCO World Heritage Church'],
                 ['name' => 'Fontainhas Latin Quarter', 'coordinates' => ['lat' => 15.4989, 'lng' => 73.8315], 'type' => 'Pastel Colonial Streetscape'],
                 ['name' => 'Dudhsagar Waterfalls', 'coordinates' => ['lat' => 15.3144, 'lng' => 74.3143], 'type' => 'Majestic Four-Tier Waterfall'],
-                ['name' => 'Palolem Beach', 'coordinates' => ['lat' => 15.0100, 'lng' => 74.0232], 'type' => 'Crescent Bay & Silent Noise Parties']
+                ['name' => 'Palolem Beach', 'coordinates' => ['lat' => 15.0100, 'lng' => 74.0232], 'type' => 'Crescent Bay & Beach Cabanas']
             ],
             'adventuresactivitiestodo' => [
                 "Parasailing, jet skiing, and bumper boat rides at Calangute and Baga beaches",
@@ -513,7 +972,7 @@ function getTravelCatalog() {
                 "Spicy Prawn Balchão and Pork Vindaloo at historic Martin's Corner",
                 "Traditional multi-layered Goan Bebinca cake and Dodol dessert",
                 "Rawa-fried Kingfish and Butter Garlic Crab at Fisherman's Wharf",
-                "Chilled Cashew Feni cocktails and coconut water by the beach shacks"
+                "Chilled coconut water and tropical mocktails by the beach shacks"
             ],
             'packingchecklist' => [
                 "Govt photo ID (Aadhaar or Passport), driving license for bike rentals",
@@ -549,7 +1008,7 @@ function getTravelCatalog() {
                         ],
                         'afternoon' => [
                             ['itineraryItem' => 'Goan Fish Thali at Ritz Classic', 'briefDescription' => 'Savor authentic surmai fry, crab masala, kismoor, and sol kadi with local red rice.'],
-                            ['itineraryItem' => 'Miramar Beach & Dona Paula Viewpoint', 'briefDescription' => 'Visit the famous lovers\' paradise where Mandovi and Zuari rivers merge into the ocean.']
+                            ['itineraryItem' => 'Miramar Beach & Dona Paula Viewpoint', 'briefDescription' => 'Visit the famous viewpoint where Mandovi and Zuari rivers merge into the ocean.']
                         ],
                         'evening' => [
                             ['itineraryItem' => 'Mandovi River Sunset Cruise', 'briefDescription' => 'Enjoy a 1-hour cruise featuring live DJ music, Portuguese folk dances, and sparkling river views.']
@@ -629,7 +1088,7 @@ function getTravelCatalog() {
                     'activities' => [
                         'morning' => [
                             ['itineraryItem' => 'Doddabetta Peak Viewpoint', 'briefDescription' => 'Stand at 2,637m altitude at the Telescope House for breathtaking views across misty Nilgiri ranges.'],
-                            ['itineraryItem' => 'Tea Museum & Factory Tour', 'briefDescription' => 'Witness how fresh green tea leaves are withered, rolled, dried, and enjoy hot cardamom tea samples.']
+                            ['itineraryItem' => 'Tea Museum & Factory Tour', 'briefDescription' => 'Witness how fresh green tea leaves are processed and enjoy hot cardamom tea samples.']
                         ],
                         'afternoon' => [
                             ['itineraryItem' => 'Wenlock Downs 9th Mile Meadows', 'briefDescription' => 'Picnic on sprawling green slopes famous for Bollywood movie shoots and fresh hill air.'],
@@ -731,10 +1190,7 @@ function getTravelCatalog() {
     ];
 }
 
-/**
- * Universal Dynamic Planner for Any Destination Globally
- */
-function generateDynamicRutugoData($dest, $days, $budget) {
+function generateDynamicCatalogData($dest, $days, $budget) {
     $cleanDest = htmlspecialchars($dest, ENT_QUOTES, 'UTF-8');
     
     return [

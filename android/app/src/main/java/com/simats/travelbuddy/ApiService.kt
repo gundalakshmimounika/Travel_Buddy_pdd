@@ -239,7 +239,7 @@ data class PackingListResponse(
 
 data class ChatOptionItem(val label: String, val action: String, val param: String = "")
 data class ChatRequest(val question: String)
-data class ChatResponse(val status: String, val answer: String, val options: List<ChatOptionItem>? = null)
+data class ChatResponse(val status: String, val answer: String, val options: List<ChatOptionItem>? = null, val agent_name: String? = null, val agent_type: String? = null)
 
 data class ApiResponse(
     val status: String,

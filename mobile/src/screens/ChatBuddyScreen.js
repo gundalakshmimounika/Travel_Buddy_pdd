@@ -30,6 +30,8 @@ export const ChatBuddyScreen = ({ navigation }) => {
     {
       id: '1',
       sender: 'bot',
+      agentName: '🌟 Travel Buddy Concierge',
+      agentType: 'default_agent',
       text: `Hello! I'm TravelBuddy AI 🌍. I'm calibrated for your location in ${originCity}. How can I assist your journey today?`,
       options: [
         { label: "💰 Plan ₹6,000 Trip", action: "budget", param: "6000" },
@@ -116,11 +118,24 @@ export const ChatBuddyScreen = ({ navigation }) => {
             { label: "ℹ️ Travel Info", action: "info" }
           ];
 
+      const agentName = res?.agent_name || (
+        query.toLowerCase().includes('budget') || query.toLowerCase().includes('6k')
+          ? '💰 Budget Specialist Agent'
+          : (query.toLowerCase().includes('hotel') ? '🏨 Hotel Specialist Agent' : '🤖 Trip Coordinator Agent')
+      );
+      const agentType = res?.agent_type || (
+        query.toLowerCase().includes('budget') || query.toLowerCase().includes('6k')
+          ? 'budget_planner'
+          : (query.toLowerCase().includes('hotel') ? 'hotel_booking' : 'group_chat_manager')
+      );
+
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
           sender: 'bot',
+          agentName: agentName,
+          agentType: agentType,
           text: botResponse,
           options: botOptions,
           time: 'Now',
@@ -185,6 +200,16 @@ export const ChatBuddyScreen = ({ navigation }) => {
                 </View>
               )}
               <View style={[styles.bubbleContent, isUser ? styles.userContent : styles.botContent]}>
+                {!isUser && msg.agentName && (
+                  <View style={[
+                    styles.agentBadge,
+                    msg.agentType === 'budget_planner' && styles.agentBadgeBudget,
+                    msg.agentType === 'hotel_booking' && styles.agentBadgeHotel,
+                    msg.agentType === 'transit_booking' && styles.agentBadgeTransit,
+                  ]}>
+                    <Text style={styles.agentBadgeText}>{msg.agentName}</Text>
+                  </View>
+                )}
                 <Text style={[styles.bubbleText, isUser ? styles.userText : styles.botText]}>
                   {msg.text}
                 </Text>
@@ -350,6 +375,34 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.surfaceBorder,
     borderBottomLeftRadius: 4,
+  },
+  agentBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(37, 99, 235, 0.2)',
+    borderColor: 'rgba(96, 165, 250, 0.4)',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginBottom: 6,
+  },
+  agentBadgeBudget: {
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    borderColor: 'rgba(52, 211, 153, 0.5)',
+  },
+  agentBadgeHotel: {
+    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+    borderColor: 'rgba(251, 191, 36, 0.5)',
+  },
+  agentBadgeTransit: {
+    backgroundColor: 'rgba(168, 85, 247, 0.2)',
+    borderColor: 'rgba(192, 132, 252, 0.5)',
+  },
+  agentBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#93C5FD',
+    textTransform: 'uppercase',
   },
   bubbleText: {
     fontSize: 14,

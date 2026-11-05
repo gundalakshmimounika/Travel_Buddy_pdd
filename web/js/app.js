@@ -1600,81 +1600,329 @@ function initTravelBuddyApp() {
       chatMessages.appendChild(typingIndicator);
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
-      // Client-side travel intelligence engine fallback
+      // ── Client-Side Intelligent Travel Advisory Engine (Offline Fallback & Options) ──
+      function parseNumericBudget(text) {
+        const str = String(text || '');
+        const matchK = str.match(/(\d+)\s*k\b/i);
+        if (matchK) return parseInt(matchK[1]) * 1000;
+        const matchFull = str.match(/(?:budget\s*(?:is|of|around|:)?\s*|(?:rs\.?|inr|₹)\s*)(\d+)\s*(k|thousand|l|lakh)?/i);
+        if (matchFull) {
+          const num = parseInt(matchFull[1]);
+          const unit = (matchFull[2] || '').toLowerCase();
+          if (unit === 'k' || unit === 'thousand') return num * 1000;
+          if (unit === 'l' || unit === 'lakh') return num * 100000;
+          return num;
+        }
+        const matchDigits = str.match(/\b(\d{3,6})\b/);
+        if (matchDigits) {
+          const val = parseInt(matchDigits[1]);
+          if (val >= 500 && val <= 500000) return val;
+        }
+        return null;
+      }
+
       function getClientSideTravelAdvice(q) {
         const lower = (q || '').toLowerCase();
+        const budget = parseNumericBudget(q);
+
+        if (budget !== null) {
+          const formatted = '₹' + budget.toLocaleString('en-IN');
+          const stayAmt = Math.round(budget * 0.38);
+          const travelAmt = Math.round(budget * 0.22);
+          const foodAmt = Math.round(budget * 0.25);
+          const bufferAmt = budget - (stayAmt + travelAmt + foodAmt);
+          const days = budget < 4000 ? '1 to 2 days' : (budget < 12000 ? '2 to 3 days' : '4 to 7 days');
+          const dest = budget <= 7000 ? 'Pondicherry' : 'Goa';
+
+          const text = `💰 **Smart Travel Plan for ${formatted} Budget:**\n\n`
+            + `With **${formatted}**, you can plan a wonderful **${days}** vacation! Here is the optimal budget breakdown:\n\n`
+            + `📍 **Top Destinations within ${formatted}:**\n`
+            + (budget <= 7000
+                ? `• **Pondicherry:** Beach sunrise, White Town French cafes, Auroville & cycling.\n• **Mahabalipuram:** Shore Temple, fresh seafood, rock carvings & beach strolls.\n• **Tirupati & Chandragiri:** Sacred temple hills, waterfalls & historic fort trails.\n• **Yelagiri Hills:** Cool mountain breeze, boat rides & tranquil nature walks.\n\n`
+                : `• **Goa Beach Escape:** Calangute beach life, watersports, beach shacks & Old Goa churches.\n• **Ooty & Coonoor:** Scenic Nilgiri Mountain Toy Train, tea estates & botanical gardens.\n• **Munnar & Kochi:** Misty hills, spice plantations & backwaters.\n\n`)
+            + `📊 **Optimal ${formatted} Allocation:**\n`
+            + `• 🏨 **Stay (${days}):** ₹${stayAmt.toLocaleString('en-IN')} (Verified budget stay or hostel)\n`
+            + `• 🚆 **Travel (Round Trip):** ₹${travelAmt.toLocaleString('en-IN')} (Express train sleeper or state bus)\n`
+            + `• 🍲 **Food & Drinks:** ₹${foodAmt.toLocaleString('en-IN')} (Authentic local thalis, coastal delicacies & street food)\n`
+            + `• 🎟️ **Sightseeing & Buffer:** ₹${bufferAmt.toLocaleString('en-IN')} (Entry tickets, local autos & buffer)\n\n`
+            + `💡 **Pro Tip:** Tap **Set ${formatted} in Budget** below to pre-configure your budget tracker right now!`;
+
+          const options = [
+            { label: `💰 Set ${formatted} in Budget`, action: 'budget', param: String(budget) },
+            { label: `🏨 Budget Hotels in ${dest}`, action: 'hotels', param: dest },
+            { label: `🎫 Book Tickets to ${dest}`, action: 'tickets', param: dest },
+            { label: '🎒 Packing Checklist', action: 'packing', param: dest },
+            { label: 'ℹ️ Travel Info & Tips', action: 'info', param: 'Budget Travel Tips' }
+          ];
+
+          return { answer: text, options: options };
+        }
+
         if (lower.includes('mumbai') || lower.includes('bombay')) {
-          return "🏙️ **Mumbai 3-Day Travel Itinerary & City Guide:**\n\n"
-               + "📅 **Day 1: Colonial Heritage & South Mumbai Charm**\n"
-               + "- **Morning:** Stand before the majestic **Gateway of India** and admire the historic Taj Mahal Palace Hotel.\n"
-               + "- **Afternoon:** Stroll down Colaba Causeway for souvenir shopping, then grab lunch at iconic Leopold Cafe.\n"
-               + "- **Evening:** Watch the golden sunset along **Marine Drive** (the Queen’s Necklace) and enjoy bhel puri at Chowpatty Beach.\n\n"
-               + "📅 **Day 2: Coastal Landmarks, Culture & Bandra Vibes**\n"
-               + "- **Morning:** Take a scenic ferry from Gateway of India to the ancient rock-cut **Elephanta Caves** (UNESCO site).\n"
-               + "- **Afternoon:** Visit the serene **Haji Ali Dargah** situated on an islet in the Arabian Sea.\n"
-               + "- **Evening:** Walk along **Bandra Bandstand**, see Mount Mary Church, and explore vibrant street art and hip cafes in Bandra.\n\n"
-               + "📅 **Day 3: Bollywood, Beaches & Culinary Delights**\n"
-               + "- **Morning:** Visit **Juhu Beach** for morning breezes and legendary hot Pav Bhaji.\n"
-               + "- **Afternoon:** Explore Sanjay Gandhi National Park & ancient Kanheri Caves, or take a Bollywood Film City tour.\n"
-               + "- **Evening:** Sunset drinks at a rooftop lounge in Lower Parel overlooking the Mumbai skyline.\n\n"
-               + "🍴 **Must-Try Mumbai Street Food:**\n"
-               + "- **Vada Pav:** Ashok Vada Pav (Kirti College) or Aram Milk Bar.\n"
-               + "- **Pav Bhaji:** Cannon Pav Bhaji (CST) or Sardar Refreshments (Tardeo).\n"
-               + "- **Irani Cafes:** Bun Maska & Chai at Britannia & Co. or Kyani & Co.\n\n"
-               + "💰 **Estimated Budget:** ₹1,500–₹2,500/day (Budget/Trains) | ₹4,000–₹7,000/day (Comfort/Cabs).\n"
-               + "☀️ **Best Time to Visit:** October to March for cool, pleasant coastal breezes!";
-        } else if (lower.includes('goa')) {
-          return "🏖️ **Goa 3-Day Beach & Sunshine Itinerary:**\n\n"
-               + "📅 **Day 1: North Goa Beaches & Forts**\n"
-               + "- **Morning:** Visit historic **Fort Aguada** and soak in lighthouse ocean views.\n"
-               + "- **Afternoon:** Water sports at Calangute & Baga beach.\n"
-               + "- **Evening:** Sunset cocktails at Anjuna with live acoustic beach music.\n\n"
-               + "📅 **Day 2: Old Goa Heritage & Panjim Latin Quarter**\n"
-               + "- **Morning:** Explore Basilica of Bom Jesus and Se Cathedral.\n"
-               + "- **Afternoon:** Colorful Portuguese architecture in Fontainhas, Panjim.\n"
-               + "- **Evening:** Mandovi River sunset cruise with Goan folk dance.\n\n"
-               + "📅 **Day 3: South Goa Tranquility & Waterfalls**\n"
-               + "- **Morning:** Day trip to majestic **Dudhsagar Waterfalls**.\n"
-               + "- **Evening:** Relax on pristine white sands of Palolem beach.\n\n"
-               + "🍴 **Must-Try Food:** Goan Fish Curry Thali, Prawn Balchão, Bebinca!";
-        } else if (lower.includes('packing')) {
-          return "🎒 **Essential Travel Packing Checklist:**\n\n"
-               + "📋 **Documents & Essentials:**\n"
-               + "- Government ID / Passport & driving license.\n"
-               + "- Flight/Train tickets and hotel booking confirmation.\n"
-               + "- Credit cards, debit cards, and emergency cash.\n\n"
-               + "🔌 **Electronics:**\n"
-               + "- Phone charger, high-capacity power bank (10,000mAh+), universal adapter.\n"
-               + "- Noise-cancelling earphones or AirPods.\n\n"
-               + "👕 **Clothing & Wear:**\n"
-               + "- 3-5 breathable cotton t-shirts and 2 pairs of comfortable pants/shorts.\n"
-               + "- Walking shoes, flip-flops, light jacket/windbreaker.\n\n"
-               + "💊 **Health & Toiletries:**\n"
-               + "- Sunscreen (SPF 50+), hand sanitizer, bug spray.\n"
-               + "- First aid kit: Paracetamol, antacid, Band-Aids, motion sickness pills.";
-        } else if (lower.includes('budget')) {
-          return "💰 **Top 5 Smart Travel Budget Tips:**\n\n"
-               + "1. **Book 3-4 Weeks Ahead:** Flights and train berths are up to 40% cheaper when booked in advance.\n"
-               + "2. **Eat Where Locals Eat:** Skip overpriced tourist cafes; local family-run eateries offer the most authentic flavor at a fraction of the cost.\n"
-               + "3. **Use Public Transit & Metro:** Use day passes or local metro/buses instead of peak-rate cabs.\n"
-               + "4. **Travel Off-Peak / Weekdays:** Hotel rates drop significantly between Monday and Thursday.\n"
-               + "5. **Track Expenses Daily:** Use the TravelBuddy Budget Tracker tab to record expenses and stay under budget!";
-        } else {
-          return "✈️ **Travel Buddy Guide for " + q + ":**\n\n"
-               + "• **Top Attractions:** Explore the historic quarter, iconic landmarks, and panoramic scenic points.\n"
-               + "• **Where to Stay:** Stay central near transit hubs to reduce commute times and taxi expenses.\n"
-               + "• **Local Cuisine:** Seek out regional delicacies and highly-rated local food markets.\n"
-               + "• **Smart Planning:** Use the My Trips and Budget sections in TravelBuddy to plan every detail smoothly!";
+          return {
+            answer: "🏙️ **Mumbai 3-Day Travel Itinerary & City Guide:**\n\n"
+              + "📅 **Day 1: Colonial Heritage & South Mumbai Charm**\n"
+              + "• **Morning:** Stand before the iconic **Gateway of India** and Taj Mahal Palace.\n"
+              + "• **Afternoon:** Stroll down Colaba Causeway for shopping, lunch at Leopold Cafe.\n"
+              + "• **Evening:** Watch the golden sunset along **Marine Drive** & Chowpatty beach.\n\n"
+              + "📅 **Day 2: Coastal Landmarks, Culture & Bandra Vibes**\n"
+              + "• **Morning:** Scenic ferry to ancient rock-cut **Elephanta Caves** (UNESCO site).\n"
+              + "• **Afternoon:** Serene **Haji Ali Dargah** situated on an islet in the Arabian Sea.\n"
+              + "• **Evening:** Walk along **Bandra Bandstand** & explore hip cafes.\n\n"
+              + "📅 **Day 3: Bollywood, Beaches & Cuisine**\n"
+              + "• **Morning:** Hot Pav Bhaji at Juhu Beach.\n"
+              + "• **Evening:** Sunset skyline views from rooftop lounges.\n\n"
+              + "🍴 **Must-Try:** Vada Pav, Pav Bhaji, Bun Maska & Irani Chai!",
+            options: [
+              { label: '📍 View Mumbai Details', action: 'place', param: 'Mumbai' },
+              { label: '🏨 Mumbai Hotels', action: 'hotels', param: 'Mumbai' },
+              { label: '🎫 Book Tickets', action: 'tickets', param: 'Mumbai' },
+              { label: '🌤️ Check Weather', action: 'weather', param: 'Mumbai' },
+              { label: 'ℹ️ Mumbai Travel Info', action: 'info', param: 'Mumbai Info' }
+            ]
+          };
+        }
+
+        if (lower.includes('goa')) {
+          return {
+            answer: "🏖️ **Goa 3-Day Beach & Sunshine Itinerary:**\n\n"
+              + "📅 **Day 1: North Goa Beaches & Forts**\n"
+              + "• **Morning:** Visit historic **Fort Aguada** and soak in lighthouse ocean views.\n"
+              + "• **Afternoon:** Watersports at Calangute & Baga beach.\n"
+              + "• **Evening:** Sunset cocktails at Anjuna with live beach music.\n\n"
+              + "📅 **Day 2: Old Goa Heritage & Panjim Latin Quarter**\n"
+              + "• **Morning:** Explore Basilica of Bom Jesus & Se Cathedral.\n"
+              + "• **Afternoon:** Colorful Portuguese architecture in Fontainhas, Panjim.\n"
+              + "• **Evening:** Mandovi River sunset cruise with Goan folk dance.\n\n"
+              + "📅 **Day 3: South Goa Tranquility & Waterfalls**\n"
+              + "• **Morning:** Day trip to majestic **Dudhsagar Waterfalls**.\n"
+              + "• **Evening:** Relax on pristine white sands of Palolem beach.\n\n"
+              + "🍴 **Must-Try:** Goan Fish Curry Thali, Prawn Balchão, Bebinca!",
+            options: [
+              { label: '📍 Explore Goa', action: 'place', param: 'Goa' },
+              { label: '🏨 Goa Beach Resorts', action: 'hotels', param: 'Goa' },
+              { label: '🌤️ Goa Weather', action: 'weather', param: 'Goa' },
+              { label: '🎫 Book Tickets', action: 'tickets', param: 'Goa' },
+              { label: 'ℹ️ Goa Travel Info', action: 'info', param: 'Goa Info' }
+            ]
+          };
+        }
+
+        if (lower.includes('pondy') || lower.includes('pondicherry')) {
+          return {
+            answer: "🌊 **Pondicherry 3-Day Coastal & French Quarter Guide:**\n\n"
+              + "📅 **Day 1: French Quarter Heritage & Promenade**\n"
+              + "• **Morning:** Sunrise stroll along **Promenade Rock Beach**.\n"
+              + "• **Afternoon:** Explore colorful colonial streets in **White Town** & French cafes.\n"
+              + "• **Evening:** Visit Sri Aurobindo Ashram & local craft boutiques.\n\n"
+              + "📅 **Day 2: Auroville & Golden Matrimandir**\n"
+              + "• **Morning:** Cycle to universal township of **Auroville**; view Matrimandir.\n"
+              + "• **Evening:** Watch golden sunset at Serenity Beach.\n\n"
+              + "📅 **Day 3: Paradise Beach & Ferries**\n"
+              + "• **Morning:** Take backwater ferry to isolated **Paradise Beach**.\n"
+              + "• **Afternoon:** Fresh coastal seafood lunch & water sports.\n\n"
+              + "🍴 **Must-Try:** Fresh baked croissants, wood-fired pizza & Creole curries!",
+            options: [
+              { label: '📍 Explore Pondicherry', action: 'place', param: 'Pondicherry' },
+              { label: '🏨 French Quarter Stays', action: 'hotels', param: 'Pondicherry' },
+              { label: '🎫 Book Tickets', action: 'tickets', param: 'Pondicherry' },
+              { label: '🌤️ Live Weather', action: 'weather', param: 'Pondicherry' },
+              { label: 'ℹ️ Travel Info', action: 'info', param: 'Pondicherry Info' }
+            ]
+          };
+        }
+
+        if (lower.includes('pack')) {
+          return {
+            answer: "🎒 **Essential Travel Packing Checklist:**\n\n"
+              + "📄 **1. Documents & Essentials:**\n"
+              + "• Govt ID card (Aadhaar / Passport) & driver's license.\n"
+              + "• Flight/train tickets & hotel booking confirmation.\n"
+              + "• Emergency cash (₹2,000–₹3,000) & UPI apps.\n\n"
+              + "🔌 **2. Electronics:**\n"
+              + "• Phone charger & high-capacity power bank (10,000mAh+).\n"
+              + "• Earphones / AirPods with protective case.\n\n"
+              + "👕 **3. Clothing & Footwear:**\n"
+              + "• 3-5 breathable cotton t-shirts, 2 pairs of comfortable pants/shorts.\n"
+              + "• Walking shoes, flip-flops, light jacket/windbreaker.\n\n"
+              + "💊 **4. Health & Toiletries:**\n"
+              + "• Sunscreen (SPF 50+), hand sanitizer, bug spray.\n"
+              + "• Mini medical kit: Paracetamol, antacid, Band-Aids & motion sickness pills.\n\n"
+              + "💡 **Tap 'Open Packing List' below to track your packed items in real time!**",
+            options: [
+              { label: '🎒 Open Packing List', action: 'packing', param: '' },
+              { label: '🌤️ Check Weather', action: 'weather', param: 'Goa' },
+              { label: '💰 Set Trip Budget', action: 'budget', param: '5000' },
+              { label: 'ℹ️ Travel Info & Tips', action: 'info', param: 'Packing Info' }
+            ]
+          };
+        }
+
+        if (lower.includes('budget') || lower.includes('cost') || lower.includes('money')) {
+          return {
+            answer: "💰 **Top Smart Travel Budget Tips:**\n\n"
+              + "1. **Book 3-4 Weeks Ahead:** Train sleeper/3AC and flights are up to 40% cheaper early.\n"
+              + "2. **Eat Local:** Family-run diners and Udupi cafes offer delicious authentic food at a fraction of tourist prices.\n"
+              + "3. **Use Public Transit:** Use local express trains or metro rather than point-to-point cabs.\n"
+              + "4. **Weekday Stays:** Hotel room tariffs drop significantly between Monday and Thursday.\n"
+              + "5. **Log Daily Expenses:** Use the TravelBuddy Budget Tracker to monitor your daily allowance in real-time!",
+            options: [
+              { label: '💰 Open Budget Tracker', action: 'budget', param: '6000' },
+              { label: '🏨 Browse Budget Hotels', action: 'hotels', param: 'Goa' },
+              { label: '🎫 Check Tickets', action: 'tickets', param: 'Goa' },
+              { label: 'ℹ️ Budget Info & Tips', action: 'info', param: 'Budget Info' }
+            ]
+          };
+        }
+
+        if (lower.includes('hotel') || lower.includes('stay') || lower.includes('resort')) {
+          return {
+            answer: "🏨 **Hotel Booking Advice & Guidelines:**\n\n"
+              + "• **Location First:** Choose stays near transit hubs to reduce taxi expenses.\n"
+              + "• **Rating Standard:** Opt for properties with 4.2★ or higher and 100+ verified guest reviews.\n"
+              + "• **AC vs Non-AC:** Select AC rooms for tropical coastal climates (Goa, Pondicherry) and Non-AC for hill stations (Ooty).\n"
+              + "• **Direct Confirmation:** Tap 'Browse Hotels' below to view prices and book instantly!",
+            options: [
+              { label: '🏨 Browse Hotels', action: 'hotels', param: 'Goa' },
+              { label: '💰 Track Stay Budget', action: 'budget', param: '4000' },
+              { label: '🎫 Book Travel Tickets', action: 'tickets', param: 'Goa' },
+              { label: 'ℹ️ Hotel Booking Info', action: 'info', param: 'Hotel Info' }
+            ]
+          };
+        }
+
+        return {
+          answer: "✈️ **Travel Buddy Guide for " + q + ":**\n\n"
+            + "• **Top Sightseeing:** Explore the historic old town, coastal promenades, and panoramic viewpoints.\n"
+            + "• **Where to Stay:** Choose central locations near transit points to save travel time.\n"
+            + "• **Local Flavors:** Taste local specialties and freshly prepared regional meals.\n"
+            + "• **Seamless Planning:** Use the Budget Tracker, Hotel Booking, and Tickets features below to organize your journey!",
+          options: [
+            { label: '💰 Plan ₹6,000 Trip', action: 'budget', param: '6000' },
+            { label: '🏨 Browse Top Hotels', action: 'hotels', param: 'Goa' },
+            { label: '🎫 Book Travel Tickets', action: 'tickets', param: 'Goa' },
+            { label: '🎒 Packing Checklist', action: 'packing', param: '' },
+            { label: 'ℹ️ Travel Info & Helpline', action: 'info', param: 'General Travel Info' }
+          ]
+        };
+      }
+
+      // ── Handle AI Option Pill Clicks (Budget, Hotels, Tickets, Info, Packing) ──
+      function handleAiOptionClick(opt) {
+        if (!opt) return;
+        const act = opt.action;
+        const param = opt.param || '';
+
+        if (act === 'budget') {
+          closeDrawer();
+          openBudgetPage(param && !isNaN(param) ? 'Trip' : (param || 'Trip'));
+          if (param && !isNaN(param)) {
+            const input = document.getElementById('budget-total-input');
+            if (input) {
+              input.value = param;
+              input.dispatchEvent(new Event('change'));
+            }
+            showToast(`💰 Set budget to ₹${Number(param).toLocaleString('en-IN')}!`);
+          }
+        } else if (act === 'hotels') {
+          closeDrawer();
+          openHotelsPage(param || 'Goa');
+        } else if (act === 'tickets') {
+          closeDrawer();
+          openTicketsPage(param || 'Goa');
+        } else if (act === 'weather') {
+          closeDrawer();
+          openWeatherPage(param || 'Goa');
+        } else if (act === 'packing') {
+          closeDrawer();
+          openPackingPage(param || 'Goa');
+        } else if (act === 'place') {
+          closeDrawer();
+          openTripDetails(param || 'Goa');
+        } else if (act === 'info') {
+          showTravelInfoModal(param || 'Travel & Emergency Info');
+        } else if (act === 'prompt') {
+          if (chatInput) {
+            chatInput.value = param;
+            chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
+          }
         }
       }
 
-      // 3. Multi-Tiered AI Backend Request with Auto-Fallback
+      // ── Travel Info Dialog Modal Popup (Emergency Contacts & Guidelines) ──
+      function showTravelInfoModal(title) {
+        const existing = document.getElementById('travel-info-sheet-overlay-id');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.className = 'travel-info-sheet-overlay';
+        overlay.id = 'travel-info-sheet-overlay-id';
+        overlay.innerHTML = `
+          <div class="travel-info-sheet">
+            <div class="travel-info-header">
+              <h3>ℹ️ ${title || 'Travel & Emergency Info'}</h3>
+              <button class="travel-info-close-btn" id="btn-close-travel-info">&times;</button>
+            </div>
+            
+            <div class="travel-info-section-title">🚨 24x7 Emergency Helplines</div>
+            <div class="travel-info-row">
+              <span class="label">🚨 National Emergency</span>
+              <span class="val">112</span>
+            </div>
+            <div class="travel-info-row">
+              <span class="label">🚓 Police Control Room</span>
+              <span class="val">100 / 112</span>
+            </div>
+            <div class="travel-info-row">
+              <span class="label">🚑 Medical Ambulance</span>
+              <span class="val">108</span>
+            </div>
+            <div class="travel-info-row">
+              <span class="label">📞 India Tourist Helpline</span>
+              <span class="val">1363 (Toll Free)</span>
+            </div>
+            <div class="travel-info-row">
+              <span class="label">🚆 Railway Security & Enquiry</span>
+              <span class="val">139</span>
+            </div>
+
+            <div class="travel-info-section-title" style="margin-top:14px;">💡 Essential Travel Advice</div>
+            <div class="travel-info-tip-item">
+              <span class="bullet">✓</span>
+              <span>Always carry a government ID (Aadhaar or Passport) and download offline maps when visiting remote beaches or hills.</span>
+            </div>
+            <div class="travel-info-tip-item">
+              <span class="bullet">✓</span>
+              <span>UPI (Google Pay, PhonePe, Paytm) is accepted nationwide at virtually all stalls, cafes, and taxis.</span>
+            </div>
+            <div class="travel-info-tip-item">
+              <span class="bullet">✓</span>
+              <span>Use the tool buttons below each message to set your exact budget, inspect hotels, or generate packing checklists.</span>
+            </div>
+
+            <button type="button" class="btn-submit" id="btn-ack-travel-info" style="margin-top:16px;width:100%;padding:12px;font-size:14px;border-radius:12px;">OK, Got It!</button>
+          </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const closeInfo = () => overlay.remove();
+        const closeBtn = overlay.querySelector('#btn-close-travel-info');
+        if (closeBtn) closeBtn.addEventListener('click', closeInfo);
+        const ackBtn = overlay.querySelector('#btn-ack-travel-info');
+        if (ackBtn) ackBtn.addEventListener('click', closeInfo);
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) closeInfo();
+        });
+      }
+
+      // ── Multi-Tiered AI Backend Request with Auto-Fallback & Options ──
       const candidateUrls = [
         `${BASE_URL}/ask_buddy.php`,
         'ask_buddy.php',
         '/website/ask_buddy.php',
         '/backend/ask_buddy.php',
-        'http://localhost:8000/ask_buddy.php',
+        'http://localhost/TravelBuddy/backend/ask_buddy.php',
         'http://localhost/website/ask_buddy.php'
       ];
 
@@ -1682,7 +1930,8 @@ function initTravelBuddyApp() {
         if (idx >= candidateUrls.length) {
           const indicator = document.getElementById(typingId);
           if (indicator) indicator.remove();
-          appendMessage(getClientSideTravelAdvice(question), 'ai');
+          const fallback = getClientSideTravelAdvice(question);
+          appendMessage(fallback.answer, 'ai', fallback.options);
           return;
         }
 
@@ -1699,9 +1948,10 @@ function initTravelBuddyApp() {
             const indicator = document.getElementById(typingId);
             if (indicator) indicator.remove();
             if (data.status === 'success' && data.answer) {
-              appendMessage(data.answer, 'ai');
+              appendMessage(data.answer, 'ai', data.options);
             } else {
-              appendMessage(getClientSideTravelAdvice(question), 'ai');
+              const fallback = getClientSideTravelAdvice(question);
+              appendMessage(fallback.answer, 'ai', fallback.options);
             }
           })
           .catch(() => {
@@ -1712,18 +1962,50 @@ function initTravelBuddyApp() {
       tryAiEndpoint(0);
     });
 
-    function appendMessage(text, sender) {
+    // ── Render Message with Clickable Action Options & Info Pills Below Message ──
+    function appendMessage(text, sender, options = null) {
       const bubble = document.createElement('div');
       bubble.className = `message ${sender}`;
       
       // Parse basic bold markers (**text**) into <strong>, bullet points (- item), and linebreaks into <br>
-      const formattedText = text
+      const formattedText = String(text || '')
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\n\s*-\s+(.*?)(?=\n|$)/g, '<br>• $1')
         .replace(/\n/g, '<br>');
         
       bubble.innerHTML = `<p>${formattedText}</p>`;
       chatMessages.appendChild(bubble);
+
+      // Render options & info buttons below AI message
+      if (sender === 'ai') {
+        let opts = Array.isArray(options) && options.length > 0 ? options : null;
+        if (!opts) {
+          const fallback = getClientSideTravelAdvice(text);
+          opts = fallback.options;
+        }
+
+        if (opts && opts.length > 0) {
+          const optContainer = document.createElement('div');
+          optContainer.className = 'ai-msg-options';
+
+          opts.forEach(opt => {
+            const pill = document.createElement('button');
+            pill.type = 'button';
+            pill.className = `ai-opt-pill ${opt.action || 'info'}-opt`;
+            pill.innerHTML = opt.label;
+
+            pill.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleAiOptionClick(opt);
+            });
+
+            optContainer.appendChild(pill);
+          });
+
+          chatMessages.appendChild(optContainer);
+        }
+      }
       
       // Keep scroll locked to bottom
       chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -5133,6 +5415,7 @@ function initTravelBuddyApp() {
 
     // 1. Check open modals
     const openModals = [
+      { id: 'travel-info-sheet-overlay-id', close: () => { const t = document.getElementById('travel-info-sheet-overlay-id'); if (t) t.remove(); } },
       { id: 'location-picker-modal', close: () => window.closeLocationModal && window.closeLocationModal() },
       { id: 'hotel-booking-modal', close: () => { const m = document.getElementById('hotel-booking-modal'); if (m) { m.classList.add('hidden'); m.classList.remove('visible'); } } },
       { id: 'reset-password-modal', close: () => { const m = document.getElementById('reset-password-modal'); if (m) { m.classList.add('hidden'); m.classList.remove('visible'); } } },

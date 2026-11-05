@@ -2301,17 +2301,13 @@ body {
 
 
 .message.ai {
-
   background-color: var(--input-bg);
-
   border-bottom-left-radius: 4px;
-
   align-self: flex-start;
-
   color: rgba(255, 255, 255, 0.95);
-
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
+  max-width: 90%;
+  line-height: 1.55;
 }
 
 
@@ -13034,6 +13030,39 @@ body {
 
 .ai-opt-pill.packing-opt:hover {
   background: #DB2777;
+  color: #FFFFFF;
+}
+
+.ai-opt-pill.map-opt {
+  background: rgba(14, 165, 233, 0.16);
+  border-color: rgba(56, 189, 248, 0.55);
+  color: #38BDF8;
+}
+
+.ai-opt-pill.map-opt:hover {
+  background: #0284C7;
+  color: #FFFFFF;
+}
+
+.ai-opt-pill.copy_itinerary-opt {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(52, 211, 153, 0.55);
+  color: #34D399;
+}
+
+.ai-opt-pill.copy_itinerary-opt:hover {
+  background: #059669;
+  color: #FFFFFF;
+}
+
+.ai-opt-pill.weather-opt {
+  background: rgba(59, 130, 246, 0.16);
+  border-color: rgba(96, 165, 250, 0.55);
+  color: #60A5FA;
+}
+
+.ai-opt-pill.weather-opt:hover {
+  background: #2563EB;
   color: #FFFFFF;
 }
 

@@ -59,6 +59,12 @@ export const ChatBuddyScreen = ({ navigation }) => {
       navigation.navigate('PackingList');
     } else if (act === 'place') {
       navigation.navigate('DestinationDetails', { destination: param || 'Goa' });
+    } else if (act === 'map') {
+      navigation.navigate('DestinationDetails', { destination: param || 'Pondicherry' });
+    } else if (act === 'weather') {
+      alert(`🌤️ Weather Forecast for ${param || 'Destination'}:\n\n• Condition: Pleasant & Clear Skies\n• Temperature: 26°C - 30°C\n• Best Time to Visit: Oct to March`);
+    } else if (act === 'copy_itinerary') {
+      alert(`📋 ${param || 'Trip'} itinerary ready! You can paste and share it anywhere.`);
     } else if (act === 'info') {
       alert(
         "ℹ️ 24x7 Travel & Emergency Helplines:\n\n" +

@@ -1625,189 +1625,173 @@ function initTravelBuddyApp() {
         const lower = (q || '').toLowerCase();
         const budget = parseNumericBudget(q);
 
-        if (budget !== null) {
-          const formatted = '₹' + budget.toLocaleString('en-IN');
-          const stayAmt = Math.round(budget * 0.38);
-          const travelAmt = Math.round(budget * 0.22);
-          const foodAmt = Math.round(budget * 0.25);
-          const bufferAmt = budget - (stayAmt + travelAmt + foodAmt);
-          const days = budget < 4000 ? '1 to 2 days' : (budget < 12000 ? '2 to 3 days' : '4 to 7 days');
-          const dest = budget <= 7000 ? 'Pondicherry' : 'Goa';
+        // Detect destination or fallback
+        let dest = 'Pondicherry';
+        if (lower.includes('goa')) dest = 'Goa';
+        else if (lower.includes('ooty') || lower.includes('nilgiri')) dest = 'Ooty';
+        else if (lower.includes('mahabalipuram') || lower.includes('mamallapuram')) dest = 'Mahabalipuram';
+        else if (lower.includes('mumbai') || lower.includes('bombay')) dest = 'Mumbai';
+        else if (lower.includes('nellore') || lower.includes('mypadu')) dest = 'Nellore';
+        else if (lower.includes('tirupati') || lower.includes('chandragiri')) dest = 'Tirupati';
+        else if (lower.includes('kerala') || lower.includes('munnar') || lower.includes('alleppey')) dest = 'Kerala';
+        else if (lower.includes('manali') || lower.includes('himachal')) dest = 'Manali';
+        else if (lower.includes('jaipur') || lower.includes('rajasthan')) dest = 'Jaipur';
+        else if (lower.includes('paris')) dest = 'Paris';
+        else if (lower.includes('dubai')) dest = 'Dubai';
+        else if (lower.includes('tokyo')) dest = 'Tokyo';
+        else if (budget !== null) dest = (budget <= 7000) ? 'Pondicherry' : 'Goa';
 
-          const text = `💰 **Smart Travel Plan for ${formatted} Budget:**\n\n`
-            + `With **${formatted}**, you can plan a wonderful **${days}** vacation! Here is the optimal budget breakdown:\n\n`
-            + `📍 **Top Destinations within ${formatted}:**\n`
-            + (budget <= 7000
-                ? `• **Pondicherry:** Beach sunrise, White Town French cafes, Auroville & cycling.\n• **Mahabalipuram:** Shore Temple, fresh seafood, rock carvings & beach strolls.\n• **Tirupati & Chandragiri:** Sacred temple hills, waterfalls & historic fort trails.\n• **Yelagiri Hills:** Cool mountain breeze, boat rides & tranquil nature walks.\n\n`
-                : `• **Goa Beach Escape:** Calangute beach life, watersports, beach shacks & Old Goa churches.\n• **Ooty & Coonoor:** Scenic Nilgiri Mountain Toy Train, tea estates & botanical gardens.\n• **Munnar & Kochi:** Misty hills, spice plantations & backwaters.\n\n`)
-            + `📊 **Optimal ${formatted} Allocation:**\n`
-            + `• 🏨 **Stay (${days}):** ₹${stayAmt.toLocaleString('en-IN')} (Verified budget stay or hostel)\n`
-            + `• 🚆 **Travel (Round Trip):** ₹${travelAmt.toLocaleString('en-IN')} (Express train sleeper or state bus)\n`
-            + `• 🍲 **Food & Drinks:** ₹${foodAmt.toLocaleString('en-IN')} (Authentic local thalis, coastal delicacies & street food)\n`
-            + `• 🎟️ **Sightseeing & Buffer:** ₹${bufferAmt.toLocaleString('en-IN')} (Entry tickets, local autos & buffer)\n\n`
-            + `💡 **Pro Tip:** Tap **Set ${formatted} in Budget** below to pre-configure your budget tracker right now!`;
+        const totalBudget = budget !== null ? budget : 6000;
+        const formatted = '₹' + totalBudget.toLocaleString('en-IN');
+        const stayAmt = Math.round(totalBudget * 0.38);
+        const travelAmt = Math.round(totalBudget * 0.22);
+        const foodAmt = Math.round(totalBudget * 0.25);
+        const actAmt = Math.round(totalBudget * 0.10);
+        const bufferAmt = totalBudget - (stayAmt + travelAmt + foodAmt + actAmt);
+        const days = totalBudget < 4000 ? 2 : (totalBudget < 12000 ? 3 : 5);
 
-          const options = [
-            { label: `💰 Set ${formatted} in Budget`, action: 'budget', param: String(budget) },
-            { label: `🏨 Budget Hotels in ${dest}`, action: 'hotels', param: dest },
-            { label: `🎫 Book Tickets to ${dest}`, action: 'tickets', param: dest },
-            { label: '🎒 Packing Checklist', action: 'packing', param: dest },
-            { label: 'ℹ️ Travel Info & Tips', action: 'info', param: 'Budget Travel Tips' }
-          ];
+        let answer = `🌟 **${dest} ${days}-Day Travel Plan (Budget: ${formatted})**\n\n`;
 
-          return { answer: text, options: options };
+        if (dest === 'Pondicherry') {
+          answer += `📖 **About Pondicherry:**\n`
+            + `Pondicherry (Puducherry) is an enchanting coastal haven on India's Coromandel Coast, celebrated for French colonial boulevards, mustard villas, tranquil Promenade Rock Beach, chic bakeries, and the universal spiritual township of Auroville.\n\n`
+            + `🌤️ **Best Time to Visit:** October to March (Pleasant 22°C - 30°C coastal breeze with clear skies)\n\n`
+            + `📅 **Interactive ${days}-Day Itinerary:**\n\n`
+            + `🗓️ **Day 1: French Quarter Heritage, Promenade Walk & Sunset Cafes**\n`
+            + `• 🌅 **Morning:**\n`
+            + `  - **Sunrise Stroll at Promenade Beach:** Catch pastel dawn skies along the 1.5km sea-facing promenade without vehicle traffic.\n`
+            + `  - **Heritage Breakfast at Baker Street:** Savor flaky French butter croissants, pain au chocolat, and freshly brewed cafe au lait in White Town.\n`
+            + `• ☀️ **Afternoon:**\n`
+            + `  - **Colonial Architecture Tour:** Stroll amidst vibrant mustard-yellow villas and visit Sri Aurobindo Ashram.\n`
+            + `  - **Artisanal Pizza Lunch at Cafe Xtasi:** Enjoy giant crispy wood-fired pizza and iced tea.\n`
+            + `• 🌆 **Evening:**\n`
+            + `  - **Sunset at Serenity Beach:** Watch waves crashing on the rocky breakwater boulders and enjoy live music at beachfront cafes.\n\n`
+            + `🗓️ **Day 2: Auroville Township, Matrimandir & Crafts**\n`
+            + `• 🌅 **Morning:**\n`
+            + `  - **Scooter Ride to Auroville:** Ride through lush green tree canopies to visit the iconic golden sphere Matrimandir.\n`
+            + `  - **Organic Farm Breakfast:** Sourdough bread, artisanal cheese, and passionfruit juice at Auroville Bakery.\n`
+            + `• ☀️ **Afternoon:**\n`
+            + `  - **Auroville Visitors Centre:** Shop for handmade incense, pottery, spirulina, and hand-woven garments.\n`
+            + `  - **Creole Seafood Lunch:** Taste French-Tamil fusion cuisine featuring coconut-infused tiger prawns at Carte Blanche.\n`
+            + `• 🌆 **Evening:**\n`
+            + `  - **Promenade Rock Beach Night Walk:** Enjoy cool sea breeze, local street snacks, and French War Memorial lights.\n\n`
+            + `🗓️ **Day 3: Paradise Beach Ferry & Water Sports**\n`
+            + `• 🌅 **Morning:**\n`
+            + `  - **Chunnambar Backwater Ferry:** Scenic 20-minute boat ride across mangrove lagoons to Paradise Beach.\n`
+            + `  - **Beach Water Sports:** Jet skiing, banana rides, or relaxing under thatched palm huts with fresh tender coconut.\n`
+            + `• ☀️ **Afternoon:**\n`
+            + `  - **Seafood Shack Lunch:** Freshly caught grilled sea bass, calamari fry, and lemon rice.\n`
+            + `• 🌆 **Evening:**\n`
+            + `  - **Farewell Dinner at Coromandel Cafe:** Signature mocktails, pasta, and dark chocolate mousse.\n\n`
+            + `📍 **Top Places to Visit & Landmarks:**\n`
+            + `• **Promenade Rock Beach** (Scenic Coastal Boardwalk) [11.9338, 79.8358]\n`
+            + `• **White Town (French Quarter)** (Colonial Heritage & Cafes) [11.9310, 79.8335]\n`
+            + `• **Auroville & Matrimandir** (Universal Spiritual Township) [12.0070, 79.8106]\n`
+            + `• **Paradise Beach & Chunnambar** (Golden Sand Beach & Backwaters) [11.8847, 79.8078]\n`
+            + `• **Sri Aurobindo Ashram** (Meditation & Spiritual Sanctuary) [11.9366, 79.8344]\n\n`
+            + `🏖️ **Top Adventure Activities:**\n`
+            + `• Scuba diving and coral reef exploration at Temple Reef, Pondicherry\n`
+            + `• Beginner surfing lessons at Kallialay Surf School, Serenity Beach\n`
+            + `• Backwater speedboating and banana boat rides at Chunnambar Boat House\n`
+            + `• Vintage bicycle heritage ride through French colonial alleyways in White Town\n`
+            + `• Sunrise paddleboarding and mangrove kayaking in Ariyankuppam backwaters\n\n`
+            + `🍲 **Local Cuisine Recommendations:**\n`
+            + `• French Baguettes, Almond Croissants & Café au Lait at Baker Street\n`
+            + `• Pondicherry Creole Prawn Curry with steamed rice at Carte Blanche\n`
+            + `• Artisanal Wood-Fired Neapolitan Pizza at Cafe Xtasi\n`
+            + `• Ghee Roast Podi Dosa & Filter Kaapi at historic Surguru\n\n`
+            + `💰 **Itemized Budget Breakdown (${formatted}):**\n`
+            + `• 🏨 **Stay (${days} Days):** ₹${stayAmt.toLocaleString('en-IN')} (Verified AC boutique stay or hostel)\n`
+            + `• 🚆 **Travel & Transit:** ₹${travelAmt.toLocaleString('en-IN')} (Roundtrip express train/bus + local scooter rental)\n`
+            + `• 🍲 **Food & Dining:** ₹${foodAmt.toLocaleString('en-IN')} (French bakeries, local messes & seafood thalis)\n`
+            + `• 🎟️ **Sightseeing & Activities:** ₹${actAmt.toLocaleString('en-IN')} (Paradise beach boat ferry & entry tickets)\n`
+            + `• 🛡️ **Emergency Buffer:** ₹${bufferAmt.toLocaleString('en-IN')} (Drinking water, snacks & emergency reserve)\n\n`
+            + `🎒 **Tailored Packing Checklist:**\n`
+            + `• ✓ Govt photo ID (Aadhaar/Passport) & booking confirmations\n`
+            + `• ✓ Breathable cotton linen shirts, shorts & swimwear\n`
+            + `• ✓ Sunscreen SPF 50+, sunglasses & beach hat\n`
+            + `• ✓ Power bank (10,000mAh) & waterproof phone pouch\n`
+            + `• ✓ Personal medical kit, mosquito repellent & ORS sachets\n\n`
+            + `💡 **Next Steps:** Tap any action option below to view spots on the live interactive map, reserve verified hotels, or configure this plan into your Budget Tracker!`;
+        } else if (dest === 'Goa') {
+          answer += `📖 **About Goa:**\n`
+            + `Goa is India's premier coastal haven on the Konkan coast, famed for golden beaches, Portuguese colonial architecture, Dudhsagar waterfalls, bustling beach shacks, and vibrant nightlife.\n\n`
+            + `🌤️ **Best Time to Visit:** October to April (Pleasant 24°C - 31°C coastal breezes)\n\n`
+            + `📅 **Interactive ${days}-Day Itinerary:**\n\n`
+            + `🗓️ **Day 1: North Goa Coastal Charm, Fort Aguada & Sunset Shacks**\n`
+            + `• 🌅 **Morning:** Fort Aguada 17th-century bastion ocean views and Infantaria bakery breakfast.\n`
+            + `• ☀️ **Afternoon:** Parasailing and jet skiing at Calangute & Baga beach; lunch at Brittos.\n`
+            + `• 🌆 **Evening:** Sunset cocktails and live acoustic music at Curlies in Anjuna.\n\n`
+            + `🗓️ **Day 2: Old Goa Heritage, Panjim Latin Quarter & River Cruise**\n`
+            + `• 🌅 **Morning:** Basilica of Bom Jesus, Se Cathedral & Fontainhas Latin Quarter tour.\n`
+            + `• ☀️ **Afternoon:** Authentic Goan Fish Curry Thali at Ritz Classic Panjim.\n`
+            + `• 🌆 **Evening:** 1-hour Mandovi River sunset cruise with Portuguese folk dances.\n\n`
+            + `🗓️ **Day 3: Dudhsagar Waterfalls or South Goa Palolem Relax**\n`
+            + `• 🌅 **Morning:** Off-road 4x4 Jeep jungle safari to swim in misty Dudhsagar waterfalls.\n`
+            + `• ☀️ **Afternoon:** Spice plantation walking tour with traditional Goan buffet.\n`
+            + `• 🌆 **Evening:** Candlelight seafood dinner and beach stargazing at Palolem.\n\n`
+            + `📍 **Top Places to Visit & Landmarks:**\n`
+            + `• **Fort Aguada & Lighthouse** [15.4926, 73.7737]\n`
+            + `• **Baga & Calangute Beach** [15.5553, 73.7517]\n`
+            + `• **Basilica of Bom Jesus** [15.5009, 73.9116]\n`
+            + `• **Fontainhas Latin Quarter Panjim** [15.4989, 73.8315]\n`
+            + `• **Dudhsagar Waterfalls** [15.3144, 74.3143]\n`
+            + `• **Palolem Crescent Beach** [15.0100, 74.0232]\n\n`
+            + `🏖️ **Top Adventure Activities:**\n`
+            + `• Parasailing and jet skiing at Calangute beach\n`
+            + `• Scuba diving and dolphin cruise at Grande Island\n`
+            + `• Off-road 4x4 Jeep jungle safari to Dudhsagar falls\n`
+            + `• Sunset sailing along Mandovi river\n`
+            + `• Kayaking through Morjim mangrove lagoons\n\n`
+            + `🍲 **Local Cuisine Recommendations:**\n`
+            + `• Goan Fish Curry Thali with Kingfish & Sol Kadi at Ritz Classic\n`
+            + `• Spicy Prawn Balchão and Pork Vindaloo at Martin's Corner\n`
+            + `• Traditional multi-layered Bebinca dessert\n`
+            + `• Butter Garlic Crab at Fisherman's Wharf\n\n`
+            + `💰 **Itemized Budget Breakdown (${formatted}):**\n`
+            + `• 🏨 **Stay (${days} Days):** ₹${stayAmt.toLocaleString('en-IN')} (Beach resort or boutique stay)\n`
+            + `• 🚆 **Travel & Transit:** ₹${travelAmt.toLocaleString('en-IN')} (Roundtrip express train/flight + scooter rental)\n`
+            + `• 🍲 **Food & Dining:** ₹${foodAmt.toLocaleString('en-IN')} (Beach shacks, seafood thalis & cafes)\n`
+            + `• 🎟️ **Sightseeing & Activities:** ₹${actAmt.toLocaleString('en-IN')} (Water sports, river cruise & fort entries)\n`
+            + `• 🛡️ **Emergency Buffer:** ₹${bufferAmt.toLocaleString('en-IN')} (Contingency, water & souvenirs)\n\n`
+            + `🎒 **Tailored Packing Checklist:**\n`
+            + `• ✓ Govt photo ID, driving license for scooter rental\n`
+            + `• ✓ Breathable cotton shirts, swim shorts & beachwear\n`
+            + `• ✓ High SPF sunscreen (50+), sunglasses & beach towel\n`
+            + `• ✓ Waterproof phone pouch & power bank (10,000mAh)\n`
+            + `• ✓ Flip-flops, walking shoes & mosquito repellent\n\n`
+            + `💡 **Next Steps:** Tap any action option below to view spots on the live interactive map, reserve verified hotels, or configure this plan into your Budget Tracker!`;
+        } else {
+          answer += `📖 **About ${dest}:**\n`
+            + `${dest} is an exceptional destination known for rich culture, historical landmarks, panoramic views, vibrant markets, and outstanding regional cuisine.\n\n`
+            + `🌤️ **Best Time to Visit:** October to March (Pleasant weather, ideal for outdoor sightseeing)\n\n`
+            + `📅 **Interactive ${days}-Day Itinerary:**\n`
+            + `• 🗓️ **Day 1: Historic City Highlights & Heritage Walk:** Explore the primary landmarks and enjoy an authentic local breakfast.\n`
+            + `• 🗓️ **Day 2: Cultural Bazaars & Sunset Viewpoints:** Browse handicraft markets and watch golden sunset panoramas.\n`
+            + `• 🗓️ **Day 3: Scenic Excursions & Local Specialties:** Excursions to natural spots followed by a farewell dinner.\n\n`
+            + `💰 **Itemized Budget Breakdown (${formatted}):**\n`
+            + `• 🏨 **Stay (${days} Days):** ₹${stayAmt.toLocaleString('en-IN')}\n`
+            + `• 🚆 **Transit:** ₹${travelAmt.toLocaleString('en-IN')}\n`
+            + `• 🍲 **Food:** ₹${foodAmt.toLocaleString('en-IN')}\n`
+            + `• 🎟️ **Sightseeing & Activities:** ₹${actAmt.toLocaleString('en-IN')}\n`
+            + `• 🛡️ **Buffer:** ₹${bufferAmt.toLocaleString('en-IN')}\n\n`
+            + `💡 **Next Steps:** Tap any action option below to view spots on the live interactive map, reserve verified hotels, or configure this plan into your Budget Tracker!`;
         }
 
-        if (lower.includes('mumbai') || lower.includes('bombay')) {
-          return {
-            answer: "🏙️ **Mumbai 3-Day Travel Itinerary & City Guide:**\n\n"
-              + "📅 **Day 1: Colonial Heritage & South Mumbai Charm**\n"
-              + "• **Morning:** Stand before the iconic **Gateway of India** and Taj Mahal Palace.\n"
-              + "• **Afternoon:** Stroll down Colaba Causeway for shopping, lunch at Leopold Cafe.\n"
-              + "• **Evening:** Watch the golden sunset along **Marine Drive** & Chowpatty beach.\n\n"
-              + "📅 **Day 2: Coastal Landmarks, Culture & Bandra Vibes**\n"
-              + "• **Morning:** Scenic ferry to ancient rock-cut **Elephanta Caves** (UNESCO site).\n"
-              + "• **Afternoon:** Serene **Haji Ali Dargah** situated on an islet in the Arabian Sea.\n"
-              + "• **Evening:** Walk along **Bandra Bandstand** & explore hip cafes.\n\n"
-              + "📅 **Day 3: Bollywood, Beaches & Cuisine**\n"
-              + "• **Morning:** Hot Pav Bhaji at Juhu Beach.\n"
-              + "• **Evening:** Sunset skyline views from rooftop lounges.\n\n"
-              + "🍴 **Must-Try:** Vada Pav, Pav Bhaji, Bun Maska & Irani Chai!",
-            options: [
-              { label: '📍 View Mumbai Details', action: 'place', param: 'Mumbai' },
-              { label: '🏨 Mumbai Hotels', action: 'hotels', param: 'Mumbai' },
-              { label: '🎫 Book Tickets', action: 'tickets', param: 'Mumbai' },
-              { label: '🌤️ Check Weather', action: 'weather', param: 'Mumbai' },
-              { label: 'ℹ️ Mumbai Travel Info', action: 'info', param: 'Mumbai Info' }
-            ]
-          };
-        }
+        const options = [
+          { label: '🗺️ View on Map', action: 'map', param: dest },
+          { label: '🏨 Recommended Hotels', action: 'hotels', param: dest },
+          { label: `💰 Set ${formatted} in Budget`, action: 'budget', param: String(totalBudget) },
+          { label: '🎒 Packing Checklist', action: 'packing', param: dest },
+          { label: '🌤️ Live Weather', action: 'weather', param: dest },
+          { label: '🎫 Book Tickets', action: 'tickets', param: dest },
+          { label: '📋 Copy Itinerary', action: 'copy_itinerary', param: dest }
+        ];
 
-        if (lower.includes('goa')) {
-          return {
-            answer: "🏖️ **Goa 3-Day Beach & Sunshine Itinerary:**\n\n"
-              + "📅 **Day 1: North Goa Beaches & Forts**\n"
-              + "• **Morning:** Visit historic **Fort Aguada** and soak in lighthouse ocean views.\n"
-              + "• **Afternoon:** Watersports at Calangute & Baga beach.\n"
-              + "• **Evening:** Sunset cocktails at Anjuna with live beach music.\n\n"
-              + "📅 **Day 2: Old Goa Heritage & Panjim Latin Quarter**\n"
-              + "• **Morning:** Explore Basilica of Bom Jesus & Se Cathedral.\n"
-              + "• **Afternoon:** Colorful Portuguese architecture in Fontainhas, Panjim.\n"
-              + "• **Evening:** Mandovi River sunset cruise with Goan folk dance.\n\n"
-              + "📅 **Day 3: South Goa Tranquility & Waterfalls**\n"
-              + "• **Morning:** Day trip to majestic **Dudhsagar Waterfalls**.\n"
-              + "• **Evening:** Relax on pristine white sands of Palolem beach.\n\n"
-              + "🍴 **Must-Try:** Goan Fish Curry Thali, Prawn Balchão, Bebinca!",
-            options: [
-              { label: '📍 Explore Goa', action: 'place', param: 'Goa' },
-              { label: '🏨 Goa Beach Resorts', action: 'hotels', param: 'Goa' },
-              { label: '🌤️ Goa Weather', action: 'weather', param: 'Goa' },
-              { label: '🎫 Book Tickets', action: 'tickets', param: 'Goa' },
-              { label: 'ℹ️ Goa Travel Info', action: 'info', param: 'Goa Info' }
-            ]
-          };
-        }
-
-        if (lower.includes('pondy') || lower.includes('pondicherry')) {
-          return {
-            answer: "🌊 **Pondicherry 3-Day Coastal & French Quarter Guide:**\n\n"
-              + "📅 **Day 1: French Quarter Heritage & Promenade**\n"
-              + "• **Morning:** Sunrise stroll along **Promenade Rock Beach**.\n"
-              + "• **Afternoon:** Explore colorful colonial streets in **White Town** & French cafes.\n"
-              + "• **Evening:** Visit Sri Aurobindo Ashram & local craft boutiques.\n\n"
-              + "📅 **Day 2: Auroville & Golden Matrimandir**\n"
-              + "• **Morning:** Cycle to universal township of **Auroville**; view Matrimandir.\n"
-              + "• **Evening:** Watch golden sunset at Serenity Beach.\n\n"
-              + "📅 **Day 3: Paradise Beach & Ferries**\n"
-              + "• **Morning:** Take backwater ferry to isolated **Paradise Beach**.\n"
-              + "• **Afternoon:** Fresh coastal seafood lunch & water sports.\n\n"
-              + "🍴 **Must-Try:** Fresh baked croissants, wood-fired pizza & Creole curries!",
-            options: [
-              { label: '📍 Explore Pondicherry', action: 'place', param: 'Pondicherry' },
-              { label: '🏨 French Quarter Stays', action: 'hotels', param: 'Pondicherry' },
-              { label: '🎫 Book Tickets', action: 'tickets', param: 'Pondicherry' },
-              { label: '🌤️ Live Weather', action: 'weather', param: 'Pondicherry' },
-              { label: 'ℹ️ Travel Info', action: 'info', param: 'Pondicherry Info' }
-            ]
-          };
-        }
-
-        if (lower.includes('pack')) {
-          return {
-            answer: "🎒 **Essential Travel Packing Checklist:**\n\n"
-              + "📄 **1. Documents & Essentials:**\n"
-              + "• Govt ID card (Aadhaar / Passport) & driver's license.\n"
-              + "• Flight/train tickets & hotel booking confirmation.\n"
-              + "• Emergency cash (₹2,000–₹3,000) & UPI apps.\n\n"
-              + "🔌 **2. Electronics:**\n"
-              + "• Phone charger & high-capacity power bank (10,000mAh+).\n"
-              + "• Earphones / AirPods with protective case.\n\n"
-              + "👕 **3. Clothing & Footwear:**\n"
-              + "• 3-5 breathable cotton t-shirts, 2 pairs of comfortable pants/shorts.\n"
-              + "• Walking shoes, flip-flops, light jacket/windbreaker.\n\n"
-              + "💊 **4. Health & Toiletries:**\n"
-              + "• Sunscreen (SPF 50+), hand sanitizer, bug spray.\n"
-              + "• Mini medical kit: Paracetamol, antacid, Band-Aids & motion sickness pills.\n\n"
-              + "💡 **Tap 'Open Packing List' below to track your packed items in real time!**",
-            options: [
-              { label: '🎒 Open Packing List', action: 'packing', param: '' },
-              { label: '🌤️ Check Weather', action: 'weather', param: 'Goa' },
-              { label: '💰 Set Trip Budget', action: 'budget', param: '5000' },
-              { label: 'ℹ️ Travel Info & Tips', action: 'info', param: 'Packing Info' }
-            ]
-          };
-        }
-
-        if (lower.includes('budget') || lower.includes('cost') || lower.includes('money')) {
-          return {
-            answer: "💰 **Top Smart Travel Budget Tips:**\n\n"
-              + "1. **Book 3-4 Weeks Ahead:** Train sleeper/3AC and flights are up to 40% cheaper early.\n"
-              + "2. **Eat Local:** Family-run diners and Udupi cafes offer delicious authentic food at a fraction of tourist prices.\n"
-              + "3. **Use Public Transit:** Use local express trains or metro rather than point-to-point cabs.\n"
-              + "4. **Weekday Stays:** Hotel room tariffs drop significantly between Monday and Thursday.\n"
-              + "5. **Log Daily Expenses:** Use the TravelBuddy Budget Tracker to monitor your daily allowance in real-time!",
-            options: [
-              { label: '💰 Open Budget Tracker', action: 'budget', param: '6000' },
-              { label: '🏨 Browse Budget Hotels', action: 'hotels', param: 'Goa' },
-              { label: '🎫 Check Tickets', action: 'tickets', param: 'Goa' },
-              { label: 'ℹ️ Budget Info & Tips', action: 'info', param: 'Budget Info' }
-            ]
-          };
-        }
-
-        if (lower.includes('hotel') || lower.includes('stay') || lower.includes('resort')) {
-          return {
-            answer: "🏨 **Hotel Booking Advice & Guidelines:**\n\n"
-              + "• **Location First:** Choose stays near transit hubs to reduce taxi expenses.\n"
-              + "• **Rating Standard:** Opt for properties with 4.2★ or higher and 100+ verified guest reviews.\n"
-              + "• **AC vs Non-AC:** Select AC rooms for tropical coastal climates (Goa, Pondicherry) and Non-AC for hill stations (Ooty).\n"
-              + "• **Direct Confirmation:** Tap 'Browse Hotels' below to view prices and book instantly!",
-            options: [
-              { label: '🏨 Browse Hotels', action: 'hotels', param: 'Goa' },
-              { label: '💰 Track Stay Budget', action: 'budget', param: '4000' },
-              { label: '🎫 Book Travel Tickets', action: 'tickets', param: 'Goa' },
-              { label: 'ℹ️ Hotel Booking Info', action: 'info', param: 'Hotel Info' }
-            ]
-          };
-        }
-
-        return {
-          answer: "✈️ **Travel Buddy Guide for " + q + ":**\n\n"
-            + "• **Top Sightseeing:** Explore the historic old town, coastal promenades, and panoramic viewpoints.\n"
-            + "• **Where to Stay:** Choose central locations near transit points to save travel time.\n"
-            + "• **Local Flavors:** Taste local specialties and freshly prepared regional meals.\n"
-            + "• **Seamless Planning:** Use the Budget Tracker, Hotel Booking, and Tickets features below to organize your journey!",
-          options: [
-            { label: '💰 Plan ₹6,000 Trip', action: 'budget', param: '6000' },
-            { label: '🏨 Browse Top Hotels', action: 'hotels', param: 'Goa' },
-            { label: '🎫 Book Travel Tickets', action: 'tickets', param: 'Goa' },
-            { label: '🎒 Packing Checklist', action: 'packing', param: '' },
-            { label: 'ℹ️ Travel Info & Helpline', action: 'info', param: 'General Travel Info' }
-          ]
-        };
+        return { answer: answer, options: options };
       }
 
-      // ── Handle AI Option Pill Clicks (Budget, Hotels, Tickets, Info, Packing) ──
+      // ── Handle AI Option Pill Clicks (Budget, Hotels, Tickets, Info, Packing, Map, Copy) ──
       function handleAiOptionClick(opt) {
         if (!opt) return;
         const act = opt.action;
@@ -1839,6 +1823,27 @@ function initTravelBuddyApp() {
         } else if (act === 'place') {
           closeDrawer();
           openTripDetails(param || 'Goa');
+        } else if (act === 'map') {
+          closeDrawer();
+          loadLocationData(param, param, null, null, true);
+          showToast(`🗺️ Loaded ${param} on interactive map!`);
+          const mapEl = document.getElementById('live-google-map') || document.getElementById('live-map-iframe');
+          if (mapEl) {
+            mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        } else if (act === 'copy_itinerary') {
+          const aiBubbles = document.querySelectorAll('.message.ai p');
+          const lastAiBubble = aiBubbles[aiBubbles.length - 1];
+          const textToCopy = lastAiBubble ? lastAiBubble.innerText : `Itinerary for ${param}`;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+              showToast(`📋 ${param} itinerary copied to clipboard!`);
+            }).catch(() => {
+              showToast(`📋 ${param} itinerary copied!`);
+            });
+          } else {
+            showToast(`📋 ${param} itinerary ready!`);
+          }
         } else if (act === 'info') {
           showTravelInfoModal(param || 'Travel & Emergency Info');
         } else if (act === 'prompt') {

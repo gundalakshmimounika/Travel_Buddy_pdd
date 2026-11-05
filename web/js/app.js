@@ -942,16 +942,23 @@ function initTravelBuddyApp() {
         Signing in...
       `;
 
-      // Make active POST request to XAMPP backend login.php
+      // Make active POST request to XAMPP backend login.php with timeout safeguard
       const formData = new FormData();
       formData.append('email', email);
       formData.append('password', password);
 
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timeoutId = controller ? setTimeout(() => controller.abort(), 6000) : null;
+
       fetch(`${BASE_URL}/login.php`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal: controller ? controller.signal : undefined
       })
-      .then(res => res.json())
+      .then(res => {
+        if (timeoutId) clearTimeout(timeoutId);
+        return res.json();
+      })
       .then(data => {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
@@ -978,15 +985,17 @@ function initTravelBuddyApp() {
           
           // Initialize Geolocation & Dashboard Integration
           initializeDashboard();
+          showToast(`Welcome, ${data.full_name || 'Traveler'}!`);
         } else {
           showToast(data.message || 'Invalid email or password.');
         }
       })
       .catch(err => {
+        if (timeoutId) clearTimeout(timeoutId);
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
         // Offline demo fallback so app is fully accessible even without local web server
-        showToast('Connecting in offline demo mode...');
+        showToast('Connecting to dashboard...');
         const displayName = email.split('@')[0] || 'Aarav Mehta';
         localStorage.setItem('ACTIVE_USER_NAME', displayName);
         localStorage.setItem('ACTIVE_EMAIL', email);

@@ -3358,7 +3358,7 @@ function initTravelBuddyApp() {
       });
     }
 
-    // Hotels listing rendering
+    // Hotels listing rendering (Interactive Cards with Direct Booking & View All)
     const hotelsContainer = document.getElementById('details-hotels-list-id');
     if (hotelsContainer) {
       hotelsContainer.innerHTML = '';
@@ -3366,11 +3366,31 @@ function initTravelBuddyApp() {
         ? info.hotels
         : [`Grand Palace Hotel, ${destination}`, `Heritage Luxury Resort, ${destination}`, `Comfort Inn, ${destination}`];
       
-      hotelsList.forEach(hotel => {
-        const li = document.createElement('li');
-        li.textContent = hotel;
-        hotelsContainer.appendChild(li);
+      hotelsList.forEach(hotelName => {
+        const item = document.createElement('div');
+        item.className = 'nearby-hotel-card-item';
+        item.innerHTML = `
+          <div class="nhc-info">
+            <span class="nhc-name">🏨 ${hotelName}</span>
+            <span class="nhc-rating">★ 4.8 · Popular stay in ${destination}</span>
+          </div>
+          <button class="btn-nearby-hotel-book" type="button">Book Stay</button>
+        `;
+        item.querySelector('.btn-nearby-hotel-book').addEventListener('click', () => {
+          openHotelBookingModal({ name: hotelName, price: 3200, rating: '4.8', description: `Top-rated luxury stay in ${destination}` }, destination);
+        });
+        hotelsContainer.appendChild(item);
       });
+
+      // Add "View All Hotels" navigation button
+      const viewAllBtn = document.createElement('button');
+      viewAllBtn.className = 'btn-view-all-hotels';
+      viewAllBtn.type = 'button';
+      viewAllBtn.innerHTML = `<span>View All Hotels in ${destination}</span> <span style="font-size:16px;">&rarr;</span>`;
+      viewAllBtn.addEventListener('click', () => {
+        openHotelsPage(destination);
+      });
+      hotelsContainer.appendChild(viewAllBtn);
     }
 
     // Setup maps route navigator
@@ -3467,40 +3487,55 @@ function initTravelBuddyApp() {
       newTicketBtn.addEventListener('click', () => openTicketsPage(trip));
     }
 
-    // ── Remaining overlays (hotels, weather, buddy) ──
-    const triggers = [
-      { id: 'btn-hotel-list', overlay: 'hotels-overlay', load: () => loadHotelsOverlay(trip) },
-      { id: 'btn-weather-list', overlay: 'weather-overlay', load: () => loadWeatherOverlay(trip) },
-      { id: 'btn-buddy-plan', overlay: 'buddy-plan-overlay', load: () => openBuddyPlanOverlay(trip) }
-    ];
+    // ── Dedicated page & overlay openers for hotels, weather, buddy ──
+    const hotelBtn = document.getElementById('btn-hotel-list');
+    if (hotelBtn) {
+      const newHotelBtn = hotelBtn.cloneNode(true);
+      hotelBtn.parentNode.replaceChild(newHotelBtn, hotelBtn);
+      newHotelBtn.addEventListener('click', () => openHotelsPage(trip));
+    }
 
-    triggers.forEach(item => {
-      const btn = document.getElementById(item.id);
-      if (btn) {
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        newBtn.addEventListener('click', () => {
-          const overlay = document.getElementById(item.overlay);
-          if (overlay) {
-            overlay.classList.remove('hidden');
-            overlay.classList.add('visible');
-            item.load();
-          }
-        });
-      }
-    });
+    const weatherBtn = document.getElementById('btn-weather-list');
+    if (weatherBtn) {
+      const newWeatherBtn = weatherBtn.cloneNode(true);
+      weatherBtn.parentNode.replaceChild(newWeatherBtn, weatherBtn);
+      newWeatherBtn.addEventListener('click', () => openWeatherPage(trip));
+    }
+
+    const buddyBtn = document.getElementById('btn-buddy-plan');
+    if (buddyBtn) {
+      const newBuddyBtn = buddyBtn.cloneNode(true);
+      buddyBtn.parentNode.replaceChild(newBuddyBtn, buddyBtn);
+      newBuddyBtn.addEventListener('click', () => {
+        const overlay = document.getElementById('buddy-plan-overlay');
+        if (overlay) {
+          overlay.classList.remove('hidden');
+          overlay.classList.add('visible');
+          openBuddyPlanOverlay(trip);
+        }
+      });
+    }
   }
 
-  // Overlay Close Handlers
+  // Overlay & Page Close Handlers
   const overlayClosers = [
     { btn: 'btn-tickets-close', overlay: 'tickets-overlay' },
     { btn: 'btn-hotels-close', overlay: 'hotels-overlay' },
+    { btn: 'btn-hotels-overlay-back', overlay: 'hotels-overlay' },
     { btn: 'btn-budget-close', overlay: 'budget-overlay' },
     { btn: 'btn-weather-close', overlay: 'weather-overlay' },
+    { btn: 'btn-weather-overlay-back', overlay: 'weather-overlay' },
     { btn: 'btn-buddy-plan-close', overlay: 'buddy-plan-overlay' },
     { btn: 'btn-info-close', overlay: 'info-modal' },
     { btn: 'btn-privacy-close', overlay: 'privacy-modal' }
   ];
+
+  // Full-screen page back buttons
+  const btnHotelsBack = document.getElementById('btn-hotels-back');
+  if (btnHotelsBack) btnHotelsBack.addEventListener('click', () => closeHotelsPage());
+
+  const btnWeatherBack = document.getElementById('btn-weather-back');
+  if (btnWeatherBack) btnWeatherBack.addEventListener('click', () => closeWeatherPage());
 
   overlayClosers.forEach(closer => {
     const btn = document.getElementById(closer.btn);
@@ -4236,9 +4271,23 @@ function initTravelBuddyApp() {
     }
   }
 
-  // --- Close Button ---
+  // --- Close & Back Buttons ---
   const hbCloseBtn = document.getElementById('btn-hotel-booking-close');
   if (hbCloseBtn) hbCloseBtn.addEventListener('click', closeHotelBookingModal);
+
+  const hbHeaderBack = document.getElementById('btn-hotel-booking-back');
+  if (hbHeaderBack) {
+    hbHeaderBack.addEventListener('click', () => {
+      if (_hotelBooking && _hotelBooking.currentStep > 1) {
+        _hotelGotoStep(_hotelBooking.currentStep - 1);
+      } else {
+        closeHotelBookingModal();
+      }
+    });
+  }
+
+  const hbStep1Back = document.getElementById('hotel-step1-back');
+  if (hbStep1Back) hbStep1Back.addEventListener('click', closeHotelBookingModal);
 
   // --- Step 1: Room type selection ---
   const hbAcBtn = document.getElementById('hotel-btn-ac');
@@ -4437,6 +4486,227 @@ function initTravelBuddyApp() {
     ];
   }
 
+  // ==========================================================================
+  // Hotels Full-Screen Page Navigation
+  // ==========================================================================
+  let _hotelsCurrentTrip = '';
+
+  function openHotelsPage(trip) {
+    _hotelsCurrentTrip = trip;
+    const section = document.getElementById('hotels-section');
+    const tripDetails = document.getElementById('trip-details-section');
+    if (!section) {
+      const overlay = document.getElementById('hotels-overlay');
+      if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('visible');
+        loadHotelsOverlay(trip);
+      }
+      return;
+    }
+
+    const titleEl = document.getElementById('hotels-page-title');
+    if (titleEl) titleEl.textContent = `Hotels in ${trip}`;
+    const subEl = document.getElementById('hotels-destination-subtitle');
+    if (subEl) subEl.textContent = `Top verified stays near ${trip}`;
+
+    if (tripDetails) tripDetails.classList.add('hidden');
+    section.classList.remove('hidden');
+
+    loadHotelsPageList(trip);
+  }
+
+  function closeHotelsPage() {
+    const section = document.getElementById('hotels-section');
+    const tripDetails = document.getElementById('trip-details-section');
+    if (section) section.classList.add('hidden');
+    if (tripDetails) tripDetails.classList.remove('hidden');
+  }
+
+  function loadHotelsPageList(trip) {
+    const container = document.getElementById('hotels-page-list');
+    if (!container) return;
+    container.innerHTML = `
+      <div class="empty-feed-state" style="padding:40px 20px;">
+        <div class="dot-pulse"></div>
+        <p style="margin-top:16px;color:#94A3B8;font-size:13px;">Finding best hotels near ${trip}...</p>
+      </div>`;
+
+    safeApiFetch(`hotels.php?place=${encodeURIComponent(trip || 'Goa')}`)
+      .then(data => {
+        let list = [];
+        if (Array.isArray(data) && data.length > 0) list = data;
+        else if (data && Array.isArray(data.data) && data.data.length > 0) list = data.data;
+        else list = getFallbackHotels(trip);
+        renderHotelsIntoContainer(list, trip, container);
+      })
+      .catch(() => {
+        renderHotelsIntoContainer(getFallbackHotels(trip), trip, container);
+      });
+  }
+
+  function renderHotelsIntoContainer(hotels, trip, container) {
+    if (!container) return;
+    container.innerHTML = '';
+
+    hotels.forEach(hotel => {
+      const card = document.createElement('div');
+      card.className = 'hotel-overlay-card';
+      card.innerHTML = `
+        <div class="hotel-card-header">
+          <h4>${hotel.name}</h4>
+          <span class="hotel-stars">★ ${hotel.rating}</span>
+        </div>
+        <p class="hotel-desc">${hotel.description}</p>
+        <div class="hotel-card-footer">
+          <div class="hotel-price">
+            <span class="hotel-price-lbl">Starting Price</span>
+            <span class="hotel-price-val">₹${hotel.price} / night</span>
+          </div>
+          <div class="hotel-card-actions">
+            <button class="btn-hotel-map" title="Map & Directions" data-query="${encodeURIComponent(hotel.name + ' ' + (trip || ''))}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                <line x1="8" y1="2" x2="8" y2="18"></line>
+                <line x1="16" y1="6" x2="16" y2="22"></line>
+              </svg>
+            </button>
+            <button class="btn-hotel-call" title="Call Hotel" data-phone="${hotel.contact}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+            </button>
+            <button class="btn-hotel-book">Book Stay</button>
+          </div>
+        </div>
+      `;
+
+      card.querySelector('.btn-hotel-call').addEventListener('click', (e) => {
+        const ph = e.currentTarget.getAttribute('data-phone') || hotel.contact;
+        showToast(`Calling hotel partner: ${ph}`);
+        try { window.location.href = `tel:${ph.replace(/[^\d+]/g, '')}`; } catch(err) {}
+      });
+
+      const mapBtn = card.querySelector('.btn-hotel-map');
+      if (mapBtn) {
+        mapBtn.addEventListener('click', (e) => {
+          const q = e.currentTarget.getAttribute('data-query');
+          window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
+        });
+      }
+
+      card.querySelector('.btn-hotel-book').addEventListener('click', () => {
+        openHotelBookingModal(hotel, trip || '');
+      });
+
+      container.appendChild(card);
+    });
+  }
+
+  // ==========================================================================
+  // Weather Full-Screen Page Navigation
+  // ==========================================================================
+  let _weatherCurrentTrip = '';
+
+  function openWeatherPage(trip) {
+    _weatherCurrentTrip = trip;
+    const section = document.getElementById('weather-section');
+    const tripDetails = document.getElementById('trip-details-section');
+    if (!section) {
+      const overlay = document.getElementById('weather-overlay');
+      if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('visible');
+        loadWeatherOverlay(trip);
+      }
+      return;
+    }
+
+    const titleEl = document.getElementById('weather-page-title');
+    if (titleEl) titleEl.textContent = `Weather in ${trip}`;
+
+    if (tripDetails) tripDetails.classList.add('hidden');
+    section.classList.remove('hidden');
+
+    loadWeatherPageData(trip);
+  }
+
+  function closeWeatherPage() {
+    const section = document.getElementById('weather-section');
+    const tripDetails = document.getElementById('trip-details-section');
+    if (section) section.classList.add('hidden');
+    if (tripDetails) tripDetails.classList.remove('hidden');
+  }
+
+  function loadWeatherPageData(trip) {
+    const hourlyContainer = document.getElementById('weather-page-hourly');
+    const dailyContainer = document.getElementById('weather-page-daily');
+    const tempEl = document.getElementById('weather-page-temp');
+    const cityEl = document.getElementById('weather-page-city');
+    const condEl = document.getElementById('weather-page-condition');
+
+    if (tempEl) tempEl.textContent = '--°C';
+    if (cityEl) cityEl.textContent = trip;
+    if (condEl) condEl.textContent = 'Loading forecast...';
+    if (hourlyContainer) hourlyContainer.innerHTML = '<div class="dot-pulse"></div>';
+    if (dailyContainer) dailyContainer.innerHTML = '<div class="dot-pulse"></div>';
+
+    const renderPageData = (data) => {
+      if (tempEl) tempEl.textContent = `${data.current_temp || 28}°C`;
+      if (cityEl) cityEl.textContent = data.city || trip;
+      if (condEl) condEl.textContent = data.condition || 'Partly Cloudy';
+
+      const getEmoji = (cond) => {
+        const c = (cond || '').toLowerCase();
+        if (c.includes('rain') || c.includes('shower')) return '🌧️';
+        if (c.includes('cloud')) return '⛅';
+        if (c.includes('thunder')) return '⛈️';
+        if (c.includes('snow')) return '❄️';
+        return '☀️';
+      };
+
+      if (hourlyContainer && Array.isArray(data.hourly_forecast)) {
+        hourlyContainer.innerHTML = '';
+        data.hourly_forecast.forEach(h => {
+          const item = document.createElement('div');
+          item.className = 'hourly-item';
+          item.innerHTML = `
+            <span class="hourly-time">${h.time}</span>
+            <span class="hourly-emoji">${getEmoji(h.condition)}</span>
+            <span class="hourly-temp">${h.temp}°</span>
+          `;
+          hourlyContainer.appendChild(item);
+        });
+      }
+
+      if (dailyContainer && Array.isArray(data.daily_forecast)) {
+        dailyContainer.innerHTML = '';
+        data.daily_forecast.forEach(d => {
+          const row = document.createElement('div');
+          row.className = 'daily-row';
+          row.innerHTML = `
+            <div class="daily-day">${d.day}</div>
+            <div class="daily-row-middle">
+              <span class="daily-emoji">${getEmoji(d.condition)}</span>
+              <span class="daily-condition-lbl">${d.condition}</span>
+            </div>
+            <div class="daily-temp-range">${d.low} / ${d.high}</div>
+          `;
+          dailyContainer.appendChild(row);
+        });
+      }
+    };
+
+    safeApiFetch(`weather.php?place=${encodeURIComponent(trip || 'Goa')}`)
+      .then(res => {
+        if (res && res.current_temp) renderPageData(res);
+        else renderPageData(getFallbackWeatherData(trip));
+      })
+      .catch(() => {
+        renderPageData(getFallbackWeatherData(trip));
+      });
+  }
+
   // Hotels Overlay Core Integration
   function loadHotelsOverlay(trip) {
     const container = document.getElementById('hotels-overlay-list');
@@ -4480,6 +4750,13 @@ function initTravelBuddyApp() {
             <span class="hotel-price-val">₹${hotel.price} / night</span>
           </div>
           <div class="hotel-card-actions">
+            <button class="btn-hotel-map" title="Map & Directions" data-query="${encodeURIComponent(hotel.name + ' ' + (trip || ''))}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                <line x1="8" y1="2" x2="8" y2="18"></line>
+                <line x1="16" y1="6" x2="16" y2="22"></line>
+              </svg>
+            </button>
             <button class="btn-hotel-call" title="Call Hotel" data-phone="${hotel.contact}">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
@@ -4491,9 +4768,18 @@ function initTravelBuddyApp() {
       `;
 
       card.querySelector('.btn-hotel-call').addEventListener('click', (e) => {
-        const ph = e.currentTarget.getAttribute('data-phone');
+        const ph = e.currentTarget.getAttribute('data-phone') || hotel.contact;
         showToast(`Calling hotel partner: ${ph}`);
+        try { window.location.href = `tel:${ph.replace(/[^\d+]/g, '')}`; } catch(err) {}
       });
+
+      const mapBtn = card.querySelector('.btn-hotel-map');
+      if (mapBtn) {
+        mapBtn.addEventListener('click', (e) => {
+          const q = e.currentTarget.getAttribute('data-query');
+          window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
+        });
+      }
 
       // ── Open multi-step hotel booking modal ──
       card.querySelector('.btn-hotel-book').addEventListener('click', () => {
@@ -4818,11 +5104,24 @@ function initTravelBuddyApp() {
       })
       .catch(() => {
         renderOverlayData(getFallbackWeatherData(trip));
-      
+      });
+  }
+
   // ==========================================================================
   // Universal Back Action Manager for Web & Android
   // ==========================================================================
   window.handleUniversalBackAction = function() {
+    // 0. Hotel Booking Modal (step back or close)
+    const hotelModal = document.getElementById('hotel-booking-modal');
+    if (hotelModal && !hotelModal.classList.contains('hidden') && (hotelModal.classList.contains('visible') || hotelModal.style.display === 'flex')) {
+      if (_hotelBooking && _hotelBooking.currentStep > 1) {
+        _hotelGotoStep(_hotelBooking.currentStep - 1);
+      } else {
+        closeHotelBookingModal();
+      }
+      return true;
+    }
+
     // 1. Check open modals
     const openModals = [
       { id: 'location-picker-modal', close: () => window.closeLocationModal && window.closeLocationModal() },
@@ -4858,6 +5157,29 @@ function initTravelBuddyApp() {
     if (budgetSec && !budgetSec.classList.contains('hidden')) {
       if (typeof closeBudgetPage === 'function') closeBudgetPage();
       return true;
+    }
+
+    const hotelsSec = document.getElementById('hotels-section');
+    if (hotelsSec && !hotelsSec.classList.contains('hidden')) {
+      if (typeof closeHotelsPage === 'function') closeHotelsPage();
+      return true;
+    }
+
+    const weatherSec = document.getElementById('weather-section');
+    if (weatherSec && !weatherSec.classList.contains('hidden')) {
+      if (typeof closeWeatherPage === 'function') closeWeatherPage();
+      return true;
+    }
+
+    // Check open planning overlays
+    const overlays = ['hotels-overlay', 'weather-overlay', 'budget-overlay', 'tickets-overlay', 'buddy-plan-overlay', 'info-modal', 'privacy-modal'];
+    for (const ovId of overlays) {
+      const ov = document.getElementById(ovId);
+      if (ov && !ov.classList.contains('hidden') && (ov.classList.contains('visible') || ov.style.display === 'flex' || ov.style.display === 'block')) {
+        ov.classList.remove('visible');
+        ov.classList.add('hidden');
+        return true;
+      }
     }
 
     const tripDetailsSec = document.getElementById('trip-details-section');
@@ -4933,9 +5255,6 @@ function initTravelBuddyApp() {
   window.addEventListener('popstate', (e) => {
     window.handleUniversalBackAction();
   });
-
-});
-  }
 
   // Set default active traveler values in localStorage on first visit only
   if (!localStorage.getItem('ACTIVE_USER_NAME') && !sessionStorage.getItem('JUST_LOGGED_OUT')) {

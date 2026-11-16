@@ -2083,16 +2083,20 @@ function initTravelBuddyApp() {
     });
   }
 
-  // Navigation: Back to Dashboard
-  const btnCommBack = document.getElementById('btn-comm-back-id');
-  if (btnCommBack) {
-    btnCommBack.addEventListener('click', () => {
-      communitySection.classList.remove('visible');
-      communitySection.classList.add('hidden');
-      dashboardSection.classList.remove('hidden');
-      dashboardSection.classList.add('visible');
+  // Navigation: Back to Dashboard from Community
+  const btnCommBacks = document.querySelectorAll('.btn-comm-back, #btn-comm-back-id');
+  btnCommBacks.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (communitySection) {
+        communitySection.classList.remove('visible');
+        communitySection.classList.add('hidden');
+      }
+      if (dashboardSection) {
+        dashboardSection.classList.remove('hidden');
+        dashboardSection.classList.add('visible');
+      }
     });
-  }
+  });
 
   // Switcher Tabs Logic
   const tabExplore = document.getElementById('tab-explore');

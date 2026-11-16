@@ -37,9 +37,29 @@ class CommunityActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_community)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.rlToolbar)) { v, insets ->
+        val mainLayout = findViewById<View>(R.id.mainLayout)
+        val toolbar = findViewById<View>(R.id.rlToolbar)
+        val fab = findViewById<View>(R.id.fabCreatePost)
+        rvCommunityPosts = findViewById(R.id.rvCommunityPosts)
+
+        ViewCompat.setOnApplyWindowInsetsListener(mainLayout) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            toolbar.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+
+            val fabLp = fab.layoutParams as ViewGroup.MarginLayoutParams
+            val defaultFabMargin = (24 * resources.displayMetrics.density).toInt()
+            fabLp.bottomMargin = systemBars.bottom + defaultFabMargin
+            fabLp.rightMargin = systemBars.right + defaultFabMargin
+            fab.layoutParams = fabLp
+
+            val bottomPadding = systemBars.bottom + (96 * resources.displayMetrics.density).toInt()
+            rvCommunityPosts.setPadding(
+                rvCommunityPosts.paddingLeft,
+                rvCommunityPosts.paddingTop,
+                rvCommunityPosts.paddingRight,
+                bottomPadding
+            )
+
             insets
         }
 

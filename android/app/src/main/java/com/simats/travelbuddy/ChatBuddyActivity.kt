@@ -140,6 +140,18 @@ class ChatBuddyActivity : AppCompatActivity() {
             "info" -> {
                 showTravelInfoDialog()
             }
+            "friend_finder" -> {
+                startActivity(Intent(this, FriendFinderActivity::class.java))
+            }
+            "surprise_dest" -> {
+                startActivity(Intent(this, SurpriseDestinationActivity::class.java))
+            }
+            "language_guard" -> {
+                startActivity(Intent(this, LanguageBodyguardActivity::class.java))
+            }
+            "photo_spots" -> {
+                startActivity(Intent(this, PhotoSpotsActivity::class.java))
+            }
             "prompt" -> {
                 etMessage.setText(opt.param)
                 btnSend.performClick()

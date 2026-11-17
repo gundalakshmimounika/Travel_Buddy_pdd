@@ -170,6 +170,24 @@
         app:cornerRadius="20dp"
         app:layout_constraintTop_toBottomOf="@id/tvForgot" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGuest"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="12dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:text="Continue as Guest"
+        android:textAllCaps="false"
+        android:textColor="#CBD5E1"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:backgroundTint="@android:color/transparent"
+        app:strokeColor="#475569"
+        app:strokeWidth="1.5dp"
+        app:cornerRadius="20dp"
+        app:layout_constraintTop_toBottomOf="@id/btnSignIn" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

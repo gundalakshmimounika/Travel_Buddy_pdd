@@ -62,6 +62,27 @@ class SemanticRouterAgent {
             return $agent->handle($question);
         }
 
+        // Special Features Routing (Features 2, 4, 9, 13)
+        if (preg_match('/\b(photo|photography|camera|angle|picture|photos|photospot|golden hour|sunset spot|aesthetic)\b/i', $q)) {
+            $agent = new PhotoSpecialistAgent();
+            return $agent->handle($question, detectDestination($question, $userDest));
+        }
+
+        if (preg_match('/\b(language|translate|translation|tamil|hindi|french|dialect|etiquette|gesture|slang|phrase|speak)\b/i', $q)) {
+            $agent = new LanguageSpecialistAgent();
+            return $agent->handle($question, detectDestination($question, $userDest));
+        }
+
+        if (preg_match('/\b(friend|friends|lost|separated|group|beacon|sos|track|radar|reconnect)\b/i', $q)) {
+            $agent = new FriendFinderSpecialistAgent();
+            return $agent->handle($question);
+        }
+
+        if (preg_match('/\b(surprise|mystery|secret|unknown|countdown|reveal|getaway)\b/i', $q)) {
+            $agent = new SurpriseDestinationSpecialistAgent();
+            return $agent->handle($question);
+        }
+
         // 2. Detect Specific Domain Inquiries
         $hasBudget = $this->hasBudgetIntent($q) || !empty($userBudget);
         $hasHotel = $this->hasHotelIntent($q);
@@ -114,6 +135,26 @@ class SemanticRouterAgent {
         if ($hasDestinationInfo) {
             $agent = new DestinationSpecialistAgent();
             return $agent->handle($question, $dest, $budget, $days);
+        }
+
+        if (preg_match('/\b(photo|photography|camera|angle|picture|photos|photospot|golden hour|sunset spot|aesthetic)\b/i', $q)) {
+            $agent = new PhotoSpecialistAgent();
+            return $agent->handle($question, $dest);
+        }
+
+        if (preg_match('/\b(language|translate|translation|tamil|hindi|french|dialect|etiquette|gesture|slang|phrase|speak)\b/i', $q)) {
+            $agent = new LanguageSpecialistAgent();
+            return $agent->handle($question, $dest);
+        }
+
+        if (preg_match('/\b(friend|friends|lost|separated|group|beacon|sos|track|radar|reconnect)\b/i', $q)) {
+            $agent = new FriendFinderSpecialistAgent();
+            return $agent->handle($question);
+        }
+
+        if (preg_match('/\b(surprise|mystery|secret|unknown|countdown|reveal|getaway)\b/i', $q)) {
+            $agent = new SurpriseDestinationSpecialistAgent();
+            return $agent->handle($question);
         }
 
         // Default to Group Chat Coordinator for general travel questions
@@ -190,6 +231,9 @@ class GroupChatManager {
             ["label" => "🎒 Packing Checklist", "action" => "packing", "param" => $dest],
             ["label" => "🌤️ Live Weather", "action" => "weather", "param" => $dest],
             ["label" => "🎫 Book Tickets", "action" => "tickets", "param" => $dest],
+            ["label" => "📸 Photo Spots", "action" => "photo_spots", "param" => $dest],
+            ["label" => "🗣️ Language Guard", "action" => "language_guard", "param" => "tamil"],
+            ["label" => "👥 Friend Radar", "action" => "friend_finder", "param" => "radar"],
             ["label" => "📋 Copy Itinerary", "action" => "copy_itinerary", "param" => $dest]
         ];
 
@@ -603,6 +647,10 @@ class DefaultGreeterAgent {
         $options = [
             ["label" => "💰 Plan ₹6,000 Trip", "action" => "prompt", "param" => "my budget is 6k"],
             ["label" => "🏖️ Explore Goa 3-Day Trip", "action" => "prompt", "param" => "plan a 3-day trip to Goa"],
+            ["label" => "📸 Photo Spots", "action" => "photo_spots", "param" => "Mahabalipuram"],
+            ["label" => "🎁 Mystery Getaway", "action" => "surprise_dest", "param" => "mystery"],
+            ["label" => "🗣️ Language Guard", "action" => "language_guard", "param" => "tamil"],
+            ["label" => "👥 Friend Radar", "action" => "friend_finder", "param" => "radar"],
             ["label" => "🏨 Browse Top Hotels", "action" => "hotels", "param" => "Goa"],
             ["label" => "🎫 Book Tickets", "action" => "tickets", "param" => "Pondicherry"],
             ["label" => "ℹ️ Travel & Emergency Info", "action" => "info", "param" => "General Info"]
@@ -622,6 +670,162 @@ class DefaultGreeterAgent {
     }
 }
 
+
+
+// =========================================================================
+// 10. PHOTO SPECIALIST AGENT (Feature 13)
+// =========================================================================
+
+class PhotoSpecialistAgent {
+    public function handle($question, $dest) {
+        $dest = $dest ?: "Mahabalipuram";
+        $md = "📸 **AI Photo Spot & Lighting Specialist for {$dest}**\n\n"
+            . "Here are curated photography vantage points, optimal golden-hour times, and camera presets:\n\n"
+            . "• **Shore Temple Sunrise Arch** (Mahabalipuram)\n"
+            . "  - ⏰ Best Time: **6:00 AM - 6:45 AM (Golden Hour)**\n"
+            . "  - ☀️ Lighting: Low angle warm golden rays with ocean mist\n"
+            . "  - 👥 Crowd: Low at sunrise; peaceful reflections\n"
+            . "  - 📐 Framing: Low-angle wide (16-24mm) with the 7th-century granite spire against pastel skies\n"
+            . "  - ⚙️ Settings: `f/8.0, 1/320s, ISO 100`\n"
+            . "  - 💡 Pro Tip: Squat near the tidal pool on the eastern edge for mirror water reflections!\n\n"
+            . "• **French Quarter Pastel Bougainvillea Villa** (Pondicherry)\n"
+            . "  - ⏰ Best Time: **7:00 AM - 8:30 AM (Soft Morning Light)**\n"
+            . "  - ☀️ Lighting: Gentle directional sunlight without harsh midday shadows\n"
+            . "  - 📐 Framing: Eye-level horizontal symmetry framing mustard yellow walls & magenta flowers\n"
+            . "  - ⚙️ Settings: `f/4.0, 1/400s, ISO 100`\n"
+            . "  - 💡 Pro Tip: Wear white or linen attire for striking aesthetic contrast against colonial walls!\n\n"
+            . "Tap below to explore all photo spots with interactive maps and GPS directions.";
+
+        $options = [
+            ["label" => "📸 Explore Photo Spots", "action" => "photo_spots", "param" => $dest],
+            ["label" => "🗺️ View Locations on Map", "action" => "map", "param" => $dest],
+            ["label" => "🌤️ Live Weather & Lighting", "action" => "weather", "param" => $dest],
+            ["label" => "🏨 Stays Near Spots", "action" => "hotels", "param" => $dest]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "photo_specialist",
+            "agent_name" => "📸 AI Photo Spot Specialist",
+            "data" => ["destination" => $dest],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+}
+
+
+// =========================================================================
+// 11. LANGUAGE BODYGUARD SPECIALIST AGENT (Feature 9)
+// =========================================================================
+
+class LanguageSpecialistAgent {
+    public function handle($question, $dest) {
+        $md = "🗣️ **AI Language Bodyguard & Cultural Shield**\n\n"
+            . "Here are essential local survival phrases and cultural etiquette rules to keep you safe and respected:\n\n"
+            . "🚨 **Emergency & Safety Phrases:**\n"
+            . "• *Please help me!* -> **தயவுசெய்து எனக்கு உதவுங்கள்!** (Thayavu seidhu enakku udhavungal!)\n"
+            . "• *Where is the hospital?* -> **மருத்துவமனை எங்கே உள்ளது?** (Maruthuvamanai enge ulladhu?)\n\n"
+            . "🚕 **Transit & Bargaining:**\n"
+            . "• *How much to go there?* -> **அங்கு செல்ல எவ்வளவு கட்டணம்?** (Angu sella evvalavu kattanam?)\n"
+            . "• *Too expensive! Reduce a little* -> **ரொம்ப அதிகம்! கொஞ்சம் குறைக்கவும்** (Romba adhigam! Konjam kuraikkavum)\n\n"
+            . "🛡️ **Cultural Etiquette Shield:**\n"
+            . "• **✓ DO: Namaste / Vanakkam Greeting:** Fold hands at chest level with a slight head bow.\n"
+            . "• **✓ DO: Head Bobble Nuance:** Gentle side-to-side head tilt communicates 'Yes / Understood / Friendly'.\n"
+            . "• **✗ DON'T: Pointing Feet:** Never point the soles of your feet at deities, scriptures, or elders.\n"
+            . "• **✗ DON'T: Shoes in Temples:** Always remove footwear before entering sanctums.\n\n"
+            . "Tap below to launch audio TTS voice pronunciation and custom live translation.";
+
+        $options = [
+            ["label" => "🗣️ Open Language Guard (TTS)", "action" => "language_guard", "param" => "tamil"],
+            ["label" => "ℹ️ Cultural Etiquette Shield", "action" => "language_guard", "param" => "gestures"],
+            ["label" => "👥 Group Friend Radar", "action" => "friend_finder", "param" => "radar"]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "language_specialist",
+            "agent_name" => "🗣️ AI Language Bodyguard",
+            "data" => ["language" => "tamil"],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+}
+
+
+// =========================================================================
+// 12. FRIEND FINDER SPECIALIST AGENT (Feature 2)
+// =========================================================================
+
+class FriendFinderSpecialistAgent {
+    public function handle($question) {
+        $md = "👥 **Lost Friend Finder & Group Radar Assistant**\n\n"
+            . "Your live travel group beacon and safety radar is active:\n\n"
+            . "• **Current Status:** 4 Members Tracked (Rendezvous: Main Beach Plaza Arch)\n"
+            . "• **Bhuma (You):** Online & Broadcasting GPS Beacon\n"
+            . "• **Rohan Verma:** 120m North (Bearing 015° N) • Battery 68%\n"
+            . "• **Sneha Patel:** 450m South-East (Near East Temple Gate) • Battery 24%\n"
+            . "• **Ananya Sharma:** 280m West • Battery 81%\n\n"
+            . "🚨 **Emergency SOS:** In case anyone gets separated or requires immediate assistance, tap **Send SOS** to instantly broadcast high-priority alarms and coordinates to all members.";
+
+        $options = [
+            ["label" => "👥 Open Friend Finder Radar", "action" => "friend_finder", "param" => "radar"],
+            ["label" => "🚨 Broadcast SOS Beacon", "action" => "friend_finder", "param" => "sos"],
+            ["label" => "🗺️ Rendezvous on Map", "action" => "map", "param" => "Mahabalipuram Beach Plaza"]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "friend_finder_specialist",
+            "agent_name" => "👥 Friend Finder Specialist",
+            "data" => ["active_members" => 4],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+}
+
+
+// =========================================================================
+// 13. SURPRISE DESTINATION SPECIALIST AGENT (Feature 4)
+// =========================================================================
+
+class SurpriseDestinationSpecialistAgent {
+    public function handle($question) {
+        $md = "🎁 **Surprise Destination & Mystery Vault Concierge**\n\n"
+            . "Your mystery getaway package is securely locked in the vault:\n\n"
+            . "• **Operation Code Name:** Golden Shore\n"
+            . "• **Vibe:** Tropical Coastal & 7th-Century Monolithic Heritage\n"
+            . "• **Budget Tier:** ₹8,000 - ₹14,000 for weekend getaway\n"
+            . "• **Auto-Reveal Countdown:** Active (T-minus 2 days to departure)\n\n"
+            . "🔓 **Progressive Clues Unlocked:**\n"
+            . "1. *Climate:* Warm coastal breeze (26°C - 31°C) with dawn sea fog.\n"
+            . "2. *Packing Hint:* Breathable cotton linen shirts, flip-flops & polarized sunglasses.\n"
+            . "3. *Gastronomy:* Fresh banana-leaf grilled catch & sweet tender coconuts.\n"
+            . "4. *Landmark:* Ancient granite monoliths carved directly out of coastal boulders.\n\n"
+            . "Tap below to scratch and reveal the secret destination instantly!";
+
+        $options = [
+            ["label" => "🎁 Open Mystery Vault & Scratch Reveal", "action" => "surprise_dest", "param" => "mystery"],
+            ["label" => "🎒 Smart Packing Checklist", "action" => "packing", "param" => "Mahabalipuram"],
+            ["label" => "💰 Budget Tracker", "action" => "budget", "param" => "8000"]
+        ];
+
+        return [
+            "status" => "success",
+            "agent_type" => "surprise_specialist",
+            "agent_name" => "🎁 Mystery Vault Concierge",
+            "data" => ["package" => "Operation: Golden Shore"],
+            "answer" => $md,
+            "reply" => $md,
+            "options" => $options
+        ];
+    }
+}
 
 // =========================================================================
 // HELPER FUNCTIONS & CATALOG

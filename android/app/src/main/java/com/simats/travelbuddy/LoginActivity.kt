@@ -39,6 +39,18 @@ class LoginActivity : AppCompatActivity() {
             finish()
         }
 
+        findViewById<MaterialButton>(R.id.btnGuest)?.setOnClickListener {
+            val sharedPreferences = getSharedPreferences("TravelBuddyPrefs", Context.MODE_PRIVATE)
+            sharedPreferences.edit().apply {
+                putString("ACTIVE_EMAIL", "guest@travelbuddy.com")
+                putString("ACTIVE_USER_NAME", "Traveler")
+                apply()
+            }
+            Toast.makeText(this@LoginActivity, "Welcome, Traveler!", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+            finish()
+        }
+
         tvForgot.setOnClickListener {
             startActivity(Intent(this, ForgotActivity::class.java))
         }

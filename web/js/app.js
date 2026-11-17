@@ -1859,6 +1859,18 @@ function initTravelBuddyApp() {
           }
         } else if (act === 'info') {
           showTravelInfoModal(param || 'Travel & Emergency Info');
+        } else if (act === 'friend_finder') {
+          closeDrawer();
+          if (typeof window.openFriendFinderPage === 'function') window.openFriendFinderPage();
+        } else if (act === 'surprise_dest') {
+          closeDrawer();
+          if (typeof window.openSurpriseDestPage === 'function') window.openSurpriseDestPage();
+        } else if (act === 'language_guard') {
+          closeDrawer();
+          if (typeof window.openLanguageBodyguardPage === 'function') window.openLanguageBodyguardPage();
+        } else if (act === 'photo_spots') {
+          closeDrawer();
+          if (typeof window.openPhotoSpotsPage === 'function') window.openPhotoSpotsPage();
         } else if (act === 'prompt') {
           if (chatInput) {
             chatInput.value = param;

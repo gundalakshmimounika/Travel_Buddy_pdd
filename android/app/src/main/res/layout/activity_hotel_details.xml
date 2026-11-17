@@ -35,13 +35,16 @@
 
                 <ImageView
                     android:id="@+id/ivBack"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:layout_margin="16dp"
-                    android:padding="8dp"
+                    android:padding="10dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Back"
                     android:background="@drawable/bg_icon_squircle"
                     android:backgroundTint="#80000000"
-                    android:src="@drawable/abc_ic_ab_back_material"
+                    android:src="@drawable/ic_back"
                     app:tint="@color/white" />
             </RelativeLayout>
 

@@ -37,11 +37,12 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_search)
+
         findViewById<android.widget.ImageView>(R.id.ivBack)?.setOnClickListener {
             finish()
         }
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_search)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.scrollView)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

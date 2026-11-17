@@ -1,4 +1,6 @@
 package com.simats.travelbuddy
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,6 +27,12 @@ class BudgetTrackerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_budget_tracker)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.rlHeader)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
 
         tripTitle = intent.getStringExtra("TRIP_TITLE") ?: "General"
         

@@ -1,4 +1,7 @@
 package com.simats.travelbuddy
+import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 import android.content.Intent
 import android.os.Bundle
@@ -27,6 +30,15 @@ class HotelDetailsActivity : AppCompatActivity(), PaymentResultListener {
         enableEdgeToEdge()
         setContentView(R.layout.activity_hotel_details)
 
+        val ivBack = findViewById<View>(R.id.ivBack)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val lp = ivBack.layoutParams as ViewGroup.MarginLayoutParams
+            lp.topMargin = systemBars.top + (16 * resources.displayMetrics.density).toInt()
+            ivBack.layoutParams = lp
+            insets
+        }
+
         hotelName = intent.getStringExtra("HOTEL_NAME") ?: "Hotel"
         val desc = intent.getStringExtra("HOTEL_DESC") ?: ""
         
@@ -36,7 +48,7 @@ class HotelDetailsActivity : AppCompatActivity(), PaymentResultListener {
         findViewById<TextView>(R.id.tvHotelName).text = hotelName
         findViewById<TextView>(R.id.tvHotelDescription).text = desc
 
-        findViewById<View>(R.id.ivBack).setOnClickListener { finish() }
+        ivBack.setOnClickListener { finish() }
 
         setupDatePickers()
         setupBookingLogic()

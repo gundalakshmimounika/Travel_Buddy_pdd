@@ -1,4 +1,6 @@
 package com.simats.travelbuddy
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 import android.content.Intent
 import android.os.Bundle
@@ -26,6 +28,12 @@ class HotelBookingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_hotel_booking)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.rlToolbar)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
 
         destination = intent.getStringExtra("DESTINATION") ?: "Ooty"
         findViewById<TextView>(R.id.tvHotelHeader).text = "Hotels in $destination"

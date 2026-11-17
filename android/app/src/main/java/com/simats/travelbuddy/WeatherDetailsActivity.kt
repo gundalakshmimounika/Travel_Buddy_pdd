@@ -1,4 +1,6 @@
 package com.simats.travelbuddy
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,6 +27,12 @@ class WeatherDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_weather_details)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.rlHeader)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            insets
+        }
 
         val destination = intent.getStringExtra("DESTINATION") ?: "Mahabalipuram"
         findViewById<TextView>(R.id.tvWeatherHeader).text = "Weather in $destination"

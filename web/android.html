@@ -366,6 +366,56 @@
           </div>
         </div>
 
+      
+        <!-- AI Smart Travel Suites -->
+        <div class="ai-suites-section" style="margin-top: 26px;">
+          <div class="ai-suites-header" style="margin-bottom: 12px;">
+            <h3 style="font-size: 19px; font-weight: 800; color: #fff; margin: 0 0 4px;">AI Smart Travel Suites</h3>
+            <p style="font-size: 13px; color: #94A3B8; margin: 0;">Real-time group rescue, mystery getaways, translation &amp; photo spots</p>
+          </div>
+          <div class="ai-suites-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+            <!-- 2. Lost Friend Finder -->
+            <div class="ai-suite-card" id="cvFriendFinder" role="button" tabindex="0" style="background:#1E293B; border:1px solid #334155; border-radius:18px; padding:16px; cursor:pointer; display:flex; flex-direction:column; gap:8px; transition:transform 0.2s, border-color 0.2s;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="background:#0284C7; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px;">👥</div>
+                <span style="font-size:10px; font-weight:800; background:rgba(2,132,199,0.2); color:#38BDF8; padding:3px 8px; border-radius:6px;">LIVE RADAR</span>
+              </div>
+              <h4 style="font-size:16px; font-weight:700; color:#fff; margin:4px 0 0;">Friend Finder</h4>
+              <p style="font-size:12px; color:#94A3B8; margin:0;">GPS distance, bearing &amp; emergency SOS</p>
+            </div>
+
+            <!-- 4. Surprise Destination -->
+            <div class="ai-suite-card" id="cvSurpriseDest" role="button" tabindex="0" style="background:#1E293B; border:1px solid #334155; border-radius:18px; padding:16px; cursor:pointer; display:flex; flex-direction:column; gap:8px; transition:transform 0.2s, border-color 0.2s;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="background:#8B5CF6; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px;">🎁</div>
+                <span style="font-size:10px; font-weight:800; background:rgba(139,92,246,0.2); color:#C084FC; padding:3px 8px; border-radius:6px;">MYSTERY VAULT</span>
+              </div>
+              <h4 style="font-size:16px; font-weight:700; color:#fff; margin:4px 0 0;">Surprise Reveal</h4>
+              <p style="font-size:12px; color:#94A3B8; margin:0;">Secret countdown, hints &amp; scratch reveal</p>
+            </div>
+
+            <!-- 9. AI Language Bodyguard -->
+            <div class="ai-suite-card" id="cvLanguageBodyguard" role="button" tabindex="0" style="background:#1E293B; border:1px solid #334155; border-radius:18px; padding:16px; cursor:pointer; display:flex; flex-direction:column; gap:8px; transition:transform 0.2s, border-color 0.2s;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="background:#059669; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px;">🗣️</div>
+                <span style="font-size:10px; font-weight:800; background:rgba(5,150,105,0.2); color:#6EE7B7; padding:3px 8px; border-radius:6px;">TTS VOICE</span>
+              </div>
+              <h4 style="font-size:16px; font-weight:700; color:#fff; margin:4px 0 0;">Language Guard</h4>
+              <p style="font-size:12px; color:#94A3B8; margin:0;">Local dialects, speech TTS &amp; gesture shield</p>
+            </div>
+
+            <!-- 13. AI Photo Spot Finder -->
+            <div class="ai-suite-card" id="cvPhotoSpots" role="button" tabindex="0" style="background:#1E293B; border:1px solid #334155; border-radius:18px; padding:16px; cursor:pointer; display:flex; flex-direction:column; gap:8px; transition:transform 0.2s, border-color 0.2s;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="background:#D97706; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px;">📸</div>
+                <span style="font-size:10px; font-weight:800; background:rgba(217,119,6,0.2); color:#FCD34D; padding:3px 8px; border-radius:6px;">PRO ANGLES</span>
+              </div>
+              <h4 style="font-size:16px; font-weight:700; color:#fff; margin:4px 0 0;">Photo Spots</h4>
+              <p style="font-size:12px; color:#94A3B8; margin:0;">Golden hour times, crowd meter &amp; presets</p>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Scrollable Dashboard Content (Trips Tab) -->
@@ -1348,6 +1398,216 @@
         </div>
       </div>
     </section>
+
+    <!-- ==========================================
+         FEATURE 2: LOST FRIEND FINDER SECTION
+         ========================================== -->
+    <section id="friend-finder-section" class="fullscreen-planning-page hidden">
+      <header class="fsp-toolbar">
+        <button class="fsp-back-btn" id="btn-friend-finder-back" aria-label="Go Back">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+        <h1 class="fsp-title">Lost Friend Finder</h1>
+        <div class="fsp-toolbar-spacer"></div>
+      </header>
+      <div class="fsp-body" style="padding: 16px 20px 40px;">
+        <!-- Header Info Card -->
+        <div class="ai-banner-card" style="background:#1E293B; border:1px solid #334155; border-radius:18px; padding:18px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span style="font-size:17px; font-weight:800; color:#38BDF8;">👥 Live Group Radar &amp; SOS Beacon</span>
+              <p style="font-size:13px; color:#94A3B8; margin:4px 0 0;">Real-time GPS distances, compass bearings &amp; rendezvous coordinates</p>
+            </div>
+            <button id="btnWebRefreshFinder" class="action-btn-sm" onclick="window.loadWebFriendFinder()" style="background:#0284C7; color:#fff; border:none; padding:8px 14px; border-radius:10px; font-weight:600; cursor:pointer;">🔄 Ping Radar</button>
+          </div>
+        </div>
+
+        <!-- Emergency SOS Broadcast Card -->
+        <div style="background:#2A1215; border:1px solid #EF4444; border-radius:18px; padding:18px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:11px; font-weight:800; background:#DC2626; color:#fff; padding:3px 8px; border-radius:6px;">EMERGENCY</span>
+              <h4 style="font-size:16px; font-weight:700; color:#fff; margin:0;">Separated or In Danger?</h4>
+            </div>
+            <p style="font-size:12px; color:#FCA5A5; margin:4px 0 0;">Instantly broadcasts your live GPS beacon &amp; alarm to all members</p>
+          </div>
+          <button id="btnWebBroadcastSos" onclick="window.sendWebFriendSos()" style="background:#DC2626; color:#fff; border:none; padding:10px 18px; border-radius:12px; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 4px 14px rgba(220,38,38,0.5);">🚨 Send SOS</button>
+        </div>
+
+        <!-- Meeting Point Beacon Card -->
+        <div style="background:#0F172A; border:1px solid #1E3A8A; border-radius:18px; padding:18px; margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <span style="font-size:11px; font-weight:800; color:#60A5FA; text-transform:uppercase;">Designated Rendezvous Point</span>
+              <h3 id="tvWebBeaconName" style="font-size:18px; font-weight:700; color:#fff; margin:4px 0;">Main Beach Plaza &amp; Monument Arch</h3>
+              <p id="tvWebBeaconDesc" style="font-size:13px; color:#CBD5E1; margin:0;">Under the clock tower opposite Beach Cafe. Free Wi-Fi hotspot.</p>
+              <span id="tvWebBeaconSetTime" style="font-size:11px; color:#64748B; margin-top:6px; display:block;">Active since: 10 mins ago</span>
+            </div>
+            <button id="btnWebNavigateBeacon" onclick="window.openBeaconDirections()" style="background:#2563EB; color:#fff; border:none; padding:10px 16px; border-radius:12px; font-weight:700; font-size:12px; cursor:pointer; white-space:nowrap;">📍 Navigate</button>
+          </div>
+        </div>
+
+        <!-- Group Members List Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="font-size:16px; font-weight:700; color:#fff; margin:0;">Group Members (Live Signals)</h3>
+          <span id="tvWebMembersCount" style="font-size:12px; color:#38BDF8;">4 Members Tracked</span>
+        </div>
+
+        <div id="web-friend-finder-list" style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         FEATURE 4: SURPRISE DESTINATION REVEAL
+         ========================================== -->
+    <section id="surprise-destination-section" class="fullscreen-planning-page hidden">
+      <header class="fsp-toolbar">
+        <button class="fsp-back-btn" id="btn-surprise-dest-back" aria-label="Go Back">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+        <h1 class="fsp-title">Surprise Destination Reveal</h1>
+        <div class="fsp-toolbar-spacer"></div>
+      </header>
+      <div class="fsp-body" style="padding: 16px 20px 40px;">
+        <!-- Secret Vault Status Card -->
+        <div style="background:linear-gradient(135deg, #1E1B4B, #0F172A); border:1px solid #6366F1; border-radius:20px; padding:22px; text-align:center; margin-bottom:20px; position:relative; overflow:hidden;">
+          <div style="font-size:11px; font-weight:800; color:#A5B4FC; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">🔒 Top Secret Mystery Vault</div>
+          <h2 id="tvWebMysteryCode" style="font-size:24px; font-weight:800; color:#fff; margin:0 0 6px;">Operation: Golden Shore</h2>
+          <p id="tvWebMysteryVibe" style="font-size:13px; color:#C7D2FE; margin:0 0 16px;">Vibe: Tropical Coastal &amp; Heritage  •  Tier: ₹8,000 - ₹14,000</p>
+          
+          <div style="background:rgba(0,0,0,0.4); border-radius:14px; padding:12px; margin-bottom:18px;">
+            <div style="font-size:11px; color:#94A3B8; margin-bottom:4px;">AUTO-REVEAL DEPARTURE TIMER</div>
+            <div id="tvWebMysteryCountdown" style="font-size:32px; font-weight:900; color:#38BDF8; font-family:monospace; letter-spacing:2px;">02d : 14h : 35m : 18s</div>
+          </div>
+
+          <button id="btnWebRevealNow" onclick="window.revealWebMystery()" style="background:linear-gradient(135deg, #7C3AED, #2563EB); color:#fff; border:none; padding:14px 26px; border-radius:14px; font-size:15px; font-weight:800; cursor:pointer; box-shadow:0 6px 20px rgba(124,58,237,0.5); transition:all 0.2s;">
+            ✨ Scratch &amp; Reveal Destination Now!
+          </button>
+        </div>
+
+        <!-- Revealed Destination Card (Hidden until revealed) -->
+        <div id="cardWebRevealed" class="hidden" style="background:#1E293B; border:2px solid #10B981; border-radius:20px; overflow:hidden; margin-bottom:22px; box-shadow:0 8px 30px rgba(16,185,129,0.3);">
+          <div style="position:relative; height:180px;">
+            <img id="imgWebRevealedHero" src="assets/img_mahabali.png" style="width:100%; height:100%; object-fit:cover;" alt="Revealed Destination">
+            <span style="position:absolute; top:12px; left:12px; background:#059669; color:#fff; font-size:11px; font-weight:800; padding:4px 10px; border-radius:6px;">🎉 UNLOCKED DESTINATION</span>
+          </div>
+          <div style="padding:18px;">
+            <h2 id="tvWebRevealedName" style="font-size:24px; font-weight:800; color:#fff; margin:0 0 4px;">Mahabalipuram, Tamil Nadu</h2>
+            <p id="tvWebRevealedTagline" style="font-size:14px; color:#38BDF8; font-weight:600; margin:0 0 12px;">7th-Century Monolithic Temples &amp; Serene Coastal Sunrises</p>
+            <div id="tvWebRevealedDetails" style="font-size:13px; color:#CBD5E1; line-height:1.6; margin-bottom:16px;"></div>
+            <button id="btnWebPlanRevealedTrip" onclick="window.openTripDetails('Mahabalipuram')" style="width:100%; background:#10B981; color:#fff; border:none; padding:12px; border-radius:12px; font-size:14px; font-weight:800; cursor:pointer;">
+              🚀 View Itinerary &amp; Start Planning
+            </button>
+          </div>
+        </div>
+
+        <!-- Progressive Clues Section -->
+        <div style="margin-bottom:12px;">
+          <h3 style="font-size:16px; font-weight:700; color:#fff; margin:0 0 4px;">Progressive Clues &amp; Packing Hints</h3>
+          <p style="font-size:12px; color:#94A3B8; margin:0;">Clues unlocked so you can pack without spoiling the surprise</p>
+        </div>
+
+        <div id="web-mystery-clues-list" style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Clues populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         FEATURE 9: AI LANGUAGE BODYGUARD
+         ========================================== -->
+    <section id="language-bodyguard-section" class="fullscreen-planning-page hidden">
+      <header class="fsp-toolbar">
+        <button class="fsp-back-btn" id="btn-language-bodyguard-back" aria-label="Go Back">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+        <h1 class="fsp-title">AI Language Bodyguard</h1>
+        <div class="fsp-toolbar-spacer"></div>
+      </header>
+      <div class="fsp-body" style="padding: 16px 20px 40px;">
+        <!-- Top Info and Language Tabs -->
+        <div style="background:#1E293B; border:1px solid #334155; border-radius:18px; padding:18px; margin-bottom:16px;">
+          <span style="font-size:17px; font-weight:800; color:#38BDF8;">🗣️ Local Survival &amp; Cultural Shield</span>
+          <p id="tvWebLangRegion" style="font-size:13px; color:#94A3B8; margin:4px 0 14px;">Tamil (தமிழ்) • Tamil Nadu, Mahabalipuram, Chennai, Ooty</p>
+          
+          <!-- Tabs -->
+          <div style="display:flex; gap:8px;">
+            <button id="btnWebLangTamil" class="web-lang-tab active" onclick="window.switchWebLanguage('tamil')" style="background:#0284C7; color:#fff; border:none; padding:8px 16px; border-radius:10px; font-weight:700; cursor:pointer;">Tamil</button>
+            <button id="btnWebLangHindi" class="web-lang-tab" onclick="window.switchWebLanguage('hindi')" style="background:#334155; color:#CBD5E1; border:none; padding:8px 16px; border-radius:10px; font-weight:700; cursor:pointer;">Hindi</button>
+            <button id="btnWebLangFrench" class="web-lang-tab" onclick="window.switchWebLanguage('french')" style="background:#334155; color:#CBD5E1; border:none; padding:8px 16px; border-radius:10px; font-weight:700; cursor:pointer;">French</button>
+          </div>
+        </div>
+
+        <!-- Live Instant Translator -->
+        <div style="background:#0F172A; border:1px solid #1E3A8A; border-radius:18px; padding:18px; margin-bottom:22px;">
+          <span style="font-size:15px; font-weight:700; color:#fff; display:block; margin-bottom:10px;">⚡ Live Instant Translator</span>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="inputWebTranslate" placeholder="Type phrase (e.g. Where is the beach?)..." style="flex:1; background:#1E293B; border:1px solid #334155; border-radius:12px; padding:10px 14px; color:#fff; font-size:13px; outline:none;">
+            <button id="btnWebTranslate" onclick="window.performWebTranslate()" style="background:#2563EB; color:#fff; border:none; padding:10px 18px; border-radius:12px; font-weight:700; font-size:13px; cursor:pointer;">Translate</button>
+          </div>
+          
+          <div id="boxWebTranslateResult" class="hidden" style="background:#1E293B; border-radius:12px; padding:14px; margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div id="tvWebTranslatedLocal" style="font-size:17px; font-weight:800; color:#38BDF8;"></div>
+              <div id="tvWebTranslatedPhonetic" style="font-size:13px; color:#CBD5E1; font-style:italic; margin-top:4px;"></div>
+            </div>
+            <button id="btnWebSpeakCustom" onclick="window.speakWebCurrentResult()" style="background:rgba(56,189,248,0.2); border:1px solid #38BDF8; color:#38BDF8; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:18px;">🔊</button>
+          </div>
+        </div>
+
+        <!-- Survival Phrases Section -->
+        <div style="margin-bottom:12px;">
+          <h3 style="font-size:17px; font-weight:800; color:#fff; margin:0 0 4px;">📖 Essential Survival Phrases</h3>
+          <p style="font-size:12px; color:#94A3B8; margin:0;">Tap speaker icon to listen to local pronunciation</p>
+        </div>
+        <div id="web-phrases-container" style="display:flex; flex-direction:column; gap:16px; margin-bottom:28px;"></div>
+
+        <!-- Cultural Etiquette & Gestures Section -->
+        <div style="margin-bottom:12px;">
+          <h3 style="font-size:17px; font-weight:800; color:#fff; margin:0 0 4px;">🛡️ Cultural Etiquette &amp; Gestures Shield</h3>
+          <p style="font-size:12px; color:#94A3B8; margin:0;">Essential customs, gestures &amp; taboo warnings</p>
+        </div>
+        <div id="web-gestures-container" style="display:flex; flex-direction:column; gap:12px;"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         FEATURE 13: AI PHOTO SPOT FINDER
+         ========================================== -->
+    <section id="photo-spots-section" class="fullscreen-planning-page hidden">
+      <header class="fsp-toolbar">
+        <button class="fsp-back-btn" id="btn-photo-spots-back" aria-label="Go Back">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+        <h1 class="fsp-title">AI Photo Spot Finder</h1>
+        <div class="fsp-toolbar-spacer"></div>
+      </header>
+      <div class="fsp-body" style="padding: 16px 20px 40px;">
+        <!-- Header Info Card -->
+        <div style="background:#1E293B; border:1px solid #334155; border-radius:18px; padding:18px; margin-bottom:16px;">
+          <span style="font-size:17px; font-weight:800; color:#F59E0B;">📸 Golden Hour &amp; Perfect Angles</span>
+          <p style="font-size:13px; color:#94A3B8; margin:4px 0 14px;">Curated locations, golden-hour lighting schedules, crowd forecasts &amp; framing angles</p>
+          
+          <!-- Filters -->
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button id="btnWebSpotAll" class="web-spot-chip active" onclick="window.filterWebPhotoSpots('All')" style="background:#F59E0B; color:#000; border:none; padding:8px 16px; border-radius:20px; font-weight:700; cursor:pointer;">All Spots</button>
+            <button id="btnWebSpotMahabali" class="web-spot-chip" onclick="window.filterWebPhotoSpots('Mahabalipuram')" style="background:#334155; color:#CBD5E1; border:none; padding:8px 16px; border-radius:20px; font-weight:700; cursor:pointer;">Mahabalipuram</button>
+            <button id="btnWebSpotPondy" class="web-spot-chip" onclick="window.filterWebPhotoSpots('Pondicherry')" style="background:#334155; color:#CBD5E1; border:none; padding:8px 16px; border-radius:20px; font-weight:700; cursor:pointer;">Pondicherry</button>
+            <button id="btnWebSpotOoty" class="web-spot-chip" onclick="window.filterWebPhotoSpots('Ooty')" style="background:#334155; color:#CBD5E1; border:none; padding:8px 16px; border-radius:20px; font-weight:700; cursor:pointer;">Ooty</button>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <h3 id="tvWebSpotsCount" style="font-size:16px; font-weight:700; color:#fff; margin:0;">Curated Locations</h3>
+        </div>
+
+        <!-- Spots Container -->
+        <div id="web-spots-container" style="display:flex; flex-direction:column; gap:20px;"></div>
+      </div>
+    </section>
+
 
 
     <!-- 5. Weather Overlay -->

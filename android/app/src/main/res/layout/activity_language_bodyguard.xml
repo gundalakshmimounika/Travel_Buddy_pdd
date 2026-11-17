@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0F172A">
+
+    <!-- Sticky Header Toolbar -->
+    <LinearLayout
+        android:id="@+id/rlToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1E293B"
+        android:elevation="6dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RelativeLayout
+            android:id="@+id/rlToolbarContent"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingHorizontal="16dp">
+
+            <ImageView
+                android:id="@+id/ivBack"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Back"
+                android:padding="10dp"
+                android:src="@drawable/ic_back"
+                app:tint="@color/white" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="12dp"
+                android:layout_toEndOf="@id/ivBack"
+                android:text="AI Language Bodyguard"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="40dp"
+        app:layout_constraintTop_toBottomOf="@id/rlToolbar"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Subtitle and Description Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#334155"
+                app:cardBackgroundColor="#1E293B">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🗣️ Local Survival &amp; Cultural Shield"
+                        android:textColor="#38BDF8"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvRegionInfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Real-time pronunciation, local slang decoding &amp; respectful cultural etiquette."
+                        android:textColor="#94A3B8"
+                        android:textSize="13sp" />
+
+                    <!-- Language Selector Tab Buttons -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="14dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnLangTamil"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            android:text="Tamil"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="10dp"
+                            android:backgroundTint="#0284C7"
+                            android:textColor="@color/white" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnLangHindi"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            android:text="Hindi"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="10dp"
+                            android:backgroundTint="#334155"
+                            android:textColor="#CBD5E1" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnLangFrench"
+                            android:layout_width="0dp"
+                            android:layout_height="40dp"
+                            android:layout_weight="1"
+                            android:text="French"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="10dp"
+                            android:backgroundTint="#334155"
+                            android:textColor="#CBD5E1" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Live AI Translator Input Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#1E3A8A"
+                app:cardBackgroundColor="#0F172A">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:background="#1E293B">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚡ Live Instant Translator"
+                        android:textColor="@color/white"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="10dp">
+
+                        <EditText
+                            android:id="@+id/etInputTranslate"
+                            android:layout_width="0dp"
+                            android:layout_height="46dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_input_field"
+                            android:hint="Type phrase (e.g. Where is the beach?)"
+                            android:textColor="@color/white"
+                            android:textColorHint="#64748B"
+                            android:textSize="13sp"
+                            android:paddingHorizontal="14dp"
+                            android:inputType="text" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnTranslate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="46dp"
+                            android:layout_marginStart="8dp"
+                            android:text="Translate"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:backgroundTint="#2563EB"
+                            android:textColor="@color/white"
+                            app:cornerRadius="12dp" />
+                    </LinearLayout>
+
+                    <!-- Translation Output Result (Initially Gone) -->
+                    <LinearLayout
+                        android:id="@+id/llTranslateResult"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="#0F172A"
+                        android:padding="14dp"
+                        android:layout_marginTop="12dp"
+                        android:visibility="gone">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:id="@+id/tvTranslatedLocal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_toStartOf="@id/ivSpeakResult"
+                                android:text="கடற்கரை எங்கே உள்ளது?"
+                                android:textColor="#38BDF8"
+                                android:textSize="17sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/ivSpeakResult"
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:padding="6dp"
+                                android:src="@drawable/ic_volume_up"
+                                app:tint="#38BDF8"
+                                android:background="?android:attr/selectableItemBackgroundBorderless"
+                                android:clickable="true"
+                                android:focusable="true" />
+                        </RelativeLayout>
+
+                        <TextView
+                            android:id="@+id/tvTranslatedPhonetic"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Pronounce: Kadarkarai enge ulladhu?"
+                            android:textColor="#E2E8F0"
+                            android:textSize="13sp"
+                            android:textStyle="italic" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Phrasebook Header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="📖 Essential Survival Phrases"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Tap the audio icon to speak aloud with accurate local accent"
+                android:textColor="#94A3B8"
+                android:textSize="12sp" />
+
+            <!-- Phrases Dynamic Container -->
+            <LinearLayout
+                android:id="@+id/llPhrasesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp" />
+
+            <!-- Cultural Etiquette &amp; Gestures Header -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="26dp"
+                android:text="🛡️ Cultural Etiquette &amp; Gestures Shield"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Local body language, customs &amp; taboo warnings to keep you safe and respected"
+                android:textColor="#94A3B8"
+                android:textSize="12sp" />
+
+            <!-- Gestures Container -->
+            <LinearLayout
+                android:id="@+id/llGesturesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="10dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

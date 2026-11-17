@@ -391,6 +391,18 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.cvAskBuddy).setOnClickListener {
             startActivity(Intent(this, ChatBuddyActivity::class.java))
         }
+        findViewById<View>(R.id.cvFriendFinder).setOnClickListener {
+            startActivity(Intent(this, FriendFinderActivity::class.java))
+        }
+        findViewById<View>(R.id.cvSurpriseDest).setOnClickListener {
+            startActivity(Intent(this, SurpriseDestinationActivity::class.java))
+        }
+        findViewById<View>(R.id.cvLanguageBodyguard).setOnClickListener {
+            startActivity(Intent(this, LanguageBodyguardActivity::class.java))
+        }
+        findViewById<View>(R.id.cvPhotoSpots).setOnClickListener {
+            startActivity(Intent(this, PhotoSpotsActivity::class.java))
+        }
         findViewById<View>(R.id.navSearch).setOnClickListener {
             startActivity(Intent(this, SearchActivity::class.java))
         }

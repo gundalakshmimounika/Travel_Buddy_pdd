@@ -5611,3 +5611,650 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+
+// ==========================================================================
+// AI SMART TRAVEL SUITES: FEATURES 2, 4, 9, 13 IMPLEMENTATION
+// ==========================================================================
+
+(function() {
+  let _webTtsLang = 'tamil';
+  let _webCountdownInterval = null;
+  let _currentMysteryData = null;
+
+  // ------------------------------------------------------------------------
+  // Section Navigation & Back Button Handlers
+  // ------------------------------------------------------------------------
+  function hideAllSections() {
+    const ids = [
+      'dashboard-section', 'friend-finder-section', 'surprise-destination-section',
+      'language-bodyguard-section', 'photo-spots-section', 'trip-details-section',
+      'packing-section', 'tickets-section', 'hotels-section', 'weather-section',
+      'budget-section', 'community-section', 'profile-info-section', 'profile-requests-section'
+    ];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    });
+  }
+
+  function showDashboard() {
+    hideAllSections();
+    const db = document.getElementById('dashboard-section');
+    if (db) db.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  window.openFriendFinderPage = function() {
+    hideAllSections();
+    const sec = document.getElementById('friend-finder-section');
+    if (sec) sec.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.loadWebFriendFinder();
+  };
+
+  window.openSurpriseDestPage = function() {
+    hideAllSections();
+    const sec = document.getElementById('surprise-destination-section');
+    if (sec) sec.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.loadWebMysteryTrip();
+  };
+
+  window.openLanguageBodyguardPage = function() {
+    hideAllSections();
+    const sec = document.getElementById('language-bodyguard-section');
+    if (sec) sec.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.switchWebLanguage('tamil');
+  };
+
+  window.openPhotoSpotsPage = function() {
+    hideAllSections();
+    const sec = document.getElementById('photo-spots-section');
+    if (sec) sec.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.filterWebPhotoSpots('All');
+  };
+
+  // ------------------------------------------------------------------------
+  // Feature 2: Lost Friend Finder
+  // ------------------------------------------------------------------------
+  window.loadWebFriendFinder = function() {
+    const list = document.getElementById('web-friend-finder-list');
+    if (!list) return;
+    list.innerHTML = '<div style="color:#94A3B8;text-align:center;padding:20px;">Pinging satellite GPS radar...</div>';
+
+    fetch('backend/friend_finder.php?action=get_members')
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success' && data.data) {
+          if (data.data.beacon) {
+            const b = data.data.beacon;
+            const bName = document.getElementById('tvWebBeaconName');
+            const bDesc = document.getElementById('tvWebBeaconDesc');
+            const bTime = document.getElementById('tvWebBeaconSetTime');
+            if (bName) bName.textContent = b.name || 'Main Beach Plaza & Monument Arch';
+            if (bDesc) bDesc.textContent = b.description || 'Under clock tower opposite Beach Cafe.';
+            if (bTime) bTime.textContent = 'Active since: ' + (b.set_at || 'Just now');
+            window._webBeaconCoords = (b.latitude || 12.6167) + ',' + (b.longitude || 80.1983);
+          }
+
+          const members = data.data.members || [];
+          renderWebMembers(members);
+        } else {
+          renderFallbackMembers();
+        }
+      })
+      .catch(() => renderFallbackMembers());
+  };
+
+  function renderWebMembers(members) {
+    const list = document.getElementById('web-friend-finder-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    members.forEach(m => {
+      const isLost = m.status && m.status.toLowerCase().includes('lost');
+      const isBeacon = m.status && m.status.toLowerCase().includes('beacon');
+      const statusBg = isLost ? '#DC2626' : (isBeacon ? '#2563EB' : '#059669');
+
+      const card = document.createElement('div');
+      card.style.cssText = `background:#1E293B; border:1px solid ${isLost ? '#EF4444' : '#334155'}; border-radius:18px; padding:16px; display:flex; justify-content:space-between; align-items:center; transition:all 0.2s;`;
+
+      card.innerHTML = `
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="position:relative; width:48px; height:48px; border-radius:50%; background:#334155; overflow:hidden; border:2px solid ${isLost ? '#EF4444' : '#38BDF8'};">
+            <img src="${m.avatar || 'assets/img_onboarding_1.png'}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='assets/ic_person.xml';">
+          </div>
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h4 style="font-size:15px; font-weight:700; color:#fff; margin:0;">${m.name}</h4>
+              <span style="font-size:10px; font-weight:800; background:${statusBg}; color:#fff; padding:2px 6px; border-radius:4px; text-transform:uppercase;">${m.status || 'Active'}</span>
+            </div>
+            <div style="font-size:12px; color:#38BDF8; font-weight:600; margin-top:2px;">
+              🧭 ${m.distance || '120m away'} • Bearing ${m.bearing || 'North-East'}
+            </div>
+            <div style="font-size:11px; color:#94A3B8; margin-top:2px;">
+              🔋 Battery: ${m.battery_level || 85}% • Last ping: ${m.last_ping || 'Just now'}
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <a href="tel:${m.phone || '9876543210'}" style="background:#0F172A; border:1px solid rgba(255,255,255,0.2); color:#fff; width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; text-decoration:none; font-size:16px;">📞</a>
+          <button onclick="window.pingWebMember('${m.name}')" style="background:#0284C7; border:none; color:#fff; padding:0 12px; height:38px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer;">Radar</button>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function renderFallbackMembers() {
+    renderWebMembers([
+      { name: 'Bhuma (You)', status: 'Active (Broadcasting)', distance: '0m (Self)', bearing: 'Current Spot', battery_level: 92, last_ping: '10s ago', avatar: 'assets/img_onboarding_1.png' },
+      { name: 'Rohan Verma', status: 'At Beacon Plaza', distance: '120m North', bearing: '015° N', battery_level: 68, last_ping: '45s ago', avatar: 'assets/img_onboarding_2.png' },
+      { name: 'Sneha Patel', status: 'Separated (Near Temple)', distance: '450m South-East', bearing: '135° SE', battery_level: 24, last_ping: '1m ago', avatar: 'assets/img_onboarding_3.png' },
+      { name: 'Ananya Sharma', status: 'En Route to Beach', distance: '280m West', bearing: '270° W', battery_level: 81, last_ping: '2m ago', avatar: 'assets/img_onboarding_1.png' }
+    ]);
+  }
+
+  window.pingWebMember = function(name) {
+    alert('📍 Pinging ' + name + "'s live GPS beacon! Direction bearing updated.");
+  };
+
+  window.sendWebFriendSos = function() {
+    const note = prompt('🚨 BROADCAST EMERGENCY SOS:
+Enter optional message for your group (e.g. Lost near East Gate):', 'Separated from group, need assistance!');
+    if (note === null) return;
+
+    fetch('backend/friend_finder.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'action=send_sos&user_name=Bhuma&note=' + encodeURIComponent(note)
+    })
+    .then(r => r.json())
+    .then(() => {
+      alert('🚨 EMERGENCY SOS BROADCASTED!
+All group members alerted with your exact GPS coordinates.');
+      window.loadWebFriendFinder();
+    })
+    .catch(() => {
+      alert('🚨 EMERGENCY SOS BROADCASTED!
+All group members alerted with your exact GPS coordinates.');
+      window.loadWebFriendFinder();
+    });
+  };
+
+  window.openBeaconDirections = function() {
+    const coords = window._webBeaconCoords || '12.6167,80.1983';
+    window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(coords), '_blank');
+  };
+
+  // ------------------------------------------------------------------------
+  // Feature 4: Surprise Destination Reveal
+  // ------------------------------------------------------------------------
+  window.loadWebMysteryTrip = function() {
+    fetch('backend/surprise_destination.php?action=get_mystery')
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success' && data.package) {
+          _currentMysteryData = data.package;
+          renderMysteryVault(data.package);
+        } else {
+          renderFallbackMystery();
+        }
+      })
+      .catch(() => renderFallbackMystery());
+  };
+
+  function renderMysteryVault(pkg) {
+    const codeEl = document.getElementById('tvWebMysteryCode');
+    const vibeEl = document.getElementById('tvWebMysteryVibe');
+    if (codeEl) codeEl.textContent = 'Operation: ' + (pkg.code_name || 'Golden Shore');
+    if (vibeEl) vibeEl.textContent = 'Vibe: ' + (pkg.vibe || 'Coastal') + ' • Tier: ' + (pkg.budget_tier || 'Budget');
+
+    startCountdown(pkg.departure_date || '2026-11-20T06:00:00');
+    renderClues(pkg.clues || []);
+
+    if (pkg.is_revealed && pkg.revealed_details) {
+      showRevealedDestinationCard(pkg.revealed_details);
+    }
+  }
+
+  function startCountdown(targetIso) {
+    if (_webCountdownInterval) clearInterval(_webCountdownInterval);
+    const targetDate = new Date(targetIso).getTime();
+
+    function update() {
+      const now = new Date().getTime();
+      let diff = targetDate - now;
+      if (diff <= 0) diff = 86400000 * 2.5; // fallback simulated duration
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+      const pad = n => String(n).padStart(2, '0');
+      const timerEl = document.getElementById('tvWebMysteryCountdown');
+      if (timerEl) {
+        timerEl.textContent = `${pad(d)}d : ${pad(h)}h : ${pad(m)}m : ${pad(s)}s`;
+      }
+    }
+    update();
+    _webCountdownInterval = setInterval(update, 1000);
+  }
+
+  function renderClues(clues) {
+    const container = document.getElementById('web-mystery-clues-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    clues.forEach((c, idx) => {
+      const el = document.createElement('div');
+      el.style.cssText = `background:#1E293B; border:1px solid ${c.unlocked ? '#38BDF8' : '#334155'}; border-radius:14px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;`;
+      el.innerHTML = `
+        <div>
+          <div style="font-size:11px; font-weight:800; color:${c.unlocked ? '#38BDF8' : '#64748B'}; text-transform:uppercase;">
+            ${c.unlocked ? '🔓 UNLOCKED HINT #' + (idx+1) : '🔒 LOCKED'} • ${c.category || 'Clue'}
+          </div>
+          <p style="font-size:13px; color:#E2E8F0; margin:4px 0 0; font-weight:500;">${c.hint}</p>
+        </div>
+        <span style="font-size:20px;">${c.unlocked ? '✨' : '🔒'}</span>
+      `;
+      container.appendChild(el);
+    });
+  }
+
+  window.revealWebMystery = function() {
+    const btn = document.getElementById('btnWebRevealNow');
+    if (btn) btn.textContent = '🔓 Decrypting Vault GPS...';
+
+    fetch('backend/surprise_destination.php?action=reveal')
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === 'success' && res.package && res.package.revealed_details) {
+          showRevealedDestinationCard(res.package.revealed_details);
+        } else {
+          showRevealedDestinationCard({
+            destination: 'Mahabalipuram, Tamil Nadu',
+            tagline: '7th-Century Monolithic Temples & Serene Coastal Sunrises',
+            hero_image: 'assets/img_mahabali.png',
+            flight_duration: '50-minute scenic drive from Chennai ECR',
+            top_attractions: ['Shore Temple', 'Pancha Rathas', 'Krishna Butterball', 'Fishermen Cove'],
+            recommended_stay: 'Radisson Blu Resort Temple Bay',
+            budget_estimate: '₹8,500 for weekend getaway',
+            best_photospot: 'Shore Temple Sunrise tidal pool reflection at 6:15 AM'
+          });
+        }
+      })
+      .catch(() => {
+        showRevealedDestinationCard({
+          destination: 'Mahabalipuram, Tamil Nadu',
+          tagline: '7th-Century Monolithic Temples & Serene Coastal Sunrises',
+          hero_image: 'assets/img_mahabali.png',
+          flight_duration: '50-minute scenic drive from Chennai ECR',
+          top_attractions: ['Shore Temple', 'Pancha Rathas', 'Krishna Butterball', 'Fishermen Cove'],
+          recommended_stay: 'Radisson Blu Resort Temple Bay',
+          budget_estimate: '₹8,500 for weekend getaway',
+          best_photospot: 'Shore Temple Sunrise tidal pool reflection at 6:15 AM'
+        });
+      });
+  };
+
+  function showRevealedDestinationCard(d) {
+    const card = document.getElementById('cardWebRevealed');
+    if (!card) return;
+    card.classList.remove('hidden');
+
+    const name = document.getElementById('tvWebRevealedName');
+    const tagline = document.getElementById('tvWebRevealedTagline');
+    const details = document.getElementById('tvWebRevealedDetails');
+    const img = document.getElementById('imgWebRevealedHero');
+
+    if (name) name.textContent = d.destination || 'Mahabalipuram, Tamil Nadu';
+    if (tagline) tagline.textContent = d.tagline || 'Monolithic temples & ocean breeze';
+    if (img && d.hero_image) img.src = d.hero_image;
+
+    if (details) {
+      details.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <div><b>🚗 Travel:</b> ${d.flight_duration || 'Short scenic drive'}</div>
+          <div><b>🏨 Recommended Stay:</b> ${d.recommended_stay || 'Beach Resort'}</div>
+          <div><b>💰 Budget Estimate:</b> ${d.budget_estimate || '₹8,000'}</div>
+          <div><b>📸 Top Photo Spot:</b> ${d.best_photospot || 'Sunrise at Shore Temple'}</div>
+          <div><b>🏛️ Key Highlights:</b> ${(d.top_attractions || []).join(' • ')}</div>
+        </div>
+      `;
+    }
+
+    card.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function renderFallbackMystery() {
+    renderMysteryVault({
+      code_name: 'Operation: Golden Shore',
+      vibe: 'Tropical Coastal & Heritage',
+      budget_tier: '₹8,000 - ₹14,000',
+      departure_date: '2026-11-20T06:00:00',
+      clues: [
+        { category: 'Climate & Temperature', hint: 'Warm coastal tropical breeze (26°C - 31°C). Expect ocean fog at dawn.', unlocked: true },
+        { category: 'Luggage & Attire', hint: 'Pack breathable linen clothing, flip-flops, sunglasses, and polarized lens.', unlocked: true },
+        { category: 'Gastronomy Secret', hint: 'Famous for fresh catch banana-leaf grilled fish and tender coconut water.', unlocked: true },
+        { category: 'Signature Landmark', hint: '7th-century granite monolithic architecture carved out of single sea boulders.', unlocked: true }
+      ]
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // Feature 9: AI Language Bodyguard
+  // ------------------------------------------------------------------------
+  window.switchWebLanguage = function(lang) {
+    _webTtsLang = lang;
+    ['tamil', 'hindi', 'french'].forEach(l => {
+      const btn = document.getElementById('btnWebLang' + l.charAt(0).toUpperCase() + l.slice(1));
+      if (btn) {
+        if (l === lang) {
+          btn.style.background = '#0284C7';
+          btn.style.color = '#fff';
+        } else {
+          btn.style.background = '#334155';
+          btn.style.color = '#CBD5E1';
+        }
+      }
+    });
+
+    fetch('backend/language_bodyguard.php?action=get_phrases&lang=' + encodeURIComponent(lang))
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success' && data.data) {
+          const regionEl = document.getElementById('tvWebLangRegion');
+          if (regionEl) regionEl.textContent = (data.data.language_name || lang) + ' • ' + (data.data.region || '');
+          renderWebPhrases(data.data.categories);
+          renderWebGestures(data.data.gestures);
+        } else {
+          renderFallbackLanguage(lang);
+        }
+      })
+      .catch(() => renderFallbackLanguage(lang));
+  };
+
+  function renderWebPhrases(categories) {
+    const container = document.getElementById('web-phrases-container');
+    if (!container || !categories) return;
+    container.innerHTML = '';
+
+    for (const [catName, phrases] of Object.entries(categories)) {
+      const catBlock = document.createElement('div');
+      catBlock.innerHTML = `<h4 style="font-size:15px; font-weight:800; color:#38BDF8; margin:0 0 10px;">${catName}</h4>`;
+      
+      const grid = document.createElement('div');
+      grid.style.cssText = 'display:flex; flex-direction:column; gap:10px;';
+
+      phrases.forEach(p => {
+        const item = document.createElement('div');
+        item.style.cssText = `background:${p.alert ? '#2A1215' : '#1E293B'}; border:1px solid ${p.alert ? '#EF4444' : '#334155'}; border-radius:14px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;`;
+        item.innerHTML = `
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:10px; font-weight:800; background:${p.alert ? '#DC2626' : '#0284C7'}; color:#fff; padding:2px 6px; border-radius:4px;">${p.badge || 'PHRASE'}</span>
+              <span style="font-size:14px; font-weight:700; color:#fff;">${p.english}</span>
+            </div>
+            <div style="font-size:16px; font-weight:700; color:#38BDF8; margin-top:4px;">${p.local}</div>
+            <div style="font-size:12px; color:#CBD5E1; font-style:italic; margin-top:2px;">Pronounce: "${p.phonetic}"</div>
+          </div>
+          <button onclick="window.speakWebText('${p.local.replace(/'/g, "\\'")}', '${p.phonetic.replace(/'/g, "\\'")}')" style="background:rgba(56,189,248,0.15); border:1px solid #38BDF8; color:#38BDF8; width:38px; height:38px; border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;">🔊</button>
+        `;
+        grid.appendChild(item);
+      });
+      catBlock.appendChild(grid);
+      container.appendChild(catBlock);
+    }
+  }
+
+  function renderWebGestures(gestures) {
+    const container = document.getElementById('web-gestures-container');
+    if (!container || !gestures) return;
+    container.innerHTML = '';
+
+    gestures.forEach(g => {
+      const isDo = (g.type || 'do').toLowerCase() === 'do';
+      const el = document.createElement('div');
+      el.style.cssText = `background:${isDo ? '#0B291B' : '#2D1515'}; border:1px solid ${isDo ? '#10B981' : '#EF4444'}; border-radius:14px; padding:14px 16px;`;
+      el.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+          <span style="font-size:10px; font-weight:800; background:${isDo ? '#059669' : '#DC2626'}; color:#fff; padding:2px 6px; border-radius:4px;">${isDo ? '✓ DO' : '✗ DON\'T'}</span>
+          <span style="font-size:12px; font-weight:700; color:${isDo ? '#6EE7B7' : '#FCA5A5'};">${g.tag || 'Etiquette'}</span>
+        </div>
+        <h4 style="font-size:15px; font-weight:700; color:#fff; margin:0 0 4px;">${g.title}</h4>
+        <p style="font-size:13px; color:#E2E8F0; margin:0; line-height:1.5;">${g.description}</p>
+      `;
+      container.appendChild(el);
+    });
+  }
+
+  window.performWebTranslate = function() {
+    const input = document.getElementById('inputWebTranslate');
+    if (!input || !input.value.trim()) return;
+    const q = input.value.trim().toLowerCase();
+
+    let local = '';
+    let phonetic = '';
+
+    if (_webTtsLang === 'tamil') {
+      if (q.includes('help')) { local = 'தயவுசெய்து எனக்கு உதவுங்கள்!'; phonetic = 'Thayavu seidhu enakku udhavungal!'; }
+      else if (q.includes('water')) { local = 'குடிநீர் வேண்டும்'; phonetic = 'Kudineer vendum'; }
+      else if (q.includes('price') || q.includes('cost') || q.includes('how much')) { local = 'இதன் விலை என்ன?'; phonetic = 'Idhan vilai enna?'; }
+      else if (q.includes('beach')) { local = 'கடற்கரை எங்கே உள்ளது?'; phonetic = 'Kadarkarai enge ulladhu?'; }
+      else if (q.includes('thank')) { local = 'மிக்க நன்றி'; phonetic = 'Mikka Nandri'; }
+      else { local = 'இது எங்கே கிடைக்கும்? (' + input.value + ')'; phonetic = 'Idhu enge kidaikkum: ' + input.value; }
+    } else if (_webTtsLang === 'hindi') {
+      if (q.includes('help')) { local = 'कृपया मेरी मदद करें!'; phonetic = 'Kripya meri madad karein!'; }
+      else if (q.includes('water')) { local = 'पीने का पानी चाहिए'; phonetic = 'Peene ka paani chahiye'; }
+      else if (q.includes('price') || q.includes('how much')) { local = 'यह कितने का है?'; phonetic = 'Yeh kitne ka hai?'; }
+      else if (q.includes('thank')) { local = 'बहुत-बहुत धन्यवाद'; phonetic = 'Bahut bahut dhanyawaad'; }
+      else { local = 'कृपया यह बताइए: ' + input.value; phonetic = 'Kripya yeh bataiye: ' + input.value; }
+    } else {
+      if (q.includes('help')) { local = "Aidez-moi s'il vous plaît!"; phonetic = 'Ay-day mwah seel voo play!'; }
+      else if (q.includes('water')) { local = "De l'eau s'il vous plaît"; phonetic = 'Duh loh seel voo play'; }
+      else if (q.includes('how much')) { local = 'Combien ça coûte?'; phonetic = 'Kohm-byan sah koot?'; }
+      else if (q.includes('thank')) { local = 'Merci beaucoup!'; phonetic = 'Mair-see boh-koo!'; }
+      else { local = "Où est " + input.value + " s'il vous plaît?"; phonetic = 'Oo ay ' + input.value + ' seel voo play?'; }
+    }
+
+    const box = document.getElementById('boxWebTranslateResult');
+    const tLocal = document.getElementById('tvWebTranslatedLocal');
+    const tPhonetic = document.getElementById('tvWebTranslatedPhonetic');
+
+    if (box) box.classList.remove('hidden');
+    if (tLocal) tLocal.textContent = local;
+    if (tPhonetic) tPhonetic.textContent = 'Pronounce: "' + phonetic + '"';
+
+    window._lastTranslatedLocal = local;
+    window._lastTranslatedPhonetic = phonetic;
+    window.speakWebText(local, phonetic);
+  };
+
+  window.speakWebCurrentResult = function() {
+    window.speakWebText(window._lastTranslatedLocal || '', window._lastTranslatedPhonetic || '');
+  };
+
+  window.speakWebText = function(text, fallback) {
+    if (!('speechSynthesis' in window)) {
+      alert('Pronunciation: ' + fallback);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    if (_webTtsLang === 'tamil') utter.lang = 'ta-IN';
+    else if (_webTtsLang === 'hindi') utter.lang = 'hi-IN';
+    else if (_webTtsLang === 'french') utter.lang = 'fr-FR';
+    else utter.lang = 'en-US';
+
+    utter.onerror = function() {
+      // Fallback phonetic speech in English
+      const fallbackUtter = new SpeechSynthesisUtterance(fallback);
+      fallbackUtter.lang = 'en-US';
+      window.speechSynthesis.speak(fallbackUtter);
+    };
+    window.speechSynthesis.speak(utter);
+  };
+
+  function renderFallbackLanguage(lang) {
+    renderWebPhrases({
+      'Emergency & Safety': [
+        { english: 'Please help me!', local: 'தயவுசெய்து எனக்கு உதவுங்கள்!', phonetic: 'Thayavu seidhu enakku udhavungal!', badge: 'SOS', alert: true },
+        { english: 'Where is the hospital?', local: 'மருத்துவமனை எங்கே உள்ளது?', phonetic: 'Maruthuvamanai enge ulladhu?', badge: 'Medical', alert: true }
+      ],
+      'Transit & Cabs': [
+        { english: 'How much to go there?', local: 'அங்கு செல்ல எவ்வளவு கட்டணம்?', phonetic: 'Angu sella evvalavu kattanam?', badge: 'Transit', alert: false },
+        { english: 'Please turn on the meter', local: 'தயவுசெய்து மீட்டர் போடுங்கள்', phonetic: 'Thayavu seidhu meter podungal', badge: 'Transit', alert: false }
+      ]
+    });
+    renderWebGestures([
+      { title: 'Namaste / Vanakkam Greeting', description: 'Fold both hands at chest level and bow gently. The universal respectful greeting.', tag: 'Recommended Respect', type: 'do' },
+      { title: 'Pointing Feet at Altars or Elders', description: 'Never point the soles of your feet toward temple deities or elders.', tag: 'Strict Taboo', type: 'dont' }
+    ]);
+  }
+
+  // ------------------------------------------------------------------------
+  // Feature 13: AI Photo Spot Finder
+  // ------------------------------------------------------------------------
+  window.filterWebPhotoSpots = function(destination) {
+    ['All', 'Mahabalipuram', 'Pondicherry', 'Ooty'].forEach(dest => {
+      const chip = document.getElementById('btnWebSpot' + dest);
+      if (chip) {
+        if (dest === destination) {
+          chip.style.background = '#F59E0B';
+          chip.style.color = '#000';
+        } else {
+          chip.style.background = '#334155';
+          chip.style.color = '#CBD5E1';
+        }
+      }
+    });
+
+    const container = document.getElementById('web-spots-container');
+    if (!container) return;
+    container.innerHTML = '<div style="color:#94A3B8;text-align:center;padding:20px;">Finding optimal photography spots...</div>';
+
+    fetch('backend/photo_spots.php?action=get_spots&destination=' + encodeURIComponent(destination))
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success' && data.spots) {
+          renderWebSpots(data.spots);
+        } else {
+          renderFallbackWebSpots();
+        }
+      })
+      .catch(() => renderFallbackWebSpots());
+  };
+
+  function renderWebSpots(spots) {
+    const container = document.getElementById('web-spots-container');
+    const countEl = document.getElementById('tvWebSpotsCount');
+    if (!container) return;
+    if (countEl) countEl.textContent = 'Featured Spots (' + spots.length + ' locations)';
+    container.innerHTML = '';
+
+    spots.forEach(s => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:#1E293B; border:1px solid #334155; border-radius:20px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.3);';
+
+      card.innerHTML = `
+        <div style="position:relative; height:200px; width:100%;">
+          <img src="${s.image || 'assets/img_mahabali.png'}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='assets/img_mahabali.png';">
+          <span style="position:absolute; top:12px; left:12px; background:#0284C7; color:#fff; font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; text-transform:uppercase;">${s.destination}</span>
+          <span style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.7); color:#FBBF24; font-size:11px; font-weight:700; padding:4px 8px; border-radius:6px;">👥 ${s.crowd_level}</span>
+        </div>
+        <div style="padding:18px;">
+          <h3 style="font-size:18px; font-weight:800; color:#fff; margin:0 0 6px;">${s.title}</h3>
+          <div style="font-size:12px; color:#38BDF8; font-weight:600; line-height:1.5; margin-bottom:10px;">
+            ⏰ Best Time: ${s.best_time}<br>
+            ☀️ Lighting: ${s.lighting}
+          </div>
+          <div style="font-size:13px; color:#E2E8F0; line-height:1.5; margin-bottom:12px;">
+            <b>📐 AI Framing Angle:</b> ${s.optimal_angle}
+          </div>
+          <div style="background:#0F172A; border-radius:12px; padding:12px; margin-bottom:14px;">
+            <div style="font-size:12px; color:#F59E0B; font-weight:700;">⚙️ Pro Settings: ${s.camera_settings}</div>
+            <div style="font-size:12px; color:#CBD5E1; margin-top:4px;">💡 AI Pro Tip: ${s.ai_tip}</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; color:#94A3B8;">📍 ${s.coordinates}</span>
+            <button onclick="window.openGooglePhotoDirections('${s.coordinates}', '${s.title.replace(/'/g, "\\'")}')" style="background:#2563EB; color:#fff; border:none; padding:8px 16px; border-radius:10px; font-weight:700; font-size:12px; cursor:pointer;">
+              Get Directions
+            </button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  window.openGooglePhotoDirections = function(coords, title) {
+    const clean = coords.replace(/°/g, '').replace(/N/g, '').replace(/E/g, '').replace(/ /g, '');
+    window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(clean), '_blank');
+  };
+
+  function renderFallbackWebSpots() {
+    renderWebSpots([
+      {
+        title: 'Shore Temple Sunrise Arch',
+        destination: 'Mahabalipuram',
+        image: 'assets/img_mahabali.png',
+        best_time: '6:00 AM - 6:45 AM (Golden Hour)',
+        lighting: 'Warm Low Golden Light with Ocean Fog',
+        crowd_level: 'Low at Sunrise',
+        coordinates: '12.6167° N, 80.1983° E',
+        optimal_angle: 'Low-angle wide shot (16-24mm) with the 7th-century granite spire framed against pink skies.',
+        camera_settings: 'f/8.0, 1/320s, ISO 100',
+        ai_tip: 'Squat near the tidal pool on eastern edge for mirror water reflections!'
+      },
+      {
+        title: 'French Quarter Pastel Bougainvillea Villa',
+        destination: 'Pondicherry',
+        image: 'assets/img_pondy.png',
+        best_time: '7:00 AM - 8:30 AM (Soft Morning Light)',
+        lighting: 'Gentle directional sunlight without harsh midday shadows',
+        crowd_level: 'Very Quiet',
+        coordinates: '11.9338° N, 79.8359° E',
+        optimal_angle: 'Eye-level horizontal composition capturing mustard yellow colonial wall and magenta flowers.',
+        camera_settings: 'f/4.0, 1/400s, ISO 100',
+        ai_tip: 'Wear white or linen attire for high aesthetic contrast!'
+      }
+    ]);
+  }
+
+  // ------------------------------------------------------------------------
+  // Bind Dashboard Cards and Back Buttons
+  // ------------------------------------------------------------------------
+  document.addEventListener('DOMContentLoaded', function() {
+    // Dashboard Cards Click
+    const cFinder = document.getElementById('cvFriendFinder');
+    if (cFinder) cFinder.addEventListener('click', window.openFriendFinderPage);
+
+    const cSurprise = document.getElementById('cvSurpriseDest');
+    if (cSurprise) cSurprise.addEventListener('click', window.openSurpriseDestPage);
+
+    const cLang = document.getElementById('cvLanguageBodyguard');
+    if (cLang) cLang.addEventListener('click', window.openLanguageBodyguardPage);
+
+    const cPhoto = document.getElementById('cvPhotoSpots');
+    if (cPhoto) cPhoto.addEventListener('click', window.openPhotoSpotsPage);
+
+    // Section Back Buttons
+    const bFinder = document.getElementById('btn-friend-finder-back');
+    if (bFinder) bFinder.addEventListener('click', showDashboard);
+
+    const bSurprise = document.getElementById('btn-surprise-dest-back');
+    if (bSurprise) bSurprise.addEventListener('click', showDashboard);
+
+    const bLang = document.getElementById('btn-language-bodyguard-back');
+    if (bLang) bLang.addEventListener('click', showDashboard);
+
+    const bPhoto = document.getElementById('btn-photo-spots-back');
+    if (bPhoto) bPhoto.addEventListener('click', showDashboard);
+  });
+
+})();

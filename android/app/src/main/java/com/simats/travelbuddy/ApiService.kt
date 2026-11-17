@@ -171,6 +171,36 @@ interface ApiService {
     fun deleteCommunityPost(
         @Field("id") id: Int
     ): Call<ApiResponse>
+
+    // 2. Lost Friend Finder
+    @GET("friend_finder.php?action=get_members")
+    fun getGroupMembers(): Call<FriendFinderResponse>
+
+    @FormUrlEncoded
+    @POST("friend_finder.php?action=send_sos")
+    fun sendFriendFinderSos(
+        @Field("user_name") userName: String,
+        @Field("note") note: String
+    ): Call<ApiResponse>
+
+    // 4. Surprise Destination Reveal
+    @GET("surprise_destination.php?action=get_mystery")
+    fun getMysteryTrip(): Call<SurpriseDestinationResponse>
+
+    @GET("surprise_destination.php?action=reveal")
+    fun revealMysteryTrip(): Call<SurpriseDestinationResponse>
+
+    // 9. AI Language Bodyguard
+    @GET("language_bodyguard.php?action=get_phrases")
+    fun getLanguagePhrases(
+        @Query("lang") lang: String
+    ): Call<LanguageBodyguardResponse>
+
+    // 13. AI Photo Spot Finder
+    @GET("photo_spots.php?action=get_spots")
+    fun getPhotoSpots(
+        @Query("destination") destination: String
+    ): Call<PhotoSpotsResponse>
 }
 
 data class TicketOption(
@@ -303,4 +333,133 @@ data class JoinRequestData(
 data class JoinRequestsResponse(
     val status: String,
     val data: List<JoinRequestData>?
+)
+
+
+// ==========================================
+// 2. Lost Friend Finder Models
+// ==========================================
+data class GroupMember(
+    val id: Int,
+    val name: String,
+    val email: String,
+    val status: String,
+    val status_text: String,
+    val distance: String,
+    val direction: String,
+    val lat: Double,
+    val lng: Double,
+    val battery: String,
+    val last_ping: String,
+    val is_me: Boolean
+)
+
+data class GroupBeacon(
+    val name: String,
+    val lat: Double,
+    val lng: Double,
+    val description: String,
+    val set_by: String,
+    val time_set: String
+)
+
+data class FriendFinderResponse(
+    val status: String,
+    val message: String?,
+    val members: List<GroupMember>?,
+    val beacon: GroupBeacon?
+)
+
+// ==========================================
+// 4. Surprise Destination Reveal Models
+// ==========================================
+data class MysteryClue(
+    val stage: Int,
+    val title: String,
+    val badge: String,
+    val hint: String,
+    val unlocked: Boolean
+)
+
+data class RevealedDetails(
+    val destination: String,
+    val tagline: String,
+    val hero_image: String,
+    val flight_duration: String,
+    val top_attractions: List<String>?,
+    val recommended_stay: String,
+    val budget_estimate: String,
+    val best_photospot: String
+)
+
+data class MysteryPackage(
+    val id: String,
+    val code_name: String,
+    val vibe: String,
+    val budget_tier: String,
+    val departure_date: String,
+    val is_revealed: Boolean,
+    val clues: List<MysteryClue>?,
+    val revealed_details: RevealedDetails?
+)
+
+data class SurpriseDestinationResponse(
+    val status: String,
+    @com.google.gson.annotations.SerializedName("package")
+    val packageData: MysteryPackage?
+)
+
+// ==========================================
+// 9. AI Language Bodyguard Models
+// ==========================================
+data class PhraseItem(
+    val english: String,
+    val local: String,
+    val phonetic: String,
+    val audio: String,
+    val badge: String,
+    val alert: Boolean
+)
+
+data class GestureItem(
+    val title: String,
+    val description: String,
+    val tag: String,
+    val type: String
+)
+
+data class LanguageData(
+    val language_name: String,
+    val region: String,
+    val categories: Map<String, List<PhraseItem>>?,
+    val gestures: List<GestureItem>?
+)
+
+data class LanguageBodyguardResponse(
+    val status: String,
+    val selected_language: String?,
+    val data: LanguageData?
+)
+
+// ==========================================
+// 13. AI Photo Spot Finder Models
+// ==========================================
+data class PhotoSpot(
+    val id: Int,
+    val title: String,
+    val destination: String,
+    val image: String,
+    val best_time: String,
+    val lighting: String,
+    val crowd_level: String,
+    val coordinates: String,
+    val optimal_angle: String,
+    val camera_settings: String,
+    val ai_tip: String
+)
+
+data class PhotoSpotsResponse(
+    val status: String,
+    val total: Int,
+    val spots: List<PhotoSpot>?
 )

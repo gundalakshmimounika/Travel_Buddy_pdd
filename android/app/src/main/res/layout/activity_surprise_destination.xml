@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0F172A">
+
+    <!-- Sticky Header Toolbar -->
+    <LinearLayout
+        android:id="@+id/rlToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#1E293B"
+        android:elevation="6dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RelativeLayout
+            android:id="@+id/rlToolbarContent"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingHorizontal="16dp">
+
+            <ImageView
+                android:id="@+id/ivBack"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Back"
+                android:padding="10dp"
+                android:src="@drawable/ic_back"
+                app:tint="@color/white" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="12dp"
+                android:layout_toEndOf="@id/ivBack"
+                android:text="Surprise Destination"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="40dp"
+        app:layout_constraintTop_toBottomOf="@id/rlToolbar"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Mystery Banner Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvMysteryBanner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:strokeColor="#8B5CF6"
+                app:strokeWidth="1.5dp"
+                app:cardBackgroundColor="#211A3E"
+                android:layout_marginBottom="18dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="🎁 Secret Journey Vault"
+                            android:textColor="#C4B5FD"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="#3B2667"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="4dp"
+                            android:text="LOCKED SECRET"
+                            android:textColor="#DDD6FE"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvCodeName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Operation Emerald Shores"
+                        android:textColor="@color/white"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:id="@+id/tvVibeBudget"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Vibe: Tropical Coastal &amp; Heritage  •  Tier: ₹8,000 - ₹14,000"
+                        android:textColor="#A78BFA"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Countdown Box -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#15112B"
+                        android:padding="14dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TIME REMAINING UNTIL JOURNEY REVEAL"
+                            android:textColor="#94A3B8"
+                            android:textSize="11sp"
+                            android:letterSpacing="0.05"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/tvCountdown"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="02d : 18h : 42m : 15s"
+                            android:textColor="#FACC15"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRevealNow"
+                        android:layout_width="match_parent"
+                        android:layout_height="54dp"
+                        android:text="✨ Scratch &amp; Reveal Destination Now!"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="#8B5CF6"
+                        app:cornerRadius="14dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Revealed Result Card (Hidden by default, shown upon reveal) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvRevealedCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="6dp"
+                app:strokeColor="#10B981"
+                app:strokeWidth="2dp"
+                app:cardBackgroundColor="#0D2B22"
+                android:layout_marginBottom="18dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎉 SURPRISE DESTINATION REVEALED!"
+                        android:textColor="#34D399"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:id="@+id/tvRevealedDestination"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Mahabalipuram, Tamil Nadu"
+                        android:textColor="@color/white"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/tvRevealedTagline"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="The Monolithic Shore Wonder of South India"
+                        android:textColor="#A7F3D0"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="14dp" />
+
+                    <TextView
+                        android:id="@+id/tvRevealedDetails"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#E2E8F0"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginBottom="16dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPlanTrip"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="View Full Itinerary &amp; Add to Trips"
+                        android:textColor="@color/white"
+                        app:backgroundTint="#059669"
+                        app:cornerRadius="12dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Progressive Clues Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Progressive Clues &amp; Packing Hints"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:id="@+id/llCluesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

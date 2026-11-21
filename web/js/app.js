@@ -5775,8 +5775,7 @@ document.head.appendChild(style);
   };
 
   window.sendWebFriendSos = function() {
-    const note = prompt('🚨 BROADCAST EMERGENCY SOS:
-Enter optional message for your group (e.g. Lost near East Gate):', 'Separated from group, need assistance!');
+    const note = prompt('🚨 BROADCAST EMERGENCY SOS:\nEnter optional message for your group (e.g. Lost near East Gate):', 'Separated from group, need assistance!');
     if (note === null) return;
 
     fetch('backend/friend_finder.php', {
@@ -5786,13 +5785,11 @@ Enter optional message for your group (e.g. Lost near East Gate):', 'Separated f
     })
     .then(r => r.json())
     .then(() => {
-      alert('🚨 EMERGENCY SOS BROADCASTED!
-All group members alerted with your exact GPS coordinates.');
+      alert('🚨 EMERGENCY SOS BROADCASTED!\nAll group members alerted with your exact GPS coordinates.');
       window.loadWebFriendFinder();
     })
     .catch(() => {
-      alert('🚨 EMERGENCY SOS BROADCASTED!
-All group members alerted with your exact GPS coordinates.');
+      alert('🚨 EMERGENCY SOS BROADCASTED!\nAll group members alerted with your exact GPS coordinates.');
       window.loadWebFriendFinder();
     });
   };

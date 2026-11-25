@@ -1,0 +1,356 @@
+Test Case ID,Module,Platform,Description,Status (Pass/Fail)
+TC_001,User Profile,Appium,Check user profile flow works seamlessly on Appium.,Pass
+TC_002,Hotel Booking,Appium,Validate hotel booking flow works seamlessly on Appium.,Pass
+TC_003,User Profile,Appium,Test user profile flow works seamlessly on Appium.,Pass
+TC_004,Packing List,Appium,Verify packing list flow works seamlessly on Appium.,Pass
+TC_005,User Profile,Appium,Validate user profile flow works seamlessly on Appium.,Pass
+TC_006,Payment Gateway,Appium,Test payment gateway flow works seamlessly on Appium.,Pass
+TC_007,Hotel Booking,Selenium,Validate hotel booking flow works seamlessly on Selenium.,Pass
+TC_008,Notifications,Selenium,Verify notifications flow works seamlessly on Selenium.,Pass
+TC_009,Trip Planning,Selenium,Check trip planning flow works seamlessly on Selenium.,Pass
+TC_010,Weather Updates,Appium,Validate weather updates flow works seamlessly on Appium.,Pass
+TC_011,Community Forum,Appium,Verify community forum flow works seamlessly on Appium.,Pass
+TC_012,Packing List,Appium,Check packing list flow works seamlessly on Appium.,Pass
+TC_013,Community Forum,Selenium,Verify community forum flow works seamlessly on Selenium.,Pass
+TC_014,Notifications,Appium,Ensure notifications flow works seamlessly on Appium.,Pass
+TC_015,User Profile,Selenium,Test user profile flow works seamlessly on Selenium.,Pass
+TC_016,Community Forum,Appium,Verify community forum flow works seamlessly on Appium.,Pass
+TC_017,Authentication,Appium,Check authentication flow works seamlessly on Appium.,Pass
+TC_018,User Profile,Appium,Verify user profile flow works seamlessly on Appium.,Pass
+TC_019,Packing List,Selenium,Ensure packing list flow works seamlessly on Selenium.,Pass
+TC_020,Community Forum,Appium,Check community forum flow works seamlessly on Appium.,Pass
+TC_021,Community Forum,Appium,Check community forum flow works seamlessly on Appium.,Pass
+TC_022,User Profile,Appium,Test user profile flow works seamlessly on Appium.,Pass
+TC_023,Hotel Booking,Appium,Ensure hotel booking flow works seamlessly on Appium.,Pass
+TC_024,Packing List,Selenium,Test packing list flow works seamlessly on Selenium.,Pass
+TC_025,Hotel Booking,Selenium,Verify hotel booking flow works seamlessly on Selenium.,Pass
+TC_026,Hotel Booking,Appium,Check hotel booking flow works seamlessly on Appium.,Pass
+TC_027,Packing List,Selenium,Verify packing list flow works seamlessly on Selenium.,Pass
+TC_028,Hotel Booking,Selenium,Validate hotel booking flow works seamlessly on Selenium.,Pass
+TC_029,Notifications,Selenium,Ensure notifications flow works seamlessly on Selenium.,Pass
+TC_030,Trip Planning,Selenium,Validate trip planning flow works seamlessly on Selenium.,Pass
+TC_031,Hotel Booking,Selenium,Test hotel booking flow works seamlessly on Selenium.,Pass
+TC_032,Packing List,Selenium,Check packing list flow works seamlessly on Selenium.,Pass
+TC_033,Hotel Booking,Appium,Test hotel booking flow works seamlessly on Appium.,Pass
+TC_034,Notifications,Appium,Verify notifications flow works seamlessly on Appium.,Pass
+TC_035,User Profile,Appium,Validate user profile flow works seamlessly on Appium.,Pass
+TC_036,Packing List,Appium,Ensure packing list flow works seamlessly on Appium.,Pass
+TC_037,Packing List,Selenium,Test packing list flow works seamlessly on Selenium.,Pass
+TC_038,Weather Updates,Appium,Verify weather updates flow works seamlessly on Appium.,Pass
+TC_039,Payment Gateway,Selenium,Check payment gateway flow works seamlessly on Selenium.,Pass
+TC_040,User Profile,Selenium,Ensure user profile flow works seamlessly on Selenium.,Pass
+TC_041,Trip Planning,Selenium,Verify trip planning flow works seamlessly on Selenium.,Pass
+TC_042,Weather Updates,Appium,Test weather updates flow works seamlessly on Appium.,Pass
+TC_043,User Profile,Selenium,Test user profile flow works seamlessly on Selenium.,Pass
+TC_044,Search Filters,Appium,Validate search filters flow works seamlessly on Appium.,Pass
+TC_045,Community Forum,Appium,Test community forum flow works seamlessly on Appium.,Pass
+TC_046,Payment Gateway,Appium,Test payment gateway flow works seamlessly on Appium.,Pass
+TC_047,Community Forum,Selenium,Verify community forum flow works seamlessly on Selenium.,Pass
+TC_048,User Profile,Selenium,Check user profile flow works seamlessly on Selenium.,Pass
+TC_049,Hotel Booking,Appium,Validate hotel booking flow works seamlessly on Appium.,Pass
+TC_050,Search Filters,Appium,Verify search filters flow works seamlessly on Appium.,Pass
+TC_051,Notifications,Appium,Test notifications flow works seamlessly on Appium.,Pass
+TC_052,Trip Planning,Appium,Ensure trip planning flow works seamlessly on Appium.,Pass
+TC_053,Payment Gateway,Appium,Check payment gateway flow works seamlessly on Appium.,Pass
+TC_054,Payment Gateway,Selenium,Validate payment gateway flow works seamlessly on Selenium.,Pass
+TC_055,Payment Gateway,Appium,Check payment gateway flow works seamlessly on Appium.,Pass
+TC_056,Packing List,Selenium,Ensure packing list flow works seamlessly on Selenium.,Pass
+TC_057,Payment Gateway,Selenium,Verify payment gateway flow works seamlessly on Selenium.,Pass
+TC_058,Hotel Booking,Appium,Verify hotel booking flow works seamlessly on Appium.,Pass
+TC_059,Community Forum,Appium,Test community forum flow works seamlessly on Appium.,Pass
+TC_060,Payment Gateway,Appium,Test payment gateway flow works seamlessly on Appium.,Pass
+TC_061,Hotel Booking,Appium,Verify hotel booking flow works seamlessly on Appium.,Pass
+TC_062,Authentication,Appium,Verify authentication flow works seamlessly on Appium.,Pass
+TC_063,Authentication,Selenium,Verify authentication flow works seamlessly on Selenium.,Pass
+TC_064,Payment Gateway,Appium,Check payment gateway flow works seamlessly on Appium.,Pass
+TC_065,Notifications,Appium,Test notifications flow works seamlessly on Appium.,Pass
+TC_066,Trip Planning,Selenium,Validate trip planning flow works seamlessly on Selenium.,Pass
+TC_067,Notifications,Selenium,Validate notifications flow works seamlessly on Selenium.,Pass
+TC_068,User Profile,Appium,Ensure user profile flow works seamlessly on Appium.,Pass
+TC_069,Community Forum,Selenium,Ensure community forum flow works seamlessly on Selenium.,Pass
+TC_070,Notifications,Appium,Verify notifications flow works seamlessly on Appium.,Pass
+TC_071,Authentication,Selenium,Check authentication flow works seamlessly on Selenium.,Pass
+TC_072,User Profile,Appium,Validate user profile flow works seamlessly on Appium.,Pass
+TC_073,Hotel Booking,Selenium,Validate hotel booking flow works seamlessly on Selenium.,Pass
+TC_074,Packing List,Appium,Check packing list flow works seamlessly on Appium.,Pass
+TC_075,Notifications,Appium,Verify notifications flow works seamlessly on Appium.,Pass
+TC_076,Notifications,Appium,Verify notifications flow works seamlessly on Appium.,Pass
+TC_077,Payment Gateway,Appium,Verify payment gateway flow works seamlessly on Appium.,Pass
+TC_078,Hotel Booking,Appium,Ensure hotel booking flow works seamlessly on Appium.,Pass
+TC_079,Notifications,Selenium,Validate notifications flow works seamlessly on Selenium.,Pass
+TC_080,Packing List,Appium,Validate packing list flow works seamlessly on Appium.,Pass
+TC_081,Packing List,Appium,Ensure packing list flow works seamlessly on Appium.,Pass
+TC_082,Weather Updates,Selenium,Check weather updates flow works seamlessly on Selenium.,Pass
+TC_083,Packing List,Selenium,Validate packing list flow works seamlessly on Selenium.,Pass
+TC_084,Hotel Booking,Selenium,Validate hotel booking flow works seamlessly on Selenium.,Pass
+TC_085,Authentication,Appium,Check authentication flow works seamlessly on Appium.,Pass
+TC_086,Authentication,Appium,Test authentication flow works seamlessly on Appium.,Pass
+TC_087,Notifications,Appium,Verify notifications flow works seamlessly on Appium.,Pass
+TC_088,Payment Gateway,Appium,Validate payment gateway flow works seamlessly on Appium.,Pass
+TC_089,User Profile,Appium,Validate user profile flow works seamlessly on Appium.,Pass
+TC_090,Packing List,Appium,Test packing list flow works seamlessly on Appium.,Pass
+TC_091,Hotel Booking,Appium,Test hotel booking flow works seamlessly on Appium.,Pass
+TC_092,User Profile,Selenium,Test user profile flow works seamlessly on Selenium.,Pass
+TC_093,Search Filters,Selenium,Check search filters flow works seamlessly on Selenium.,Pass
+TC_094,Hotel Booking,Selenium,Validate hotel booking flow works seamlessly on Selenium.,Pass
+TC_095,Weather Updates,Selenium,Validate weather updates flow works seamlessly on Selenium.,Pass
+TC_096,Weather Updates,Selenium,Check weather updates flow works seamlessly on Selenium.,Pass
+TC_097,User Profile,Appium,Ensure user profile flow works seamlessly on Appium.,Pass
+TC_098,Search Filters,Appium,Verify search filters flow works seamlessly on Appium.,Pass
+TC_099,Payment Gateway,Appium,Test payment gateway flow works seamlessly on Appium.,Pass
+TC_100,Weather Updates,Appium,Check weather updates flow works seamlessly on Appium.,Pass
+TC_101,User Profile,Appium,Check user profile flow works seamlessly on Appium.,Pass
+TC_102,Weather Updates,Appium,Ensure weather updates flow works seamlessly on Appium.,Pass
+TC_103,Payment Gateway,Selenium,Test payment gateway flow works seamlessly on Selenium.,Pass
+TC_104,Payment Gateway,Appium,Test payment gateway flow works seamlessly on Appium.,Pass
+TC_105,Weather Updates,Appium,Validate weather updates flow works seamlessly on Appium.,Pass
+TC_106,Weather Updates,Appium,Verify weather updates flow works seamlessly on Appium.,Pass
+TC_107,Payment Gateway,Appium,Check payment gateway flow works seamlessly on Appium.,Pass
+TC_108,Weather Updates,Appium,Check weather updates flow works seamlessly on Appium.,Pass
+TC_109,Hotel Booking,Selenium,Test hotel booking flow works seamlessly on Selenium.,Pass
+TC_110,Notifications,Selenium,Verify notifications flow works seamlessly on Selenium.,Pass
+TC_111,User Profile,Selenium,Check user profile flow works seamlessly on Selenium.,Pass
+TC_112,Authentication,Appium,Check authentication flow works seamlessly on Appium.,Pass
+TC_113,Trip Planning,Selenium,Validate trip planning flow works seamlessly on Selenium.,Pass
+TC_114,Notifications,Selenium,Test notifications flow works seamlessly on Selenium.,Pass
+TC_115,Authentication,Appium,Verify authentication flow works seamlessly on Appium.,Pass
+TC_116,Trip Planning,Appium,Check trip planning flow works seamlessly on Appium.,Pass
+TC_117,Search Filters,Appium,Ensure search filters flow works seamlessly on Appium.,Pass
+TC_118,Trip Planning,Appium,Check trip planning flow works seamlessly on Appium.,Pass
+TC_119,Community Forum,Appium,Check community forum flow works seamlessly on Appium.,Pass
+TC_120,Hotel Booking,Appium,Verify hotel booking flow works seamlessly on Appium.,Pass
+TC_121,Community Forum,Selenium,Test community forum flow works seamlessly on Selenium.,Pass
+TC_122,Trip Planning,Appium,Validate trip planning flow works seamlessly on Appium.,Pass
+TC_123,Trip Planning,Selenium,Verify trip planning flow works seamlessly on Selenium.,Pass
+TC_124,Trip Planning,Selenium,Ensure trip planning flow works seamlessly on Selenium.,Pass
+TC_125,Hotel Booking,Selenium,Validate hotel booking flow works seamlessly on Selenium.,Pass
+TC_126,User Profile,Selenium,Verify user profile flow works seamlessly on Selenium.,Pass
+TC_127,Notifications,Appium,Validate notifications flow works seamlessly on Appium.,Pass
+TC_128,Notifications,Selenium,Check notifications flow works seamlessly on Selenium.,Pass
+TC_129,Hotel Booking,Appium,Verify hotel booking flow works seamlessly on Appium.,Pass
+TC_130,Hotel Booking,Selenium,Check hotel booking flow works seamlessly on Selenium.,Pass
+TC_131,Weather Updates,Appium,Check weather updates flow works seamlessly on Appium.,Pass
+TC_132,Community Forum,Selenium,Test community forum flow works seamlessly on Selenium.,Pass
+TC_133,Community Forum,Appium,Verify community forum flow works seamlessly on Appium.,Pass
+TC_134,Weather Updates,Appium,Test weather updates flow works seamlessly on Appium.,Pass
+TC_135,Weather Updates,Appium,Verify weather updates flow works seamlessly on Appium.,Pass
+TC_136,Search Filters,Selenium,Check search filters flow works seamlessly on Selenium.,Pass
+TC_137,Community Forum,Selenium,Test community forum flow works seamlessly on Selenium.,Pass
+TC_138,Payment Gateway,Appium,Ensure payment gateway flow works seamlessly on Appium.,Pass
+TC_139,Search Filters,Appium,Check search filters flow works seamlessly on Appium.,Pass
+TC_140,Authentication,Selenium,Verify authentication flow works seamlessly on Selenium.,Pass
+TC_141,Payment Gateway,Appium,Check payment gateway flow works seamlessly on Appium.,Pass
+TC_142,Packing List,Appium,Check packing list flow works seamlessly on Appium.,Pass
+TC_143,Search Filters,Selenium,Verify search filters flow works seamlessly on Selenium.,Pass
+TC_144,Weather Updates,Selenium,Ensure weather updates flow works seamlessly on Selenium.,Pass
+TC_145,Community Forum,Selenium,Check community forum flow works seamlessly on Selenium.,Pass
+TC_146,Payment Gateway,Appium,Validate payment gateway flow works seamlessly on Appium.,Pass
+TC_147,Packing List,Selenium,Validate packing list flow works seamlessly on Selenium.,Pass
+TC_148,Search Filters,Selenium,Ensure search filters flow works seamlessly on Selenium.,Pass
+TC_149,Payment Gateway,Appium,Check payment gateway flow works seamlessly on Appium.,Pass
+TC_150,Weather Updates,Appium,Ensure weather updates flow works seamlessly on Appium.,Pass
+TC_151,Search Filters,Selenium,Ensure search filters flow works seamlessly on Selenium.,Pass
+TC_152,Notifications,Selenium,Validate notifications flow works seamlessly on Selenium.,Pass
+TC_153,Payment Gateway,Selenium,Validate payment gateway flow works seamlessly on Selenium.,Pass
+TC_154,User Profile,Selenium,Test user profile flow works seamlessly on Selenium.,Pass
+TC_155,Search Filters,Selenium,Verify search filters flow works seamlessly on Selenium.,Pass
+TC_156,Hotel Booking,Selenium,Validate hotel booking flow works seamlessly on Selenium.,Pass
+TC_157,Hotel Booking,Appium,Verify hotel booking flow works seamlessly on Appium.,Pass
+TC_158,Authentication,Appium,Ensure authentication flow works seamlessly on Appium.,Pass
+TC_159,Search Filters,Appium,Ensure search filters flow works seamlessly on Appium.,Pass
+TC_160,Packing List,Appium,Ensure packing list flow works seamlessly on Appium.,Pass
+TC_161,Notifications,Selenium,Validate notifications flow works seamlessly on Selenium.,Pass
+TC_162,Trip Planning,Appium,Verify trip planning flow works seamlessly on Appium.,Pass
+TC_163,Packing List,Appium,Validate packing list flow works seamlessly on Appium.,Pass
+TC_164,Payment Gateway,Selenium,Verify payment gateway flow works seamlessly on Selenium.,Pass
+TC_165,Payment Gateway,Appium,Verify payment gateway flow works seamlessly on Appium.,Pass
+TC_166,Notifications,Appium,Ensure notifications flow works seamlessly on Appium.,Pass
+TC_167,Payment Gateway,Selenium,Ensure payment gateway flow works seamlessly on Selenium.,Pass
+TC_168,Search Filters,Selenium,Test search filters flow works seamlessly on Selenium.,Pass
+TC_169,Notifications,Appium,Ensure notifications flow works seamlessly on Appium.,Pass
+TC_170,Notifications,Selenium,Validate notifications flow works seamlessly on Selenium.,Pass
+TC_171,Weather Updates,Selenium,Validate weather updates flow works seamlessly on Selenium.,Pass
+TC_172,Weather Updates,Selenium,Verify weather updates flow works seamlessly on Selenium.,Pass
+TC_173,Weather Updates,Appium,Check weather updates flow works seamlessly on Appium.,Pass
+TC_174,Community Forum,Selenium,Test community forum flow works seamlessly on Selenium.,Pass
+TC_175,User Profile,Appium,Validate user profile flow works seamlessly on Appium.,Pass
+TC_176,Hotel Booking,Selenium,Validate hotel booking flow works seamlessly on Selenium.,Pass
+TC_177,Hotel Booking,Appium,Ensure hotel booking flow works seamlessly on Appium.,Pass
+TC_178,Packing List,Selenium,Test packing list flow works seamlessly on Selenium.,Pass
+TC_179,Notifications,Selenium,Verify notifications flow works seamlessly on Selenium.,Pass
+TC_180,Hotel Booking,Selenium,Ensure hotel booking flow works seamlessly on Selenium.,Pass
+TC_181,Search Filters,Appium,Test search filters flow works seamlessly on Appium.,Pass
+TC_182,Packing List,Selenium,Verify packing list flow works seamlessly on Selenium.,Pass
+TC_183,Community Forum,Selenium,Ensure community forum flow works seamlessly on Selenium.,Pass
+TC_184,Packing List,Appium,Ensure packing list flow works seamlessly on Appium.,Pass
+TC_185,Hotel Booking,Selenium,Ensure hotel booking flow works seamlessly on Selenium.,Pass
+TC_186,Notifications,Appium,Ensure notifications flow works seamlessly on Appium.,Pass
+TC_187,Community Forum,Selenium,Validate community forum flow works seamlessly on Selenium.,Pass
+TC_188,Notifications,Appium,Test notifications flow works seamlessly on Appium.,Pass
+TC_189,Payment Gateway,Appium,Ensure payment gateway flow works seamlessly on Appium.,Pass
+TC_190,Search Filters,Appium,Verify search filters flow works seamlessly on Appium.,Pass
+TC_191,Packing List,Appium,Ensure packing list flow works seamlessly on Appium.,Pass
+TC_192,Trip Planning,Appium,Check trip planning flow works seamlessly on Appium.,Pass
+TC_193,Packing List,Selenium,Validate packing list flow works seamlessly on Selenium.,Pass
+TC_194,Notifications,Selenium,Check notifications flow works seamlessly on Selenium.,Pass
+TC_195,Packing List,Selenium,Ensure packing list flow works seamlessly on Selenium.,Pass
+TC_196,Weather Updates,Appium,Ensure weather updates flow works seamlessly on Appium.,Pass
+TC_197,Authentication,Appium,Check authentication flow works seamlessly on Appium.,Pass
+TC_198,Hotel Booking,Appium,Verify hotel booking flow works seamlessly on Appium.,Pass
+TC_199,Authentication,Appium,Validate authentication flow works seamlessly on Appium.,Pass
+TC_200,Authentication,Appium,Validate authentication flow works seamlessly on Appium.,Pass
+TC_201,Trip Planning,Selenium,Verify trip planning flow works seamlessly on Selenium.,Pass
+TC_202,Search Filters,Appium,Ensure search filters flow works seamlessly on Appium.,Pass
+TC_203,Weather Updates,Selenium,Validate weather updates flow works seamlessly on Selenium.,Pass
+TC_204,Search Filters,Appium,Validate search filters flow works seamlessly on Appium.,Pass
+TC_205,Weather Updates,Appium,Test weather updates flow works seamlessly on Appium.,Pass
+TC_206,Authentication,Selenium,Test authentication flow works seamlessly on Selenium.,Pass
+TC_207,Packing List,Selenium,Validate packing list flow works seamlessly on Selenium.,Pass
+TC_208,User Profile,Appium,Verify user profile flow works seamlessly on Appium.,Pass
+TC_209,Weather Updates,Appium,Test weather updates flow works seamlessly on Appium.,Pass
+TC_210,Authentication,Selenium,Test authentication flow works seamlessly on Selenium.,Pass
+TC_211,Packing List,Selenium,Verify packing list flow works seamlessly on Selenium.,Pass
+TC_212,Payment Gateway,Selenium,Verify payment gateway flow works seamlessly on Selenium.,Pass
+TC_213,Packing List,Selenium,Verify packing list flow works seamlessly on Selenium.,Pass
+TC_214,Packing List,Selenium,Ensure packing list flow works seamlessly on Selenium.,Pass
+TC_215,Trip Planning,Selenium,Validate trip planning flow works seamlessly on Selenium.,Pass
+TC_216,Payment Gateway,Selenium,Test payment gateway flow works seamlessly on Selenium.,Pass
+TC_217,Payment Gateway,Selenium,Ensure payment gateway flow works seamlessly on Selenium.,Pass
+TC_218,Packing List,Selenium,Check packing list flow works seamlessly on Selenium.,Pass
+TC_219,Hotel Booking,Appium,Check hotel booking flow works seamlessly on Appium.,Pass
+TC_220,Notifications,Appium,Ensure notifications flow works seamlessly on Appium.,Pass
+TC_221,Search Filters,Selenium,Check search filters flow works seamlessly on Selenium.,Pass
+TC_222,Authentication,Selenium,Check authentication flow works seamlessly on Selenium.,Pass
+TC_223,Trip Planning,Selenium,Validate trip planning flow works seamlessly on Selenium.,Pass
+TC_224,Community Forum,Selenium,Check community forum flow works seamlessly on Selenium.,Pass
+TC_225,Weather Updates,Selenium,Test weather updates flow works seamlessly on Selenium.,Pass
+TC_226,Authentication,Appium,Verify authentication flow works seamlessly on Appium.,Pass
+TC_227,Hotel Booking,Selenium,Ensure hotel booking flow works seamlessly on Selenium.,Pass
+TC_228,Payment Gateway,Appium,Ensure payment gateway flow works seamlessly on Appium.,Pass
+TC_229,Notifications,Selenium,Verify notifications flow works seamlessly on Selenium.,Pass
+TC_230,User Profile,Selenium,Validate user profile flow works seamlessly on Selenium.,Pass
+TC_231,Packing List,Appium,Check packing list flow works seamlessly on Appium.,Pass
+TC_232,Search Filters,Selenium,Ensure search filters flow works seamlessly on Selenium.,Pass
+TC_233,Payment Gateway,Selenium,Ensure payment gateway flow works seamlessly on Selenium.,Pass
+TC_234,Payment Gateway,Selenium,Check payment gateway flow works seamlessly on Selenium.,Pass
+TC_235,Notifications,Selenium,Check notifications flow works seamlessly on Selenium.,Pass
+TC_236,Weather Updates,Appium,Verify weather updates flow works seamlessly on Appium.,Pass
+TC_237,Hotel Booking,Selenium,Verify hotel booking flow works seamlessly on Selenium.,Pass
+TC_238,Payment Gateway,Appium,Validate payment gateway flow works seamlessly on Appium.,Pass
+TC_239,Hotel Booking,Selenium,Check hotel booking flow works seamlessly on Selenium.,Pass
+TC_240,Search Filters,Selenium,Verify search filters flow works seamlessly on Selenium.,Pass
+TC_241,Hotel Booking,Selenium,Validate hotel booking flow works seamlessly on Selenium.,Pass
+TC_242,Community Forum,Appium,Check community forum flow works seamlessly on Appium.,Pass
+TC_243,Authentication,Appium,Check authentication flow works seamlessly on Appium.,Pass
+TC_244,Authentication,Appium,Test authentication flow works seamlessly on Appium.,Pass
+TC_245,Weather Updates,Appium,Ensure weather updates flow works seamlessly on Appium.,Pass
+TC_246,User Profile,Appium,Test user profile flow works seamlessly on Appium.,Pass
+TC_247,Weather Updates,Selenium,Ensure weather updates flow works seamlessly on Selenium.,Pass
+TC_248,Notifications,Selenium,Validate notifications flow works seamlessly on Selenium.,Pass
+TC_249,Authentication,Selenium,Ensure authentication flow works seamlessly on Selenium.,Pass
+TC_250,User Profile,Appium,Ensure user profile flow works seamlessly on Appium.,Pass
+TC_251,Notifications,Appium,Test notifications flow works seamlessly on Appium.,Pass
+TC_252,Authentication,Appium,Validate authentication flow works seamlessly on Appium.,Pass
+TC_253,Search Filters,Selenium,Verify search filters flow works seamlessly on Selenium.,Pass
+TC_254,Hotel Booking,Appium,Test hotel booking flow works seamlessly on Appium.,Pass
+TC_255,Packing List,Appium,Test packing list flow works seamlessly on Appium.,Pass
+TC_256,Packing List,Selenium,Ensure packing list flow works seamlessly on Selenium.,Pass
+TC_257,Weather Updates,Selenium,Check weather updates flow works seamlessly on Selenium.,Pass
+TC_258,Search Filters,Appium,Test search filters flow works seamlessly on Appium.,Pass
+TC_259,User Profile,Appium,Validate user profile flow works seamlessly on Appium.,Pass
+TC_260,Weather Updates,Appium,Validate weather updates flow works seamlessly on Appium.,Pass
+TC_261,Hotel Booking,Appium,Test hotel booking flow works seamlessly on Appium.,Pass
+TC_262,User Profile,Appium,Verify user profile flow works seamlessly on Appium.,Pass
+TC_263,Packing List,Selenium,Test packing list flow works seamlessly on Selenium.,Pass
+TC_264,Notifications,Selenium,Verify notifications flow works seamlessly on Selenium.,Pass
+TC_265,Hotel Booking,Selenium,Check hotel booking flow works seamlessly on Selenium.,Pass
+TC_266,Notifications,Appium,Validate notifications flow works seamlessly on Appium.,Pass
+TC_267,Weather Updates,Appium,Ensure weather updates flow works seamlessly on Appium.,Pass
+TC_268,User Profile,Appium,Validate user profile flow works seamlessly on Appium.,Pass
+TC_269,Weather Updates,Appium,Verify weather updates flow works seamlessly on Appium.,Pass
+TC_270,Authentication,Appium,Check authentication flow works seamlessly on Appium.,Pass
+TC_271,Search Filters,Selenium,Ensure search filters flow works seamlessly on Selenium.,Pass
+TC_272,User Profile,Selenium,Check user profile flow works seamlessly on Selenium.,Pass
+TC_273,Packing List,Selenium,Test packing list flow works seamlessly on Selenium.,Pass
+TC_274,Payment Gateway,Selenium,Ensure payment gateway flow works seamlessly on Selenium.,Pass
+TC_275,User Profile,Appium,Ensure user profile flow works seamlessly on Appium.,Pass
+TC_276,Community Forum,Selenium,Verify community forum flow works seamlessly on Selenium.,Pass
+TC_277,User Profile,Appium,Test user profile flow works seamlessly on Appium.,Pass
+TC_278,Search Filters,Appium,Check search filters flow works seamlessly on Appium.,Pass
+TC_279,Search Filters,Appium,Validate search filters flow works seamlessly on Appium.,Pass
+TC_280,Notifications,Selenium,Check notifications flow works seamlessly on Selenium.,Pass
+TC_281,Trip Planning,Selenium,Ensure trip planning flow works seamlessly on Selenium.,Pass
+TC_282,User Profile,Selenium,Check user profile flow works seamlessly on Selenium.,Pass
+TC_283,Packing List,Selenium,Check packing list flow works seamlessly on Selenium.,Pass
+TC_284,User Profile,Appium,Check user profile flow works seamlessly on Appium.,Pass
+TC_285,Packing List,Selenium,Check packing list flow works seamlessly on Selenium.,Pass
+TC_286,Packing List,Appium,Ensure packing list flow works seamlessly on Appium.,Pass
+TC_287,User Profile,Selenium,Check user profile flow works seamlessly on Selenium.,Pass
+TC_288,Community Forum,Appium,Ensure community forum flow works seamlessly on Appium.,Pass
+TC_289,Payment Gateway,Appium,Test payment gateway flow works seamlessly on Appium.,Pass
+TC_290,Notifications,Selenium,Verify notifications flow works seamlessly on Selenium.,Pass
+TC_291,Hotel Booking,Selenium,Test hotel booking flow works seamlessly on Selenium.,Pass
+TC_292,Notifications,Selenium,Verify notifications flow works seamlessly on Selenium.,Pass
+TC_293,Hotel Booking,Selenium,Test hotel booking flow works seamlessly on Selenium.,Pass
+TC_294,Trip Planning,Selenium,Ensure trip planning flow works seamlessly on Selenium.,Pass
+TC_295,Notifications,Appium,Verify notifications flow works seamlessly on Appium.,Pass
+TC_296,Search Filters,Appium,Validate search filters flow works seamlessly on Appium.,Pass
+TC_297,Weather Updates,Appium,Test weather updates flow works seamlessly on Appium.,Pass
+TC_298,Packing List,Appium,Validate packing list flow works seamlessly on Appium.,Pass
+TC_299,User Profile,Selenium,Verify user profile flow works seamlessly on Selenium.,Pass
+TC_300,Trip Planning,Selenium,Check trip planning flow works seamlessly on Selenium.,Pass
+TC_301,Payment Gateway,Selenium,Ensure payment gateway flow works seamlessly on Selenium.,Pass
+TC_302,Notifications,Selenium,Validate notifications flow works seamlessly on Selenium.,Pass
+TC_303,Notifications,Appium,Ensure notifications flow works seamlessly on Appium.,Pass
+TC_304,Hotel Booking,Appium,Verify hotel booking flow works seamlessly on Appium.,Pass
+TC_305,Weather Updates,Selenium,Check weather updates flow works seamlessly on Selenium.,Pass
+TC_306,Payment Gateway,Selenium,Verify payment gateway flow works seamlessly on Selenium.,Pass
+TC_307,Weather Updates,Selenium,Test weather updates flow works seamlessly on Selenium.,Pass
+TC_308,Search Filters,Selenium,Validate search filters flow works seamlessly on Selenium.,Pass
+TC_309,Notifications,Selenium,Check notifications flow works seamlessly on Selenium.,Pass
+TC_310,Community Forum,Selenium,Ensure community forum flow works seamlessly on Selenium.,Pass
+TC_311,Community Forum,Appium,Validate community forum flow works seamlessly on Appium.,Pass
+TC_312,Search Filters,Selenium,Validate search filters flow works seamlessly on Selenium.,Pass
+TC_313,Packing List,Appium,Check packing list flow works seamlessly on Appium.,Pass
+TC_314,Notifications,Selenium,Ensure notifications flow works seamlessly on Selenium.,Pass
+TC_315,Trip Planning,Selenium,Verify trip planning flow works seamlessly on Selenium.,Pass
+TC_316,Trip Planning,Selenium,Verify trip planning flow works seamlessly on Selenium.,Pass
+TC_317,Notifications,Appium,Test notifications flow works seamlessly on Appium.,Pass
+TC_318,Notifications,Appium,Validate notifications flow works seamlessly on Appium.,Pass
+TC_319,Packing List,Appium,Verify packing list flow works seamlessly on Appium.,Pass
+TC_320,Notifications,Selenium,Check notifications flow works seamlessly on Selenium.,Pass
+TC_321,Search Filters,Selenium,Verify search filters flow works seamlessly on Selenium.,Pass
+TC_322,Community Forum,Selenium,Check community forum flow works seamlessly on Selenium.,Pass
+TC_323,Notifications,Appium,Test notifications flow works seamlessly on Appium.,Pass
+TC_324,User Profile,Appium,Check user profile flow works seamlessly on Appium.,Pass
+TC_325,Hotel Booking,Appium,Ensure hotel booking flow works seamlessly on Appium.,Pass
+TC_326,User Profile,Appium,Ensure user profile flow works seamlessly on Appium.,Pass
+TC_327,Trip Planning,Selenium,Verify trip planning flow works seamlessly on Selenium.,Pass
+TC_328,Authentication,Selenium,Verify authentication flow works seamlessly on Selenium.,Pass
+TC_329,Weather Updates,Selenium,Check weather updates flow works seamlessly on Selenium.,Pass
+TC_330,Packing List,Appium,Validate packing list flow works seamlessly on Appium.,Pass
+TC_331,Payment Gateway,Selenium,Test payment gateway flow works seamlessly on Selenium.,Pass
+TC_332,Trip Planning,Appium,Validate trip planning flow works seamlessly on Appium.,Pass
+TC_333,User Profile,Selenium,Test user profile flow works seamlessly on Selenium.,Pass
+TC_334,Hotel Booking,Selenium,Test hotel booking flow works seamlessly on Selenium.,Pass
+TC_335,Trip Planning,Appium,Ensure trip planning flow works seamlessly on Appium.,Pass
+TC_336,Weather Updates,Selenium,Check weather updates flow works seamlessly on Selenium.,Pass
+TC_337,Authentication,Selenium,Check authentication flow works seamlessly on Selenium.,Pass
+TC_338,Payment Gateway,Appium,Verify payment gateway flow works seamlessly on Appium.,Pass
+TC_339,Notifications,Selenium,Test notifications flow works seamlessly on Selenium.,Pass
+TC_340,Weather Updates,Selenium,Check weather updates flow works seamlessly on Selenium.,Pass
+TC_341,Notifications,Selenium,Validate notifications flow works seamlessly on Selenium.,Pass
+TC_342,Packing List,Selenium,Verify packing list flow works seamlessly on Selenium.,Pass
+TC_343,Hotel Booking,Selenium,Test hotel booking flow works seamlessly on Selenium.,Pass
+TC_344,Community Forum,Selenium,Check community forum flow works seamlessly on Selenium.,Pass
+TC_345,Authentication,Selenium,Check authentication flow works seamlessly on Selenium.,Pass
+TC_346,Authentication,Appium,Test authentication flow works seamlessly on Appium.,Pass
+TC_347,Notifications,Selenium,Validate notifications flow works seamlessly on Selenium.,Pass
+TC_348,Search Filters,Selenium,Validate search filters flow works seamlessly on Selenium.,Pass
+TC_349,Hotel Booking,Selenium,Validate hotel booking flow works seamlessly on Selenium.,Pass
+TC_350,User Profile,Appium,Check user profile flow works seamlessly on Appium.,Pass
+TC_351,Notifications,Appium,Test notifications flow works seamlessly on Appium.,Pass
+TC_352,Community Forum,Appium,Verify community forum flow works seamlessly on Appium.,Pass
+TC_353,Weather Updates,Selenium,Ensure weather updates flow works seamlessly on Selenium.,Pass
+TC_354,Trip Planning,Appium,Validate trip planning flow works seamlessly on Appium.,Pass
+TC_355,Payment Gateway,Selenium,Test payment gateway flow works seamlessly on Selenium.,Pass

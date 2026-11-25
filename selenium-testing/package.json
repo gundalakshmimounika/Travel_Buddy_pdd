@@ -1,0 +1,15 @@
+{
+  "name": "travelbuddy-selenium-testing",
+  "version": "1.0.0",
+  "description": "Selenium WebDriver End-to-End Automation & Excel Reporting for TravelBuddy Web App",
+  "main": "runner.js",
+  "scripts": {
+    "test": "node runner.js",
+    "test:headless": "node runner.js --headless",
+    "test:headed": "node runner.js --headed"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "selenium-webdriver": "^4.27.0"
+  }
+}

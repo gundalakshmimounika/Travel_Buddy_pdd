@@ -1,0 +1,14 @@
+{
+  "name": "travelbuddy-appium-testing",
+  "version": "1.0.0",
+  "description": "Appium UiAutomator2 Mobile Automation & Excel Reporting for TravelBuddy Android App",
+  "main": "runner.js",
+  "scripts": {
+    "test": "node runner.js",
+    "test:device": "node runner.js --device",
+    "test:mock": "node runner.js --mock"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  }
+}

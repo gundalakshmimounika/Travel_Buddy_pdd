@@ -1,0 +1,12 @@
+{
+  "name": "travelbuddy-test-cases-excel",
+  "version": "1.0.0",
+  "description": "Comprehensive Test Cases and Excel Analysis Generator for TravelBuddy",
+  "main": "generate-test-cases-excel.js",
+  "scripts": {
+    "generate": "node generate-test-cases-excel.js"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  }
+}

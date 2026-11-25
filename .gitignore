@@ -17,3 +17,7 @@ backend/cache/*.json
 
 # Scratch scripts
 scratch/
+
+# Node dependencies
+node_modules/
+**/node_modules/

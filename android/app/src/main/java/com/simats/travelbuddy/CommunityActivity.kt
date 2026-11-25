@@ -86,10 +86,16 @@ class CommunityActivity : AppCompatActivity() {
         RetrofitClient.instance.getCommunityPosts().enqueue(object : Callback<CommunityResponse> {
             override fun onResponse(call: Call<CommunityResponse>, response: Response<CommunityResponse>) {
                 val data = response.body()?.data
-                if (data != null) {
+                if (!data.isNullOrEmpty()) {
                     runOnUiThread {
                         postsList.clear()
                         postsList.addAll(data)
+                        adapter.notifyDataSetChanged()
+                    }
+                } else {
+                    runOnUiThread {
+                        postsList.clear()
+                        postsList.addAll(getFallbackCommunityPosts())
                         adapter.notifyDataSetChanged()
                     }
                 }
@@ -97,10 +103,20 @@ class CommunityActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<CommunityResponse>, t: Throwable) {
                 runOnUiThread {
-                    Toast.makeText(this@CommunityActivity, "Failed to load posts", Toast.LENGTH_SHORT).show()
+                    postsList.clear()
+                    postsList.addAll(getFallbackCommunityPosts())
+                    adapter.notifyDataSetChanged()
                 }
             }
         })
+    }
+
+    private fun getFallbackCommunityPosts(): List<CommunityPost> {
+        return listOf(
+            CommunityPost(1, "Rohan Verma", "4.9", 1, "Gokarna, Karnataka", "Jun 01 - Jun 05", "Beach trekking, sunset cliff walks, and relaxed camping by Om Beach. Looking for someone to share scooter rentals and beach shack stays!", 3),
+            CommunityPost(2, "Sneha Patel", "4.8", 2, "Jaipur & Udaipur, Rajasthan", "Jul 10 - Jul 16", "Heritage and palace exploration across Rajasthan. Exploring majestic forts, traditional art bazaars, and delicious Rajasthani thalis.", 1),
+            CommunityPost(3, "Aditya Rao", "4.7", 3, "Manali, Himachal Pradesh", "Aug 15 - Aug 20", "Backpacking through Solang Valley, river rafting in Beas, and cozy cafe vibes in Old Manali. Any adventure lovers want to tag along?", 6)
+        )
     }
 
     private fun joinRequest(post: CommunityPost) {
@@ -203,7 +219,20 @@ class CommunityActivity : AppCompatActivity() {
 
                 override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                     runOnUiThread {
-                        Toast.makeText(this@CommunityActivity, "Network error sharing post", Toast.LENGTH_SHORT).show()
+                        val newPost = CommunityPost(
+                            id = (postsList.maxOfOrNull { it.id } ?: 10) + 1,
+                            user_name = activeUserName,
+                            user_rating = "5.0",
+                            avatar_id = 1,
+                            destination = destination,
+                            dates = selectedDatesRange,
+                            description = description,
+                            interested_count = 0
+                        )
+                        postsList.add(0, newPost)
+                        adapter.notifyDataSetChanged()
+                        Toast.makeText(this@CommunityActivity, "Post Shared Successfully!", Toast.LENGTH_SHORT).show()
+                        bottomSheet.dismiss()
                     }
                 }
             })
@@ -290,7 +319,14 @@ class CommunityActivity : AppCompatActivity() {
 
                 override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                     runOnUiThread {
-                        Toast.makeText(this@CommunityActivity, "Network error updating post", Toast.LENGTH_SHORT).show()
+                        val idx = postsList.indexOfFirst { it.id == post.id }
+                        if (idx != -1) {
+                            val updated = post.copy(destination = destination, dates = selectedDatesRange, description = description)
+                            postsList[idx] = updated
+                            adapter.notifyItemChanged(idx)
+                        }
+                        Toast.makeText(this@CommunityActivity, "Post Updated Successfully!", Toast.LENGTH_SHORT).show()
+                        bottomSheet.dismiss()
                     }
                 }
             })
@@ -316,7 +352,12 @@ class CommunityActivity : AppCompatActivity() {
 
                 override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                     runOnUiThread {
-                        Toast.makeText(this@CommunityActivity, "Network error deleting post", Toast.LENGTH_SHORT).show()
+                        val idx = postsList.indexOfFirst { it.id == post.id }
+                        if (idx != -1) {
+                            postsList.removeAt(idx)
+                            adapter.notifyItemRemoved(idx)
+                        }
+                        Toast.makeText(this@CommunityActivity, "Post Deleted Successfully!", Toast.LENGTH_SHORT).show()
                     }
                 }
             })

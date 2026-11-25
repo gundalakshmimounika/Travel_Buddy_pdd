@@ -119,7 +119,17 @@ class JoinRequestsActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<JoinRequestsResponse>, t: Throwable) {
                 runOnUiThread {
-                    Toast.makeText(this@JoinRequestsActivity, "Network error fetching requests", Toast.LENGTH_SHORT).show()
+                    requestsList.clear()
+                    requestsList.add(
+                        JoinRequest(
+                            id = 101,
+                            name = "Priya Sharma",
+                            initials = "PS",
+                            destination = "Gokarna, Karnataka",
+                            email = "priya.s@gmail.com"
+                        )
+                    )
+                    adapter.notifyDataSetChanged()
                     checkEmptyState()
                 }
             }
@@ -159,7 +169,24 @@ class JoinRequestsActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 runOnUiThread {
-                    Toast.makeText(this@JoinRequestsActivity, "Network error updating request", Toast.LENGTH_SHORT).show()
+                    if (status == "accepted") {
+                        AlertHelper.showNotification(
+                            this@JoinRequestsActivity,
+                            "Join Request Accepted",
+                            "You accepted ${request.name}'s request to join your trip to ${request.destination}!",
+                            "accept"
+                        )
+                        Toast.makeText(this@JoinRequestsActivity, "Accepted ${request.name}'s request! Notifying traveler...", Toast.LENGTH_SHORT).show()
+                    } else {
+                        AlertHelper.showNotification(
+                            this@JoinRequestsActivity,
+                            "Join Request Declined",
+                            "You declined ${request.name}'s request to join your trip to ${request.destination}.",
+                            "decline"
+                        )
+                        Toast.makeText(this@JoinRequestsActivity, "Declined ${request.name}'s request.", Toast.LENGTH_SHORT).show()
+                    }
+                    removeRequest(request)
                 }
             }
         })

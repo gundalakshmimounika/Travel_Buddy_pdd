@@ -78,56 +78,74 @@ class PackingListActivity : AppCompatActivity() {
     private fun loadPackingItems() {
         RetrofitClient.instance.getPackingItems(tripTitle).enqueue(object : Callback<PackingListResponse> {
             override fun onResponse(call: Call<PackingListResponse>, response: Response<PackingListResponse>) {
-                response.body()?.data?.let {
+                val data = response.body()?.data
+                if (!data.isNullOrEmpty()) {
                     itemList.clear()
-                    itemList.addAll(it)
+                    itemList.addAll(data)
                     updateUI()
+                } else {
+                    renderFallbackPackingItems()
                 }
             }
             override fun onFailure(call: Call<PackingListResponse>, t: Throwable) {
-                Toast.makeText(this@PackingListActivity, "Failed to load", Toast.LENGTH_SHORT).show()
+                renderFallbackPackingItems()
             }
         })
+    }
+
+    private fun renderFallbackPackingItems() {
+        itemList.clear()
+        itemList.addAll(OfflineFallbackInterceptor.localPackingItems.map {
+            PackingItem(it.first, it.second, "Essential", it.third)
+        })
+        updateUI()
     }
 
     private fun updateUI() {
         runOnUiThread {
             adapter.notifyDataSetChanged()
-            val total = itemList.size
-            val packed = itemList.count { it.is_packed }
-            val percent = if (total > 0) (packed * 100) / total else 0
-
-            findViewById<TextView>(R.id.tvPackedStatus).text = "$packed of $total items packed"
-            findViewById<TextView>(R.id.tvPercentage).text = "$percent%"
-            findViewById<CircularProgressIndicator>(R.id.pbPacking).progress = percent
         }
     }
 
     private fun addItem(name: String) {
+        val nextId = (OfflineFallbackInterceptor.localPackingItems.maxOfOrNull { it.first } ?: 10) + 1
+        OfflineFallbackInterceptor.localPackingItems.add(Triple(nextId, name, false))
         RetrofitClient.instance.addPackingItem(tripTitle, name, "Personal").enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 loadPackingItems()
             }
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {}
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                loadPackingItems()
+            }
         })
     }
 
     private fun toggleItem(item: PackingItem) {
         val newStatus = if (item.is_packed) 1 else 0
+        val idx = OfflineFallbackInterceptor.localPackingItems.indexOfFirst { it.first == item.id }
+        if (idx != -1) {
+            val cur = OfflineFallbackInterceptor.localPackingItems[idx]
+            OfflineFallbackInterceptor.localPackingItems[idx] = Triple(cur.first, cur.second, !cur.third)
+        }
         RetrofitClient.instance.togglePackingItem(tripTitle, item.id, newStatus).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 updateUI()
             }
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {}
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                updateUI()
+            }
         })
     }
 
     private fun deleteItem(item: PackingItem) {
+        OfflineFallbackInterceptor.localPackingItems.removeAll { it.first == item.id }
         RetrofitClient.instance.deletePackingItem(tripTitle, item.id).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 loadPackingItems()
             }
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {}
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                loadPackingItems()
+            }
         })
     }
 

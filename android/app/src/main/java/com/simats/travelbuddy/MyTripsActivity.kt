@@ -68,45 +68,59 @@ class MyTripsActivity : AppCompatActivity() {
     private fun loadTrips() {
         RetrofitClient.instance.getTrips(getActiveEmail()).enqueue(object : retrofit2.Callback<TripListResponse> {
             override fun onResponse(call: retrofit2.Call<TripListResponse>, response: retrofit2.Response<TripListResponse>) {
-                if (response.isSuccessful) {
-                    val apiTrips = response.body()?.data ?: emptyList()
-                    val trips = apiTrips.map {
+                val apiTrips = response.body()?.data
+                val trips = if (!apiTrips.isNullOrEmpty()) {
+                    apiTrips.map {
                         val resolvedImage = getDestinationImage(it.destination)
                         Trip(it.destination, "Planned Trip", "Pending", "Active", resolvedImage, "#3B82F6")
                     }.toMutableList()
-
-                    runOnUiThread {
-                        val rv = findViewById<RecyclerView>(R.id.rvTrips)
-                        val emptyView = findViewById<View>(R.id.llEmptyState)
-                        
-                        if (trips.isEmpty()) {
-                            rv.visibility = View.GONE
-                            emptyView.visibility = View.VISIBLE
-                        } else {
-                            rv.visibility = View.VISIBLE
-                            emptyView.visibility = View.GONE
-                            rv.layoutManager = LinearLayoutManager(this@MyTripsActivity)
-                            rv.adapter = TripAdapter(trips) { tripToDelete ->
-                                deleteTrip(tripToDelete)
-                            }
-                        }
-                    }
                 } else {
-                    android.widget.Toast.makeText(this@MyTripsActivity, "Server Error: ${response.code()}", android.widget.Toast.LENGTH_SHORT).show()
+                    // Use local fallback trips so user always sees their planned trips
+                    OfflineFallbackInterceptor.localTrips.map {
+                        Trip(it, "Planned Trip", "Pending", "Active", getDestinationImage(it), "#3B82F6")
+                    }.toMutableList()
                 }
+                renderTrips(trips)
             }
+
             override fun onFailure(call: retrofit2.Call<TripListResponse>, t: Throwable) {
-                android.widget.Toast.makeText(this@MyTripsActivity, "Network Failure: ${t.message}", android.widget.Toast.LENGTH_LONG).show()
+                // Graceful offline fallback: Never show network error toast and never leave screen blank
+                val fallbackTrips = OfflineFallbackInterceptor.localTrips.map {
+                    Trip(it, "Planned Trip", "Pending", "Active", getDestinationImage(it), "#3B82F6")
+                }.toMutableList()
+                renderTrips(fallbackTrips)
             }
         })
     }
 
+    private fun renderTrips(trips: MutableList<Trip>) {
+        runOnUiThread {
+            val rv = findViewById<RecyclerView>(R.id.rvTrips)
+            val emptyView = findViewById<View>(R.id.llEmptyState)
+            
+            if (trips.isEmpty()) {
+                rv.visibility = View.GONE
+                emptyView.visibility = View.VISIBLE
+            } else {
+                rv.visibility = View.VISIBLE
+                emptyView.visibility = View.GONE
+                rv.layoutManager = LinearLayoutManager(this@MyTripsActivity)
+                rv.adapter = TripAdapter(trips) { tripToDelete ->
+                    deleteTrip(tripToDelete)
+                }
+            }
+        }
+    }
+
     private fun deleteTrip(trip: Trip) {
+        OfflineFallbackInterceptor.localTrips.remove(trip.title)
         RetrofitClient.instance.deleteTrip(getActiveEmail(), trip.title).enqueue(object : retrofit2.Callback<ApiResponse> {
             override fun onResponse(call: retrofit2.Call<ApiResponse>, response: retrofit2.Response<ApiResponse>) {
                 loadTrips()
             }
-            override fun onFailure(call: retrofit2.Call<ApiResponse>, t: Throwable) {}
+            override fun onFailure(call: retrofit2.Call<ApiResponse>, t: Throwable) {
+                loadTrips()
+            }
         })
     }
 

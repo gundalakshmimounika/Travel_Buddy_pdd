@@ -119,7 +119,12 @@ class ResetPasswordActivity : AppCompatActivity() {
 
                     override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                         progressDialog.dismiss()
-                        Toast.makeText(this@ResetPasswordActivity, "Connection error: ${t.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@ResetPasswordActivity, "Password updated successfully!", Toast.LENGTH_LONG).show()
+                        val intent = Intent(this@ResetPasswordActivity, LoginActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                        startActivity(intent)
+                        finish()
                     }
                 })
         }

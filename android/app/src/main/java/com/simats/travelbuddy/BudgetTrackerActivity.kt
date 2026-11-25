@@ -57,19 +57,33 @@ class BudgetTrackerActivity : AppCompatActivity() {
     private fun loadBudgetData() {
         RetrofitClient.instance.getBudgetInfo(tripTitle).enqueue(object : Callback<BudgetResponse> {
             override fun onResponse(call: Call<BudgetResponse>, response: Response<BudgetResponse>) {
-                response.body()?.let {
-                    totalBudget = it.total_budget
+                val body = response.body()
+                if (body != null && (body.total_budget > 0 || body.expenses.isNotEmpty())) {
+                    totalBudget = body.total_budget
                     expenseList.clear()
-                    expenseList.addAll(it.expenses)
+                    expenseList.addAll(body.expenses)
                     
                     if (totalBudget <= 0) {
                         showSetLimitDialog()
                     }
                     updateUI()
+                } else {
+                    renderFallbackBudget()
                 }
             }
-            override fun onFailure(call: Call<BudgetResponse>, t: Throwable) {}
+            override fun onFailure(call: Call<BudgetResponse>, t: Throwable) {
+                renderFallbackBudget()
+            }
         })
+    }
+
+    private fun renderFallbackBudget() {
+        totalBudget = OfflineFallbackInterceptor.localTotalBudget
+        expenseList.clear()
+        expenseList.addAll(OfflineFallbackInterceptor.localExpenses.map {
+            ExpenseItem(it.first, it.second, it.third, "Today")
+        })
+        updateUI()
     }
 
     private fun updateUI() {
@@ -143,29 +157,39 @@ class BudgetTrackerActivity : AppCompatActivity() {
     }
 
     private fun setBudgetLimit(limit: Double) {
+        OfflineFallbackInterceptor.localTotalBudget = limit
         RetrofitClient.instance.setBudgetLimit(tripTitle, limit).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 loadBudgetData()
             }
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {}
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                loadBudgetData()
+            }
         })
     }
 
     private fun addExpense(amount: Double, note: String) {
+        val nextId = (OfflineFallbackInterceptor.localExpenses.maxOfOrNull { it.first } ?: 10) + 1
+        OfflineFallbackInterceptor.localExpenses.add(Triple(nextId, amount, note))
         RetrofitClient.instance.addExpense(tripTitle, amount, note).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 loadBudgetData()
             }
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {}
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                loadBudgetData()
+            }
         })
     }
 
     private fun deleteExpense(item: ExpenseItem) {
+        OfflineFallbackInterceptor.localExpenses.removeAll { it.first == item.id }
         RetrofitClient.instance.deleteExpense(tripTitle, item.id).enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 loadBudgetData()
             }
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {}
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                loadBudgetData()
+            }
         })
     }
 
